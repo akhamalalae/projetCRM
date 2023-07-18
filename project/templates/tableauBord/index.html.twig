@@ -1,0 +1,414 @@
+
+{% extends 'base.html.twig' %}
+{% block title %}Tableau De Bord!{% endblock %}
+
+{% block content %}
+
+<div class="container">
+        <br>
+        <br>
+        <h2>Tableau De Bord
+        {% if requete_tableau_bord != null and requete_tableau_bord.libelle != null %}
+        (
+            {{ requete_tableau_bord.libelle}}
+        )
+        {% endif %}
+        </h2>
+        <hr>
+        <br>
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+        {{ form_start(form) }}
+        <div class="row">
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-6">
+                        <h5>Filtres
+                            <a class="btn btn-secondary pull-right" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                               Documentation
+                            </a>
+                        </h5>
+                        <hr>
+                        <div class="collapse" id="collapseExample">
+                            <div class="card card-body">
+                                <div class="alert alert-success" role="alert">
+                                    <h4 class="alert-heading">Syntaxe des champs</h4>
+                                    <p>Champ valeur de type Date (Y/m/d H:i), exemple : 2019/01/12 12:12</p>
+                                    <hr>
+                                    <p class="mb-0">Champ valeur de type Boolean (true ou false), exemple : true</p>
+                                </div>
+                            </div>
+                        </div>
+                        {# render each row and field in the embedded form, in this example it's rendering the experience (Exp) fiels as rows #}
+                        <div id="clause_where" data-prototype="{{ form_widget(form.requeteTableauBordFiltres.vars.prototype)|e('html_attr') }}">
+                            {% set indice = 0 %}
+                            {% for row in form.requeteTableauBordFiltres %}
+                                {% set functionEntityChecked = 'getChampsByEntityChecked(' ~ indice ~ ')' %}
+                                {% set functionGetOperator = 'functionGetOperator(' ~ indice ~ ')' %}
+                                {% set indice = indice + 1 %}
+                                <div class="liste_options_accordion" id="accordionExample{{ indice }}">
+                                    <div class="accordion" id="accordionExample{{ indice }}">
+                                        {% if indice != 1 %}
+                                            <div style="text-align:center">
+                                                <span class="badge bg-primary">{{ row.vars.value.tableau_bord_filtre_condition.libelle }}</span>
+                                            </div>
+                                        {% endif %}
+                                        <br>
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header" id="headingOne{{ indice }}">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne{{ indice }}" aria-expanded="false" aria-controls="collapseOne{{ indice }}">
+                                                <div>
+                                                    <span class="badge rounded-pill bg-success">
+                                                        {{ row.vars.value.entities_propriete.name }} {{ " (" }}  {{ row.vars.value.entities_propriete.entitie.libelle }} {{ " )" }}
+                                                    </span>
+                                                    <span class="badge rounded-pill bg-info">
+                                                        {{ row.vars.value.tableau_bord_filtre_operator.libelle }}
+                                                    </span>
+                                                    <strong>
+                                                        {{ row.vars.value.valeur }}
+                                                    </strong>
+                                                </div>
+                                            </button>
+                                            </h2>
+                                            <div id="collapseOne{{ indice }}" class="accordion-collapse collapse" aria-labelledby="headingOne{{ indice }}" data-bs-parent="#accordionExample{{ indice }}">
+                                                <div class="accordion-body">
+                                                    <div class="panel panel-warning">
+                                                        <div class="panel-body">
+                                                        {% if indice == 1 %}
+                                                                <div id="" style="display:none;">
+                                                                    {{ form_row(row.tableau_bord_filtre_condition, {'attr': {'style': 'display:none'} }) }}
+                                                                </div>
+                                                            {% else %}
+                                                                {{ form_row(row.tableau_bord_filtre_condition) }}
+                                                            {% endif %}
+                                                            <br>
+                                                            {{ form_row(row.entitie, {'attr': {'onchange': functionEntityChecked } }) }}
+                                                            <br>
+                                                            {{ form_row(row.entities_propriete, {'attr': {'onchange': functionGetOperator} }) }}
+                                                            <br>
+                                                            {{ form_row(row.tableau_bord_filtre_operator) }}
+                                                            <br>
+                                                            {{ form_row(row.valeur) }}
+                                                            <br>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <br>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h5>Choix des champs</h5>
+                        <hr>
+
+                        {% for entitie in listes_entities %}
+                            {% set indice = entitie.id %}
+                            <div class="accordion" id="accordionPanelsStayOpenExample">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="panelsStayOpen-headingThree">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#choix_champs{{ indice }}" aria-expanded="false" aria-controls="choix_champs{{ indice }}">
+                                        {{ entitie.libelle }}
+                                    </button>
+                                    </h2>
+                                    <div id="choix_champs{{ indice }}" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingThree">
+                                        <div class="accordion-body">
+                                            <div class="row">
+                                                {% for champ in listes_champs %}
+                                                    {% if champ.entitie.id == entitie.id %}
+                                                        {% for checkbox in form.properties_entity_choix_champs.children %}
+                                                            {% if (champ.id) == checkbox.vars.value %}
+                                                                <div class="col-6">
+                                                                    <strong>
+                                                                        {{ form_widget(checkbox) }}
+                                                                        {{ form_label(checkbox) }}
+                                                                        {{ form_errors(checkbox) }}
+                                                                    </strong>
+                                                                </div>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br>
+                            </div>
+                        {% endfor %}
+                        <br>
+                    </div>
+                    <div class="col-12" id="form_enregistrer_requete">
+                        <hr>
+                        {{ form_row(form.enregistrer_requete) }}
+                        <br>
+                        {{ form_row(form.libelle) }}
+                    </div>
+                    <div class="col-12">
+                        <hr>
+                        {{ form_row(form.save) }}
+                        <br>
+                    </div>
+                    {{ form_end(form) }}
+            </div>
+        </div>
+
+        {% if resultatsRequeteTableauBord != null %}
+            <h2>Résultats de la requête</h2>
+            <hr>
+            <br>
+            <div id="resultats" class="d-flex flex-column flex-shrink-0 p-3 bg-light">
+                <table id="table_id" class="display nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            {% for key, val in resultatsRequeteTableauBord[0] %}
+                                {% if key %}
+                                    <th>{{ key }}</th>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key_resultatsRequeteTableauBord, val_resultatsRequeteTableauBord in resultatsRequeteTableauBord  %}
+                            <tr>
+                                {% for key, val in val_resultatsRequeteTableauBord %}
+                                    <td>
+                                        {% if (val) %}
+                                            {% if val.timestamp is defined %}
+                                                {{ val|date('m/d/Y H:i') }}
+                                            {% elseif val == 'false' %}
+                                                {{ "Oui" }}
+                                            {% elseif val == 'true' %}
+                                                {{ "Non" }}
+                                            {% else %}
+                                                {{ val }}
+                                            {% endif %}
+                                        {% else %}
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+</div>
+{% endblock %}
+{% block javascript %}
+<script>
+
+    var requete_tableau_bord_id = '{{ requete_tableau_bord_id }}';
+    if (requete_tableau_bord_id != 0) {
+        $("#form_enregistrer_requete").hide();
+    }{
+        $("#tableau_bord_libelle").hide();
+    }
+
+    const checkbox = document.getElementById('tableau_bord_enregistrer_requete')
+    checkbox.addEventListener('change', (event) => {
+        if (event.currentTarget.checked) {
+            $("#tableau_bord_libelle").show();
+        } else {
+            $("#tableau_bord_libelle").hide();
+        }
+    })
+
+    let nbr = parseInt({{ nombreFiltres }});
+    for (let i = 0; i < nbr; i++) {
+        var idChamps = $("#tableau_bord_requeteTableauBordFiltres_"+i+"_entities_propriete").val();
+        getChampsByEntityChecked(i, idChamps);
+        var idOperator = $("#tableau_bord_requeteTableauBordFiltres_"+i+"_tableau_bord_filtre_operator").val();
+        functionGetOperator(i, idOperator);
+    }
+
+    function getChampsByEntityChecked(indice, idChamps = null) {
+        idEntite = $("#tableau_bord_requeteTableauBordFiltres_"+indice+"_entitie").val();
+        $.ajax({
+            //L'URL de la requête
+            url: "{{ path('getEntitiesProprieteConditionByEntities') }}",
+            //La méthode d'envoi (type de requête)
+            method: "GET",
+            data: {'idEntite':idEntite},
+            beforeSend: function () {
+                //Code à jouer avant l'appel ajax en lui même
+                var htmlSpinner = '<center><i class="fa fa-spinner fa-pulse" style="font-size:200px;color:Gray;"></i></center>';
+                $('.modal-body').html(htmlSpinner);
+            }
+        })
+        .done(function(response){
+			$("#tableau_bord_requeteTableauBordFiltres_"+indice+"_entities_propriete").html(response['listes_EntitiesPropriete']);
+            if(idChamps != null) {
+                document.getElementById("tableau_bord_requeteTableauBordFiltres_"+indice+"_entities_propriete").value = idChamps;
+            }
+        })
+        .fail(function(error){
+            alert("La requête s'est terminée en échec.");
+        })
+    }
+
+    function functionGetOperator(indice, idOperator = null) {
+        idEntitePropriete = $("#tableau_bord_requeteTableauBordFiltres_"+indice+"_entities_propriete").val();
+        $.ajax({
+            //L'URL de la requête
+            url: "{{ path('getTypeChamp') }}",
+            //La méthode d'envoi (type de requête)
+            method: "GET",
+            data: {'idEntitePropriete':idEntitePropriete},
+            beforeSend: function () {
+                //Code à jouer avant l'appel ajax en lui même
+                var htmlSpinner = '<center><i class="fa fa-spinner fa-pulse" style="font-size:200px;color:Gray;"></i></center>';
+                $('.modal-body').html(htmlSpinner);
+            }
+        })
+        .done(function(response){
+            $("#tableau_bord_requeteTableauBordFiltres_"+indice+"_tableau_bord_filtre_operator").html(response['listOperators']);
+            if(idOperator != null) {
+                document.getElementById("tableau_bord_requeteTableauBordFiltres_"+indice+"_tableau_bord_filtre_operator").value = idOperator;
+            }
+        })
+        .fail(function(error){
+            alert("La requête s'est terminée en échec.");
+        })
+
+    }
+
+    $(document).ready( function () {
+        $(function() {
+            $('.js-multiple').select2({
+                placeholder: 'Choisir'
+            });
+        });
+
+        $('.js-datepicker').datepicker({
+            format: 'yyyy-mm-dd'
+        });
+    });
+
+    $(document).ready(function() {
+        $('#table_id').DataTable( {
+            "scrollY": 200,
+            "scrollX": true,
+            responsive: true,
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/fr_fr.json"
+            }
+        } );
+    } );
+
+    // this variable is the list in the dom, it's initiliazed when the document is ready
+    var $collectionHolder;
+    // the link which we click on to add new items
+    var $addNewItem = $('<a href="#" class="btn btn-primary"><i class="fa fa-plus-square-o" aria-hidden="true"></i></a>');
+    // when the page is loaded and ready
+    $(document).ready(function () {
+        // get the collectionHolder, initilize the var by getting the list;
+        $collectionHolder = $('#clause_where');
+        // append the add new item link to the collectionHolder
+        $collectionHolder.append($addNewItem);
+        // add an index property to the collectionHolder which helps track the count of forms we have in the list
+        $collectionHolder.data('index', $collectionHolder.find('.panel').length)
+        // finds all the panels in the list and foreach one of them we add a remove button to it
+        // add remove button to existing items
+        $collectionHolder.find('.panel').each(function () {
+            // $(this) means the current panel that we are at
+            // which means we pass the panel to the addRemoveButton function
+            // inside the function we create a footer and remove link and append them to the panel
+            // more informations in the function inside
+            addRemoveButton($(this));
+        });
+
+        // handle the click event for addNewItem
+        $addNewItem.click(function (e) {
+            // preventDefault() is your  homework if you don't know what it is
+            // also look up preventPropagation both are usefull
+            e.preventDefault();
+            // create a new form and append it to the collectionHolder
+            // and by form we mean a new panel which contains the form
+            addNewForm();
+        })
+    });
+    /*
+    * creates a new form and appends it to the collectionHolder
+    */
+    function addNewForm() {
+        // getting the prototype
+        // the prototype is the form itself, plain html
+        var prototype = $collectionHolder.data('prototype');
+        // get the index
+        // this is the index we set when the document was ready, look above for more info
+        var index = $collectionHolder.data('index');
+        // create the form
+        var newForm = prototype;
+        // replace the __name__ string in the html using a regular expression with the index value
+        newForm = newForm.replace(/__name__/g, index);
+        newForm = newForm.split('class="form-group"').join('class="col-8"');
+        //class="form-group"
+        // incrementing the index data and setting it again to the collectionHolder
+        $collectionHolder.data('index', index+1);
+        // create the panel
+        // this is the panel that will be appending to the collectionHolder
+        var $panel = $('<div class="panel panel-warning"><div class="panel-heading"></div></div>');
+        // create the panel-body and append the form to it
+        var $panelBody = $('<div class="panel-body"></div>').append(newForm);
+        // append the body to the panel
+        $panel.append($panelBody);
+        // append the removebutton to the new panel
+        addRemoveButton($panel);
+        // append the panel to the addNewItem
+        // we are doing it this way to that the link is always at the bottom of the collectionHolder
+        $addNewItem.before($panel);
+
+        if(index == 0) {
+            $("#tableau_bord_requeteTableauBordFiltres_0_tableau_bord_filtre_condition").hide();
+        }
+
+        $("select#tableau_bord_requeteTableauBordFiltres_"+index+"_entities_propriete").empty();
+
+        //$("select#tableau_bord_requeteTableauBordFiltres_"+index+"_tableau_bord_filtre_operator").empty();
+
+        $("select#tableau_bord_requeteTableauBordFiltres_"+index+"_entitie").change(function(){
+            getChampsByEntityChecked(index);
+        });
+
+        $("select#tableau_bord_requeteTableauBordFiltres_"+index+"_entities_propriete").change(function(){
+            functionGetOperator(index);
+        });
+
+    }
+
+    /**
+    * adds a remove button to the panel that is passed in the parameter
+    * @param $panel
+    */
+    function addRemoveButton ($panel) {
+        // create remove button
+        //var $removeButton = $('<a href="#" class="btn btn-danger pull-right"><i class="fa fa-trash" aria-hidden="true"></i></a><br><br><hr><br>');
+        var $removeButton = $('<a href="#" class="btn btn-danger pull-right"><i class="fa fa-trash" aria-hidden="true"></i></a><br><br><hr><br>');
+        // appending the removebutton to the panel footer
+        var $panelFooter = $('<div class="panel-footer"></div>').append($removeButton);
+        // handle the click event of the remove button
+        $removeButton.click(function (e) {
+            e.preventDefault();
+            // gets the parent of the button that we clicked on "the panel" and animates it
+            // after the animation is done the element (the panel) is removed from the html
+            $(e.target).parents('.panel').slideUp(1000, function () {
+                $(this).remove();
+            })
+        });
+        // append the footer to the panel
+        $panel.append($panelFooter);
+    }
+
+</script>
+{% endblock %}

@@ -1,0 +1,73 @@
+
+{% extends 'base.html.twig' %}
+{% block title %}Entreprises!{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <br>
+        <br>
+        <h2>Listes des Entreprises
+        <a class="btn btn-primary pull-right" href="{{ path('entreprise_produits', {'id': 0}) }}" aria-label="add" title="formulaire">
+            <i class="fa fa-plus-square-o" aria-hidden="true"></i> Ajouter une nouvelle entreprise
+        </a>
+        </h2>
+        <hr>
+        <div class="row">
+            {{ include('entrepriseProduits/sidebar.html.twig') }}
+            <div class="col-9">
+            <br>
+                <table id="table_id" class="display">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Forme Juridique</th>
+                            <th>Date création entreprise</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for entreprise in entreprises %}
+                        <tr>
+                            <td>{{ entreprise.nomsCommerciaux }}</td>
+                            <td>{{ entreprise.formeJuridique }}</td>
+                            <td><small>{{ entreprise.dateCreationEntreprise ? entreprise.dateCreationEntreprise|date('Y-m-d H:i') : '' }}</small></td>
+                            <td>
+                                <a class="btn btn-success" href="{{ path('entreprise_produits', {'id': entreprise.id}) }}" aria-label="edit" title="jjjj">
+                                    <i class="fa fa-edit" aria-hidden="true"></i>
+                                </a>
+                                <a class="btn btn-danger" href="" aria-label="delet">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="10"></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <br>
+                <br>
+
+            </div>
+        </div>
+        <hr>
+    </div>
+
+{% endblock %}
+{% block javascript %}
+<script>
+    $(document).ready( function () {
+        //$('#table_id').DataTable();
+        $('#table_id').DataTable( {
+            responsive: true,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/fr_fr.json"
+            }
+        } );
+
+    });
+
+</script>
+{% endblock %}

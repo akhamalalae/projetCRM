@@ -1,0 +1,60 @@
+
+{% extends 'base.html.twig' %}
+{% block title %}Choix de Tableau De Bord!{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <br>
+        <br>
+        <h2>Choix de Tableau De Bord</h2>
+        <hr>
+        <br>
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+        <div class="d-flex flex-column flex-shrink-0 p-3 bg-light">
+        <div class="row">
+            <div class="col-12">
+                <hr>
+                {{ form_start(form) }}
+                <br>
+                {{ form_row(form.choix) }}
+                <br>
+                <div id="form_tb" style="display:none;">
+                    {{ form_row(form.RequeteTableauBord) }}
+                </div>
+                <br>
+                <hr>
+                {{ form_row(form.save) }}
+                <br>
+                {{ form_end(form) }}
+            </div>
+        </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascript %}
+<script>
+$(document).ready( function () {
+        $("select#choix_tableau_bord_choix").change(function(){
+            console.log($(this).val());
+            if ($(this).val() == 0) {//Créer un nouveau tableau de Bord
+                $("#form_tb").hide();
+            }else {//Charger un tableau de Bord
+                $("#form_tb").show();
+            }
+        });
+        $(function() {
+            $('.js-multiple').select2({
+                placeholder: 'Choisir'
+            });
+        });
+
+        $('.js-datepicker').datepicker({
+            format: 'yyyy-mm-dd'
+        });
+    });
+</script>
+{% endblock %}

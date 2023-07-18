@@ -1,0 +1,77 @@
+
+{% extends 'base.html.twig' %}
+{% block title %}Configuration Espace!{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <br>
+        <br>
+        <h2>Configuration de l'objet : {{ configurationEspace.libelle }}
+        </h2>
+        <hr>
+        <div class="col-12">
+            {{ include('configurationEspace/sidebar.html.twig') }}
+        </div>
+        <div class="row">
+            <div class="col-4">
+                {{ form_start(form) }}
+                 <br>
+                 {{ form_row(form.libelle) }}
+                 <br>
+                {{ form_row(form.save) }}
+                {{ form_end(form) }}
+                <br><br><br>
+            </div>
+            <div class="col-8">
+                <br>
+                <div class="d-flex flex-column flex-shrink-0 p-3 bg-light">
+                    <table id="table_id" class="display">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for objet in configurationObjets %}
+                            <tr>
+                                <td>{{ objet.libelle }}</td>
+                                <td>
+                                    <a class="btn btn-danger" href="" aria-label="delet">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="10"></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <br><br><br>
+            </div>
+        </div>
+
+    </div>
+
+
+
+{% endblock %}
+{% block javascript %}
+<script>
+    $(document).ready( function () {
+        //$('#table_id').DataTable();  style="transform: translate(525px, -47px);" data-x="100" data-y="100"
+        $('#table_id').DataTable( {
+            responsive: true,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/fr_fr.json"
+            }
+        } );
+
+    });
+
+</script>
+{% endblock %}

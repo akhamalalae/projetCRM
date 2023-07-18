@@ -1,0 +1,31 @@
+
+{% extends 'base.html.twig' %}
+{% block title %}Demo!{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <br>
+        <br>
+        <h2>Formulaire : {{ formulaire.libelle }}</h2>
+        <hr>
+        {{ form_start(form) }}
+        {{ form_end(form) }}
+        <br>
+        <br>
+    </div>
+
+{% endblock %}
+{% block javascript %}
+<script>
+    $(document).ready( function () {
+        //$('#table_id').DataTable();
+        $('#table_id').DataTable( {
+            responsive: true,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/fr_fr.json"
+            }
+        } );
+
+    });
+</script>
+{% endblock %}

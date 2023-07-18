@@ -1,0 +1,38 @@
+
+{% extends 'base.html.twig' %}
+{% block title %}Page accueil!{% endblock %}
+
+{% block content %}
+    <main class="container">
+                <div class="d-flex align-items-center p-3 my-3 text-white bg-purple rounded shadow-sm">
+                    <div class="lh-1">
+                    <h1 class="h6 mb-0 text-white lh-1"> </h1>
+                    </div>
+                </div>
+                <div class="my-3 p-3 bg-body rounded shadow-sm">
+                    <h6 class="border-bottom pb-2 mb-0">Rendez vous du jours
+                        <span class="badge bg-primary">{{countRendezVous}}</span>
+                    </h6>
+                    <div class="d-flex text-muted pt-3">
+                    </div>
+                    <div class="list-group">
+                        {% for un_rendezVous in rendezVous %}
+                            <a href="#" class="list-group-item list-group-item-action" aria-current="true">
+                                <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">Titre : {{ un_rendezVous.Title }}</h5>
+                                <small>{{ un_rendezVous.start|date('H:i') }} - {{ un_rendezVous.end|date('H:i') }}</small>
+                                </div>
+                                <p class="mb-1">Description : {{ un_rendezVous.description }}</p>
+                                {##<small>And some small print.</small>##}
+                            </a>
+                        {% endfor %}
+                    </div>
+
+                    <small class="d-block text-end mt-3">
+                        <a href="{{ path('calendar_vue_agenda') }}">La vue Agenda</a>
+                        </small>
+
+                </div>
+    </main>
+
+{% endblock %}

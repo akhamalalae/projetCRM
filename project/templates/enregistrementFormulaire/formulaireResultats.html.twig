@@ -1,0 +1,211 @@
+
+{% extends 'base.html.twig' %}
+{% block title %}Resultats!{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <br>
+        <br>
+        <br>
+        <h2>Resultats du formulaire : {{ formulaire.libelle }}
+            <div class="btn-group pull-right" role="group" aria-label="Button group with nested dropdown">
+                <div class="btn-group" role="group">
+                    <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    Téléchargement format
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                    <li><a class="dropdown-item" href="#"><i class="fa fa-edit" aria-hidden="true"></i> PDF</a></li>
+                    <li><a class="dropdown-item" href="{{ path('telecharger_excel', {'id': formulaire.id}) }}"><i class="fa fa-edit" aria-hidden="true"></i> EXCEL</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fa fa-edit" aria-hidden="true"></i> WORD</a></li>
+                    </ul>
+                </div>
+            </div>
+        </h2>
+        <hr>
+        <br>
+        {% if enregistrementFormulaire and enregistrementFormulaire != [] %}
+            {% set enregistrementFormulaireLength = enregistrementFormulaire|length %}
+            {% set enregistrementFormulaireLength = enregistrementFormulaireLength - 1 %}
+            <table id="table_id" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Intervenant</th>
+                        <th>Formulaires</th>
+                        <th>Entreprise</th>
+                        <th>Pointe de vente</th>
+                        {% for key, val in enregistrementFormulaire[enregistrementFormulaireLength].resultats  %}
+                            {% for keyhampsFormulaires, valChampsFormulaires  in champsFormulaires  %}
+                                {% if valChampsFormulaires.id == key %}
+                                    <th>{{ valChampsFormulaires.libelle }}</th>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for keyEnregistrementFormulaire, valEnregistrementFormulaire in enregistrementFormulaire  %}
+                        <tr>
+                            <td>
+                                {% if (valEnregistrementFormulaire.CalanderRendezVous) and (valEnregistrementFormulaire.CalanderRendezVous.intervenant) %}
+                                    {{ valEnregistrementFormulaire.CalanderRendezVous.intervenant.lastname }}
+                                {% else %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if (valEnregistrementFormulaire.CalanderRendezVous) and (valEnregistrementFormulaire.CalanderRendezVous.formulaire) %}
+                                    {{ valEnregistrementFormulaire.CalanderRendezVous.formulaire.libelle }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if (valEnregistrementFormulaire.CalanderRendezVous) and (valEnregistrementFormulaire.CalanderRendezVous.entreprise) %}
+                                    {{ valEnregistrementFormulaire.CalanderRendezVous.entreprise.formeJuridique }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if (valEnregistrementFormulaire.CalanderRendezVous) and (valEnregistrementFormulaire.CalanderRendezVous.pointeVente) %}
+                                    {{ valEnregistrementFormulaire.CalanderRendezVous.pointeVente.libelle }}
+                                {% endif %}
+                            </td>
+                            {% for key, val in valEnregistrementFormulaire.resultats  %}
+                                <td>
+                                    {% if val == 'files' %}
+                                        {% set filesLength = valEnregistrementFormulaire.files|length %}
+                                        {% set random = random() %}
+                                        {% if (filesLength > 0) %}
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#exampleModal{{ valEnregistrementFormulaire.id }}{{ random }}">
+                                                <i class="fa fa-files-o" aria-hidden="true"></i>
+                                            </button>
+                                            <div class="card">
+                                                <!-- Modal -->
+                                                <div class="modal fade" id="exampleModal{{ valEnregistrementFormulaire.id }}{{ random }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                    <div class="modal-dialog modal-xl">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="exampleModalLabel">Fichiers</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                {% for un_fichier in valEnregistrementFormulaire.files %}
+                                                                    {% if (key and un_fichier.champsFormulaire and un_fichier.champsFormulaire.id == key) %}
+                                                                        {% set functionChacked = 'functionDeleteFiles(' ~ un_fichier.id ~ ')' %}
+                                                                        <div>
+                                                                            {% set extensionFichier = un_fichier.name|split('.') %}
+                                                                            {% if ((extensionFichier[1] == 'JPG') or (extensionFichier[1] == "jpg") or
+                                                                                   (extensionFichier[1] == 'GIF') or (extensionFichier[1] == 'gif') or
+                                                                                   (extensionFichier[1] == 'PNG') or (extensionFichier[1] == 'png')) %}
+
+                                                                                <img id="{{un_fichier.id}}" class="card-img-top" src= "{{ asset('images/' ~ un_fichier.file) }}" alt="" >
+                                                                                <hr>
+                                                                                {# On ajoute un lien permettant de supprimer une image (sera géré en Ajax)
+                                                                                <a class="btn btn-danger" onclick="{{functionDeleteFiles}}" href="{{ path('enregistrement_formulaire_delete_image', {id: image.id})}}" data-delete data-token="{{ csrf_token('delete' ~ image.id )}}">Supprimer</a>
+                                                                                #}
+                                                                                <a href="{{ asset('images/' ~ un_fichier.file) }}" download>
+                                                                                    <i class="fa fa-download" aria-hidden="true"></i>
+                                                                                </a>
+                                                                            {% else %}
+                                                                                <i class="fa fa-file-pdf-o" aria-hidden="true"></i> {{un_fichier.name}}
+                                                                                <hr>
+                                                                                <a href="{{ asset('images/' ~ un_fichier.file) }}" download>
+                                                                                    <i class="fa fa-download" aria-hidden="true"></i>
+                                                                                </a>
+                                                                            {% endif %}
+                                                                        </div>
+                                                                        <hr>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        {{ val }}
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <table id="table_id" class="display">
+                <thead>
+                    <tr>
+                        {% for keyhampsFormulaires, valChampsFormulaires  in champsFormulaires  %}
+                                <th>{{ valChampsFormulaires.libelle }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        {% endif %}
+        <br>
+        <br>
+        <br>
+        <br>
+    </div>
+
+{% endblock %}
+{% block javascript %}
+<script>
+
+function functionDeleteFiles(id) {
+  document.getElementById(id).remove();
+}
+
+window.onload = () => {
+    // Gestion des boutons "Supprimer"
+    let links = document.querySelectorAll("[data-delete]")
+
+    // On boucle sur links
+    for(link of links){
+        // On écoute le clic
+        link.addEventListener("click", function(e){
+            // On empêche la navigation
+            e.preventDefault()
+
+            // On demande confirmation
+            if(confirm("Voulez-vous supprimer cette image ?")){
+                // On envoie une requête Ajax vers le href du lien avec la méthode DELETE
+                fetch(this.getAttribute("href"), {
+                    method: "DELETE",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({"_token": this.dataset.token})
+                }).then(
+                    // On récupère la réponse en JSON
+                    response => response.json()
+                ).then(data => {
+                    if(data.success){
+                        this.parentElement.remove()
+                    }else{
+                        alert(data.error)
+                    }
+                }).catch(e => alert(e))
+            }
+        })
+    }
+}
+
+    $(document).ready(function() {
+        $('#table_id').DataTable( {
+            "scrollY": 200,
+            "scrollX": true,
+            responsive: true,
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/fr_fr.json"
+            }
+        } );
+    } );
+</script>
+{% endblock %}

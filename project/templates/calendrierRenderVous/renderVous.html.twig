@@ -1,0 +1,328 @@
+{% extends 'base.html.twig' %}
+{% block title %}Calendar!{% endblock %}
+{% block stylesheets %}
+    <!-- fullcalendar -->
+    <style>
+    @media (max-width: 767.98px) {
+        .fc .fc-toolbar.fc-header-toolbar {
+            display: block;
+            text-align: center;
+        }
+
+        .fc-header-toolbar .fc-toolbar-chunk {
+            display: block;
+        }
+    }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <br>
+        <a class="btn btn-default" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+            <i class="fa fa-align-justify fa-2x" title="Align Justify"></i>
+        </a>
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="offcanvasExampleLabel">Filtres</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <br>
+                <div class="col-12">
+                    <div class="d-flex flex-column flex-shrink-0 p-3 bg-light">
+                        <div class="py-1">
+                            {{ form_start(form) }}
+                                <br>
+                                {{ form_row(form.intervenants) }}
+                                <br>
+                                {{ form_row(form.entreprises) }}
+                                <br>
+                                {{ form_row(form.formulaire) }}
+                                <br>
+                                {{ form_row(form.pointeVente) }}
+                                <br>
+                                {{ form_row(form.save) }}
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <br><br>
+        <div id='calendrier'></div>
+        <br>
+        <div class="modal" id="modal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        var urlApi = '{{ urlApi }}';
+        var urlApiGetTokenJWT = '{{ urlApiGetTokenJWT }}';
+
+        window.onload = () => {
+            let calendarElt = document.querySelector("#calendrier")
+            let calendar = new FullCalendar.Calendar(calendarElt, {
+                initialView: 'timeGridWeek',
+                locale: 'fr',
+                timeZone: 'Europe/Paris',
+                headerToolbar: {
+                    start: 'prev,next',
+                    center: 'title',
+                    end: 'dayGridMonth,timeGridWeek,listWeek'
+                },
+                events: {{ data|raw }},
+                editable: true,
+                eventResizableFromStart: true,
+                selectable: true,
+                droppable: true,
+                minTime: "09:00:00",
+                maxTime: "18:00:00",
+                eventClick: function(info) {
+                    var roles = {{ app.user.roles|json_encode|raw }};
+                    editRenderVous(info.event.id);
+                },
+                dateClick: function(info) {
+                    var roles = {{ app.user.roles|json_encode|raw }};
+                    if(roles.includes('ROLE_GESTIONNAIRE') || roles.includes('ROLE_ADMIN')){
+                        addRenderVous(info);
+                    }
+                },
+                eventResize: function(info) {
+                    if (confirm("Êtes-vous sûr de vouloir appliquer ces modifications?")) {
+                        //submitTimeChanges(info.event);
+                    }else{
+                        info.revert();
+                    }
+                },
+                eventDrop : function(info){
+                    //$('.popover.in').remove();
+                    if (confirm("Êtes-vous sûr de vouloir appliquer ces modifications?")) {
+                        //submitTimeChanges(info.event);
+                    }else{
+                        info.revert();
+                    }
+                },
+                select: function(info) {
+                    element.find("#delet_rendez_vous").on('click', function() {
+                        $('#calendar').fullCalendar('removeEvents',event._id);
+                    });
+                }
+            });
+            calendar.render()
+            $('#modal').on('hidden.bs.modal', function () {
+                calendar.refetchEvents();
+            });
+
+            function editRenderVous(id){
+                $.ajax({
+                    url: "{{ path('calendar_edit') }}",
+                    method: "GET",
+                    data: {'id':id},
+                    beforeSend: function () {
+                        //Code à jouer avant l'appel ajax en lui même
+                        var htmlSpinner = '<center><i class="fa fa-spinner fa-pulse" style="font-size:50px;color:Gray;"></i></center>';
+                        $('.modal-title').html("Modification du rendez vous");
+                        $('.modal-body').html(htmlSpinner);
+                        $('#modal').modal('show');
+                    }
+                })
+                //Ce code sera exécuté en cas de succès - La réponse du serveur est passée à done()
+                .done(function(response){
+                    //let data = JSON.stringify(response);
+                    $('.modal-title').html("Modification du rendez vous");
+                    $('.modal-body').html(response);
+                    $('#modal').modal('show');
+                    editeSaveRenderVous(id);
+                })
+                //Ce code sera exécuté en cas d'échec - L'erreur est passée à fail()
+                .fail(function(error){
+                    alert("La requête s'est terminée en échec.");
+                    $("#modal").modal('hide');
+                })
+            }
+
+            function editeSaveRenderVous(id){
+                $(document).on('submit','#rendez_vous_form', function(e){
+                    const donnees = getInfoRendezVous();
+                    const token = localStorage.getItem('token');
+                    e.preventDefault();
+                    $.ajax({
+                        //L'URL de la requête
+                        url: urlApi+"/"+id,
+                        method: "PUT",
+                        timeout: 0,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + token
+                        },
+                        data: JSON.stringify(donnees),
+                        beforeSend: function () {
+                            //Code à jouer avant l'appel ajax en lui même
+                            var htmlSpinner = '<center><i class="fa fa-spinner fa-pulse" style="font-size:50px;color:Gray;"></i></center>';
+                            $('.modal-body').html(htmlSpinner);
+                        }
+                    })
+
+                    //Ce code sera exécuté en cas de succès - La réponse du serveur est passée à done()
+                    .done(function(response){
+                        $('#modal').modal('hide');
+                    })
+
+                    //Ce code sera exécuté en cas d'échec - L'erreur est passée à fail()
+                    .fail(function(error){
+                        alert("La requête s'est terminée en échec.");
+                    })
+                });
+            }
+
+            function addRenderVous(info){
+                $.ajax({
+                    url: "{{ path('calendar_add') }}",
+                    method: "GET",
+                    beforeSend: function () {
+                        //Code à jouer avant l'appel ajax en lui même
+                        var htmlSpinner = '<center><i class="fa fa-spinner fa-pulse" style="font-size:50px;color:Gray;"></i></center>';
+                        $('.modal-title').html("Nouveau rendez-vous");
+                        $('.modal-body').html(htmlSpinner);
+                        $('#modal').modal('show');
+                    }
+                })
+
+                //Ce code sera exécuté en cas de succès - La réponse du serveur est passée à done()
+                .done(function(response){
+                    //on injecte le html du formulaire dans la modale
+                    $('.modal-title').html("Nouveau rendez-vous");
+                    $('.modal-body').html(response);
+                    $('#modal').modal('show');
+
+                    var date = info["dateStr"];
+                    document.getElementById("render_vous_start").value = date;
+                    document.getElementById("render_vous_end").value = date;
+                    addSaveRenderVous(info);
+                })
+
+                //Ce code sera exécuté en cas d'échec - L'erreur est passée à fail()
+                .fail(function(error){
+                    alert("La requête s'est terminée en échec.");
+                    $("#modal").modal('hide');
+                })
+            }
+
+            function addSaveRenderVous(info){
+                var dateStar = info.startStr;
+                var dateEnd = info.endStr;
+                $(document).on('submit','#rendez_vous_form', function(e){
+                    const token = localStorage.getItem('token');
+                    const donnees = getInfoRendezVous();
+                    e.preventDefault();
+                    $.ajax({
+                        url: urlApi,
+                        method: "POST",
+                        timeout: 0,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + token
+                        },
+                        data: JSON.stringify(donnees),
+                        beforeSend: function () {
+                            //Code à jouer avant l'appel ajax en lui même
+                            var htmlSpinner = '<center><i class="fa fa-spinner fa-pulse" style="font-size:50px;color:Gray;"></i></center>'; 
+                            $('.modal-body').html(htmlSpinner);
+                        }
+                    })
+
+                    //Ce code sera exécuté en cas de succès - La réponse du serveur est passée à done()
+                    .done(function(response){
+                        $('#modal').modal('hide');
+                    })
+
+                    //Ce code sera exécuté en cas d'échec - L'erreur est passée à fail()
+                    .fail(function(error){
+                        alert("La requête s'est terminée en échec.");
+                    })
+                });
+            }
+
+            function getInfoRendezVous(){
+                title = $('#render_vous_title').val();
+                start_date = $('#render_vous_start').val();
+                end_date = $('#render_vous_end').val();
+                description = $('#render_vous_description').val();
+                background_color = $('#render_vous_background_color').val();
+                border_color = $('#render_vous_border_color').val();
+                text_color = $('#render_vous_text_color').val();
+                formulaire = $('#render_vous_formulaire').val();
+                intervenant = $('#render_vous_intervenant').val();
+                entreprise = $('#render_vous_entreprise').val();
+                pointeVente = $('#render_vous_pointeVente').val();
+
+                var ckbox = $("input[name='render_vous[all_day]']");
+                if (ckbox.is(':checked')) {
+                    allDay = true;
+                }else {
+                    allDay = false;
+                }
+
+                var donnees = {
+                    "title": title,
+                    "description": description,
+                    "start": start_date,
+                    "end": end_date,
+                    "backgroundColor": background_color,
+                    "borderColor": border_color,
+                    "textColor": text_color,
+                    "allDay": allDay,
+                    "formulaire": "/api/formulaires/"+formulaire,
+                    "intervenant": "/api/users/"+intervenant,
+                    "entreprise" : "/api/entreprises/"+entreprise,
+                    "pointeVente": "/api/point_ventes/"+pointeVente
+                }
+
+                return donnees;
+            }
+        }
+
+        function apiGetJWTToken(){
+            var settings = {
+                "url": urlApiGetTokenJWT,
+                "method": "POST",
+                "timeout": 0,
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "data": JSON.stringify({
+                    "username": "admin@gmail.com",
+                    "password": "rootroot"
+                }),
+            };
+
+            $.ajax(settings).done(function (response) {
+                localStorage.setItem('token', response["token"]);
+            });
+        }
+
+        apiGetJWTToken();
+
+        $(function() {
+            $('.js-multiple').select2({
+                placeholder: 'Choisir ...'
+            });
+        });
+
+    </script>
+{% endblock %}

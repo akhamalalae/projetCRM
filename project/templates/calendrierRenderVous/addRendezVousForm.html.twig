@@ -1,0 +1,62 @@
+<div class="container">
+    {{ form_start(form, {'attr': {'id': 'rendez_vous_form'}}) }}
+        <div class="mb-3">
+        {{ form_row(form.title) }}
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+            {{ form_row(form.start) }}
+            </div>
+            <div class="col-md-6 ms-auto">
+            {{ form_row(form.end) }}
+            </div>
+        </div>
+        </br>
+        <div class="mb-3">
+        {{ form_row(form.description) }}
+        </div>
+
+       <div class="row">
+            <div class="col-md-6">
+            {{ form_row(form.entreprise) }}
+            </div>
+            <div class="col-md-6">
+            {{ form_row(form.pointeVente) }}
+            </div>
+        </div>
+        </br>
+
+        <div class="row">
+            <div class="col-md-6">
+            {{ form_row(form.formulaire) }}
+            </div>
+            <div class="col-md-6">
+            {{ form_row(form.intervenant) }}
+            </div>
+        </div>
+        </br>
+
+        <div class="row">
+            <div class="col-md-4">
+            {{ form_row(form.background_color) }}
+            </div>
+            <div class="col-md-4 ms-auto">
+            {{ form_row(form.border_color) }}
+            </div>
+            <div class="col-md-4 ms-auto">
+            {{ form_row(form.text_color) }}
+            </div>
+        </div>
+        </br>
+        <div class="mb-3">
+        {{ form_row(form.all_day) }}
+        </div>
+        <div class="modal-footer">
+            <button id="Nouveau_rendez_vous" class="btn btn-primary">
+                <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                {{ button_label|default('Enregistrer') }}
+            </button>
+    {{ form_end(form) }}
+        </div>
+</div>

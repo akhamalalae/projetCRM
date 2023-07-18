@@ -1,0 +1,91 @@
+
+{% extends 'base.html.twig' %}
+{% block title %}Formulaire!{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <br>
+        <br>
+        <h2>Listes des formulaires
+        <a class="btn btn-primary pull-right" href="{{ path('add_formulaire') }}" aria-label="add" title="formulaire">
+            <i class="fa fa-plus-square-o" aria-hidden="true"></i> Ajouter un nouveau formulaire
+        </a>
+        </h2>
+        <hr>
+        <div class="row">
+            {{ include('formulaire/sidebar.html.twig') }}
+            <div class="col-9">
+            <br>
+            <div class="d-flex flex-column flex-shrink-0 p-3 bg-light">
+                <table id="table_id" class="display">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Description</th>
+                            <th>Date debut et fin de l'utilisation</th>
+                            <th>Statut</th>
+                            <th>Visualisation</th>
+                            <th>Résultats</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for formulaire in formulaires %}
+                        <tr>
+                            <td>{{ formulaire.libelle }}</td>
+                            <td>{{ formulaire.description }}</td>
+                            <td>
+                                {{ formulaire.dateDebut ? formulaire.dateDebut|date('Y-m-d H:i') : '' }}
+                                -
+                                {{ formulaire.dateFin ? formulaire.dateFin|date('Y-m-d H:i') : '' }}
+                            </td>
+
+                            <td><small>{% if formulaire.status == 1 %}<span class="badge bg-danger text-dark">Inactif</span>{% else %}<span class="badge bg-warning text-dark">Actif</span>{% endif %} </small></td>
+                            <td>
+                                <a class="btn btn" href="{{ path('demo_formulaire', {'id': formulaire.id}) }}" aria-label="delet">
+                                    <i class="fa fa-laptop" aria-hidden="true"></i>
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn btn" href="{{ path('resultats_formulaire', {'id': formulaire.id}) }}" aria-label="delet">
+                                    <i class="fa fa-tasks" aria-hidden="true"></i>
+                                </a>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                                    <a class="btn btn-success" href="{{ path('formulaire_edit', {'id': formulaire.id}) }}" aria-label="edit" title="edit">
+                                        <i class="fa fa-edit" aria-hidden="true"></i>
+                                    </a>
+                                    <a class="btn btn-danger" href="{{ path('formulaire_delete', {'id': formulaire.id}) }}" aria-label="delet">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="10"></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block javascript %}
+<script>
+    $(document).ready( function () {
+        //$('#table_id').DataTable();
+        $('#table_id').DataTable( {
+            responsive: true,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/fr_fr.json"
+            }
+        } );
+
+    });
+</script>
+{% endblock %}

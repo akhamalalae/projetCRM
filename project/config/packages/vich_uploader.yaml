@@ -1,0 +1,8 @@
+vich_uploader:
+    db_driver: orm
+    mappings:
+        attachement_object:
+            uri_prefix: /attachement
+            upload_destination: '%kernel.project_dir%/public/attachement'
+            # Will rename uploaded files using a uniqueid as a prefix.
+            namer: Vich\UploaderBundle\Naming\OrignameNamer

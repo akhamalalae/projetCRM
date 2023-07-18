@@ -1,0 +1,134 @@
+<div class="container">
+    {{ form_start(form, {'attr': {'id': 'rendez_vous_form'}}) }}
+        <div class="mb-3">
+        {{ form_row(form.title) }}
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+            {{ form_row(form.start) }}
+            </div>
+            <div class="col-md-6 ms-auto">
+            {{ form_row(form.end) }}
+            </div>
+        </div>
+        </br>
+        <div class="mb-3">
+        {{ form_row(form.description) }}
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+            {{ form_row(form.entreprise) }}
+            </div>
+            <div class="col-md-6">
+            {{ form_row(form.pointeVente) }}
+            </div>
+        </div>
+        </br>
+
+        <div class="row">
+            <div class="col-md-6">
+            {{ form_row(form.formulaire) }}
+            </div>
+            <div class="col-md-6">
+            {{ form_row(form.intervenant) }}
+            </div>
+        </div>
+        </br>
+
+        <div class="row">
+            <div class="col-md-4">
+            {{ form_row(form.background_color) }}
+            </div>
+            <div class="col-md-4 ms-auto">
+            {{ form_row(form.border_color) }}
+            </div>
+            <div class="col-md-4 ms-auto">
+            {{ form_row(form.text_color) }}
+            </div>
+        </div>
+        </br>
+        <div class="mb-3">
+            {{ form_row(form.all_day) }}
+        </div>
+        <div class="modal-footer">
+            {% if ('ROLE_GESTIONNAIRE' in app.user.roles) %}
+                <div class="py-1 text-center">
+                    <button id="Nouveau_rendez_vous" class="btn btn-primary pull-right"><i class="fa fa-plus-circle" aria-hidden="true"></i>
+                        {{ button_label|default('Enregistrer') }}
+                    </button>
+                </div>
+                {#
+                <div class="py-1 text-center">
+                    <form method="post" action="{{ path('calendar_delet_ajax', {'id': calendar.id}) }}" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ calendar.id) }}">
+                        <button class="btn btn-danger pull-right"><i class="fa fa-trash-o fa-lg"></i> Supprimer</button>
+                    </form>
+                </div>
+                #}
+                <div class="py-1 text-center">
+                    <a class="btn btn-danger pull-right" onclick="calendar_delet({{ calendar.id }})">
+                        <i class="fa fa-trash-o fa-lg" aria-hidden="true"></i>
+                    </a>
+                </div>
+            {% endif %}
+            <div class="py-1 text-center">
+                <a class="btn btn-primary pull-left" href="{{ path('remplir_formulaire', {'id': calendar.id}) }}" aria-label="delet">
+                    <i class="fa fa-files-o" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% block javascript %}
+<script>
+    function calendar_delet(id) {
+        // On demande confirmation
+        if(confirm("Voulez-vous supprimer ce rendez-vous ?")){
+           $.ajax({
+                //L'URL de la requête
+                url: "{{ path('calendar_delet') }}",
+                //La méthode d'envoi (type de requête)
+                method: "DELETE",
+                data: {'id':id},
+                beforeSend: function () {
+                    //Code à jouer avant l'appel ajax en lui même
+                    var htmlSpinner = '<center><i class="fa fa-spinner fa-pulse" style="font-size:200px;color:Gray;"></i></center>';
+                    $('.modal-body').html(htmlSpinner);
+                }
+                })
+                .done(function(response){
+                    $('#modal').modal('hide');
+                })
+                .fail(function(error){
+                    alert("La requête s'est terminée en échec.");
+                })
+        }
+    }
+
+    liste_point_ventes_calander();
+    $("select#render_vous_entreprise").change(function(){
+        liste_point_ventes_calander();
+    });
+
+    function liste_point_ventes_calander(){
+        var e = document.getElementById("render_vous_entreprise");
+        var selected = e.value;
+        $.ajax({
+            //L'URL de la requête
+            url: "{{ path('get_point_ventes_calander') }}",
+            //La méthode d'envoi (type de requête)
+            method: "GET",
+            data: {'selected':selected},
+        })
+        .done(function(response){
+			$('#render_vous_pointeVente').html(response['listePointeVentes']);
+        })
+        .fail(function(error){
+            alert("La requête s'est terminée en échec.");
+        })
+    }
+</script>
+{% endblock %}

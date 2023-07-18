@@ -1,0 +1,85 @@
+
+{% extends 'base.html.twig' %}
+{% block title %}Formulaire!{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <br>
+        <br>
+        <h2>Catégories Produits
+        <a class="btn btn-primary pull-right"  id='btn_add_categories' aria-label="add" title="formulaire">
+            <i class="fa fa-plus-square-o" aria-hidden="true"></i> Ajouter une catégorie
+        </a>
+        </h2>
+        <hr>
+        <div class="row">
+        {{ include('entrepriseProduits/sidebar.html.twig') }}
+            <div id='tab_categories' class="col-9">
+                <table id="table" class="display">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Status</th>
+                            <th>Ordre</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for categorieProduit in listeCategorieProduits %}
+                            <tr>
+                                <td>{{ categorieProduit.libelle }}</td>
+                                <td><small>{% if categorieProduit.status == 1 %}<span class="badge bg-danger text-dark">Inactif</span>{% else %}<span class="badge bg-warning text-dark">Actif</span>{% endif %} </small></td>
+                                <td>{{ categorieProduit.ordre }}</td>
+                                <td>
+                                    <a class="btn btn-danger" href="" aria-label="delet">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="10"></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div id='add_categorie' class="col-9">
+                <h5>Nouvelle catégorie</h5>
+                <hr>
+                {{ form_start(form) }}
+                {{ form_row(form.libelle) }}
+                <br>
+                {{ form_row(form.ordre) }}
+                <br>
+                {{ form_row(form.status) }}
+                <hr>
+                {{ form_row(form.save) }}
+                {{ form_end(form) }}
+                <br>
+            </div>
+        </div>
+        <hr>
+    </div>
+
+{% endblock %}
+{% block javascript %}
+<script>
+    $("#add_categorie").hide();
+    $( "#btn_add_categories" ).click(function() {
+        $("#tab_categories").hide();
+        $("#add_categorie").show();
+    });
+
+    $(document).ready( function () {
+        //$('#table_id').DataTable();
+        $('#table').DataTable( {
+            responsive: true,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/fr_fr.json"
+            }
+        } );
+
+    });
+</script>
+{% endblock %}
