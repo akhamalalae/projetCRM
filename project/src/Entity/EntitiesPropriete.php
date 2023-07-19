@@ -148,6 +148,12 @@ class EntitiesPropriete
         return $this;
     }
 
+    public function getNameTypesChamps(): ?string
+    {
+
+        return $this->name."( ".$this->typesChamps->getLibelle()." )";
+    }
+
     /**
      * @return Collection<int, RequeteTableauBordFiltres>
      */

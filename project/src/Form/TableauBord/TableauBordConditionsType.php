@@ -59,7 +59,7 @@ class TableauBordConditionsType extends AbstractType
                         ->andWhere('u.status = 0')
                         ->orderBy('u.libelle', 'ASC');
                 },
-                'choice_label' => 'name',
+                'choice_label' => 'getNameTypesChamps',
                 'required' => false,
                 'placeholder' => 'Choisir le champ',
                 'label' => "Champ"

@@ -3,8 +3,8 @@
 {% block title %}Tableau De Bord!{% endblock %}
 
 {% block content %}
-
-<div class="container">
+<main>
+<div class="container col-xxl-12 px-6 py-1">
         <br>
         <br>
         <h2>Tableau De Bord
@@ -35,11 +35,11 @@
                         <div class="collapse" id="collapseExample">
                             <div class="card card-body">
                                 <div class="alert alert-success" role="alert">
-                                    <h4 class="alert-heading">Syntaxe d'écriture de la valeur </h4>
+                                    <h4 class="alert-heading">Syntaxe d'écriture du champ valeur </h4>
                                     <hr>
                                     <p>Champ valeur de type Date (Y/m/d H:i), exemple : 2019/01/12 12:12</p>
                                     <hr>
-                                    <p class="mb-0">Champ valeur de type Boolean (true ou false), exemple : true</p>
+                                    <p class="mb-0">Champ valeur de type Boolean (0 ou 1), exemple : 1</p>
                                 </div>
                             </div>
                         </div>
@@ -159,12 +159,13 @@
                     {{ form_end(form) }}
             </div>
         </div>
-
+</div>
+<div class="container col-xxl-12 px-6 py-5">
         {% if resultatsRequeteTableauBord != null %}
             <h2>Résultats de la requête</h2>
             <hr>
             <br>
-            <div id="resultats" class="d-flex flex-column flex-shrink-0 p-3 bg-light">
+            <div id="resultats">
                 <table id="table_id" class="display nowrap" style="width:100%">
                     <thead>
                         <tr>
@@ -201,6 +202,7 @@
             </div>
         {% endif %}
 </div>
+</main>
 {% endblock %}
 {% block javascript %}
 <script>

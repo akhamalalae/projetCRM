@@ -2,6 +2,7 @@
 
 namespace App\Controller\ModuleGestionOutilsPilotage;
 
+use DateTimeImmutable;
 use App\Entity\Entities;
 use App\Entity\Formulaire;
 use App\Entity\RenderVous;
@@ -111,6 +112,12 @@ class TableauBordController extends BaseController
                 $warning = true;
             }
 
+            $checkValidateSyntaxeChampValeur = $this->checkValidateSyntaxeChampValeur($requeteTableauBord->getRequeteTableauBordFiltres());
+            if ($checkValidateSyntaxeChampValeur == true) {
+                $this->addFlash('success', 'Erreur de syntaxe du champ Valeur des filtres, veuillez regarder la documentation!');
+                $warning = true;
+            }
+
             if ($warning== false) {
                 $this->doctrinePersist($requeteTableauBord);
                 $this->doctrineFlush();
@@ -119,14 +126,7 @@ class TableauBordController extends BaseController
 
                 $resultatsRequeteTableauBord = $this->em->getRepository(Formulaire::class)->requeteTableauBordFiltres($requeteSQL);
 
-                foreach ($resultatsRequeteTableauBord as $key => $var) {
-                    foreach ($var as $keychamp => $varchamp) {
-                        $explode = explode("_", $keychamp);
-                        $champ = $this->em->getRepository(EntitiesPropriete::class)->find($explode[1]);
-                        $resultatsRequeteTableauBord[$key][$champ->getName()." (".$champ->getEntitie()->getLibelle().")"] = $varchamp;
-                        unset($resultatsRequeteTableauBord[$key][$keychamp]);
-                    }
-                }
+                $resultatsRequeteTableauBord = $this->changeLabelFormatResultats($resultatsRequeteTableauBord);
 
                 // Ne pas enregistrer la requête dans la base
                 if (($id == 0) && ($requeteTableauBord->getEnregistrerRequete() == false)) {
@@ -147,6 +147,20 @@ class TableauBordController extends BaseController
             'requete_tableau_bord' =>$requeteTableauBord,
             "nombreFiltres" => count($requeteTableauBord->getRequeteTableauBordFiltres()),
         ]);
+    }
+
+    public function changeLabelFormatResultats($resultatsRequeteTableauBord)
+    {
+        foreach ($resultatsRequeteTableauBord as $key => $var) {
+            foreach ($var as $keychamp => $varchamp) {
+                $explode = explode("_", $keychamp);
+                $champ = $this->em->getRepository(EntitiesPropriete::class)->find($explode[1]);
+                $resultatsRequeteTableauBord[$key][$champ->getName()." (".$champ->getEntitie()->getLibelle().")"] = $varchamp;
+                unset($resultatsRequeteTableauBord[$key][$keychamp]);
+            }
+        }
+
+        return $resultatsRequeteTableauBord;
     }
 
     public function createRequete($requeteTableauBord)
@@ -218,6 +232,30 @@ class TableauBordController extends BaseController
         return $jointure;
     }
 
+    function checkValidateSyntaxeChampValeur($filtres)
+    {
+        $erreur = false;
+
+        foreach ($filtres as $filtre) {
+            $valeur = $filtre->getValeur();
+
+            if ($filtre->getEntitiesPropriete()->getTypesChamps()->getId() === 9) { //type date
+                $format = 'Y/m/d H:i';
+                $checkDateFormat = DateTimeImmutable::createFromFormat($format, $valeur);
+                if($checkDateFormat === false) {
+                    $erreur = true;
+                    break;
+                }
+            }
+
+            if ($filtre->getEntitiesPropriete()->getTypesChamps()->getId() === 11) { //type boolean
+                $valeur = $valeur === '0'? 0: 1;
+            }
+        }
+
+        return $erreur;
+    }
+
      /**
      * @Route("/gestionnaire/tableau_de_bord/get/entities", name="getEntitiesProprieteConditionByEntities", methods={"GET","POST"})
      */
@@ -229,7 +267,7 @@ class TableauBordController extends BaseController
         $entitiesProprietes = $this->em->getRepository(EntitiesPropriete::class)->findBy(['entitie' => $idEntite, 'status' => 0]);
 
         foreach ($entitiesProprietes as $une_prop) {
-            $listes_EntitiesPropriete .= "<option value=".$une_prop->getId()." >".$une_prop->getName()."</option>";
+            $listes_EntitiesPropriete .= "<option value=".$une_prop->getId()." >".$une_prop->getName()."( ".$une_prop->getTypesChamps()->getLibelle()." )"."</option>";
         }
 
         return $this->json(array('listes_EntitiesPropriete' => $listes_EntitiesPropriete));

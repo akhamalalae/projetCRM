@@ -65,7 +65,7 @@ class GenerationAutomatiqueRendezVous extends BaseController
                 }
             }
 
-            //return $this->redirectToRoute('generation_automatique_rendez_vous');
+            return $this->redirectToRoute('generation_automatique_rendez_vous');
         }
 
         return $this->render('calendrierRenderVous/generationAutomatiqueRendezVous.html.twig', [
