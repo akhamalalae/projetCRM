@@ -92,7 +92,7 @@ Le CRM permet la configuration et la création automatique des enquêtes de merc
 
 1 : Application
    - http://127.0.0.1:8741/
-   - Authentification ("username": "admin@gmail.com", "password": "rootroot")
+   - Authentification ("username": "admin@gmail.com", "password": "admin")
 
 2 : phpMyAdmin ("username": "root", "password": "")
   - http://127.0.0.1:8080/

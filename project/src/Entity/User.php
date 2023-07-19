@@ -2,15 +2,16 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Entity\Generale\Adresse;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
-use ApiPlatform\Core\Annotation\ApiResource;
-use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -20,7 +21,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']],
 )]
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User extends Adresse implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * @ORM\Id
@@ -106,21 +107,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $dateModification;
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $adresse;
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $complementAdresse;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Ville::class, inversedBy="users")
-     */
-    private $ville;
 
     public function __construct()
     {
@@ -437,42 +423,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setDateModification(?\DateTimeInterface $dateModification): self
     {
         $this->dateModification = $dateModification;
-
-        return $this;
-    }
-
-    public function getAdresse(): ?string
-    {
-        return $this->adresse;
-    }
-
-    public function setAdresse(?string $adresse): self
-    {
-        $this->adresse = $adresse;
-
-        return $this;
-    }
-
-    public function getComplementAdresse(): ?string
-    {
-        return $this->complementAdresse;
-    }
-
-    public function setComplementAdresse(?string $complementAdresse): self
-    {
-        $this->complementAdresse = $complementAdresse;
-
-        return $this;
-    }
-
-    public function getVille(): ?Ville
-    {
-        return $this->ville;
-    }
-
-    public function setVille(?Ville $ville): self
-    {
-        $this->ville = $ville;
 
         return $this;
     }

@@ -11,11 +11,13 @@ use App\Entity\Entreprise;
 use App\Entity\Formulaire;
 use App\Entity\PointVente;
 use App\Entity\Typeschamps;
+use App\Entity\Referentiels;
 use App\Entity\MenuCategorie;
 use App\Entity\ChampsFormulaire;
 use App\Entity\CategorieProduits;
 use App\Entity\EntitiesPropriete;
 use App\Entity\MenuSousCategorie;
+use App\Entity\ReferentielsOptions;
 use Doctrine\DBAL\Driver\Connection;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -63,24 +65,44 @@ class AppFixtures extends Fixture
 
         $this->createFormulaires($manager);
 
+        $this->createReferentiels($manager);
+
         $manager->flush();
+    }
+
+    public function createReferentiels($manager)
+    {
+        $dateNoow = new DateTime();
+
+        for ($i = 0; $i < 5; $i++) {
+            $referentiel = new Referentiels();
+            $referentiel->setLibelle("Referentiel ". $i);
+            $referentiel->setDescription("Description Referentiel ". $i);
+            $referentiel->setStatus(0);
+            $referentiel->setDateCreation($dateNoow);
+
+            for ($j = 0; $j < 10; $j++) {
+                $referentielOption = new ReferentielsOptions();
+                $referentielOption->setLibelle("Option ". $j . " du Referentiel ". $i);
+                $referentielOption->setDescription("Description Option ". $j);
+                $referentielOption->setStatus(0);
+                $referentielOption->setDateCreation($dateNoow);
+
+                $manager->persist($referentielOption);
+
+                $referentiel->addReferentielsOption($referentielOption);
+            }
+
+            $manager->persist($referentiel);
+        }
     }
 
     public function createFormulaires($manager)
     {
         $dateNoow = new DateTime();
         $type = $manager->getRepository(Typeschamps::class)->find(1);
+        $user = $this->createUserAdmin($manager);
 
-        $user = new User();
-        $user->setEmail('admin@gmail.com');
-        $roles = array('ROLE_USER', 'ROLE_ADMIN', 'ROLE_GESTIONNAIRE');
-        $user->setRoles($roles);
-        $user->setPassword('$2y$13$gVbAQ8gYFFPWZT5xOtOOMeptPU92Sbfd738bg/lXLkuWMZatCGswC');//admin
-        $user->setLastname('Admin');
-
-        $manager->persist($user);
-
-        $indice = 0;
         for ($i = 0; $i < 20; $i++) {
             $formulaire = new Formulaire();
             $formulaire->setLibelle("Formulaire ". $i);
@@ -116,6 +138,20 @@ class AppFixtures extends Fixture
                 $manager->persist($champsFormulaire);
             }
         }
+    }
+
+    public function createUserAdmin($manager)
+    {
+        $user = new User();
+        $user->setEmail('admin@gmail.com');
+        $roles = array('ROLE_USER', 'ROLE_ADMIN', 'ROLE_GESTIONNAIRE');
+        $user->setRoles($roles);
+        $user->setPassword('$2y$13$gVbAQ8gYFFPWZT5xOtOOMeptPU92Sbfd738bg/lXLkuWMZatCGswC');//admin
+        $user->setLastname('Admin');
+
+        $manager->persist($user);
+
+        return $user;
     }
 
     public function createEntreprises($manager, $i)
