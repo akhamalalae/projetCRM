@@ -61,6 +61,8 @@ class TableauBordController extends BaseController
      */
     public function tableauBrd(Request $request,$id)
     {
+        ini_set('memory_limit','2048M');
+        set_time_limit(600);
         $menus = $this->serviceMenu();
         $user = $this->getUser();
         $resultatsRequeteTableauBord = null;

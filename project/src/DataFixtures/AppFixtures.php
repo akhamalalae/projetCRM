@@ -3,10 +3,16 @@
 namespace App\DataFixtures;
 
 use Faker;
+use DateTime;
 use App\Entity\User;
+use App\Entity\Ville;
 use App\Entity\Entities;
+use App\Entity\Entreprise;
+use App\Entity\Formulaire;
+use App\Entity\PointVente;
 use App\Entity\Typeschamps;
 use App\Entity\MenuCategorie;
+use App\Entity\ChampsFormulaire;
 use App\Entity\CategorieProduits;
 use App\Entity\EntitiesPropriete;
 use App\Entity\MenuSousCategorie;
@@ -53,13 +59,118 @@ class AppFixtures extends Fixture
         $sql = $this->RequeteSqlInsertEntitiesPropriete();
         $manager->getConnection()->exec($sql);
 
-        $generator = Faker\Factory::create('fr_FR');
-
-        $this->createUsers($manager);
-
         $this->createCategorieProduits($manager);
 
+        $this->createFormulaires($manager);
+
         $manager->flush();
+    }
+
+    public function createFormulaires($manager)
+    {
+        $dateNoow = new DateTime();
+        $type = $manager->getRepository(Typeschamps::class)->find(1);
+
+        $user = new User();
+        $user->setEmail('admin@gmail.com');
+        $roles = array('ROLE_USER', 'ROLE_ADMIN', 'ROLE_GESTIONNAIRE');
+        $user->setRoles($roles);
+        $user->setPassword('$2y$13$gVbAQ8gYFFPWZT5xOtOOMeptPU92Sbfd738bg/lXLkuWMZatCGswC');//admin
+        $user->setLastname('Admin');
+
+        $manager->persist($user);
+
+        $indice = 0;
+        for ($i = 0; $i < 20; $i++) {
+            $formulaire = new Formulaire();
+            $formulaire->setLibelle("Formulaire ". $i);
+            $formulaire->setDescription("Description Formulaire ". $i);
+            $formulaire->setDateCreation($dateNoow);
+            $formulaire->setDateDebut($dateNoow);
+            $formulaire->setDateFin($dateNoow->modify('+1 day'));
+            $formulaire->setStatus(0);
+            $formulaire->setUser($user);
+
+            for ($f = 0; $f < 5; $f++) {
+                $entreprise = $this->createEntreprises($manager, $f);
+                $formulaire->addEntreprise($entreprise);
+            }
+
+            for ($f = 0; $f < 5; $f++) {
+                $intervenant = $this->createIntervenants($manager);
+                $formulaire->addIntervenant($intervenant);
+            }
+
+            $manager->persist($formulaire);
+
+            for ($k = 0; $k < 10; $k++) {
+                $champsFormulaire = new ChampsFormulaire();
+                $champsFormulaire->setLibelle("Champ ". $k);
+                $champsFormulaire->setDescription("Description Champ ". $k);
+                $champsFormulaire->setOrdre($k);
+                $champsFormulaire->setStatus(0);
+                $champsFormulaire->setDateCreation($dateNoow);
+                $champsFormulaire->setType($type);
+                $champsFormulaire->setFormulaire($formulaire);
+
+                $manager->persist($champsFormulaire);
+            }
+        }
+    }
+
+    public function createEntreprises($manager, $i)
+    {
+        $generator = Faker\Factory::create('fr_FR');
+        $dateNoow = new DateTime();
+        $ville = $manager->getRepository(Ville::class)->find(30905);
+        $company = $generator->Company();
+
+        $entreprise = new Entreprise();
+        $entreprise->setFormeJuridique($company);
+        $entreprise->setNomsCommerciaux($company);
+        $entreprise->setDateCreationEntreprise($dateNoow);
+        $entreprise->setNumeroSIREN("00000000000000");
+        $entreprise->setNumeroSIRET("00000000000000");
+        $entreprise->setNumerosRCS("00000000000000");
+        $entreprise->setDateImmatriculationRCS($dateNoow);
+        $entreprise->setDateEnregistrementINSEE($dateNoow);
+        $entreprise->setCapitalSocial("1200000000000000");
+        $entreprise->setDateCreation($dateNoow);
+        $entreprise->setVille($ville);
+        $entreprise->setAdresse("Adresse ". $i);
+
+        $manager->persist($entreprise);
+
+        for ($j = 0; $j < 10; $j++) {
+            $pointVente = new PointVente();
+            $pointVente->setLibelle("Point de vente ". $company . " " . $j);
+            $pointVente->setDateCreation($dateNoow);
+            $pointVente->setStatus(0);
+            $pointVente->addEntreprise($entreprise);
+            $pointVente->setVille($ville);
+            $pointVente->setAdresse("Adresse ". $j);
+
+            $manager->persist($pointVente);
+        }
+
+        return $entreprise;
+    }
+
+    public function createIntervenants($manager)
+    {
+        $generator = Faker\Factory::create('fr_FR');
+        $name = explode(" ", $generator->name());
+        $user = new User();
+        $user->setEmail($name[0].$name[1].'@gmail.com');
+        $roles = array('ROLE_USER');
+        $user->setRoles($roles);
+        $user->setPassword('$2y$13$gVbAQ8gYFFPWZT5xOtOOMeptPU92Sbfd738bg/lXLkuWMZatCGswC');
+        $user->setLastname($name[0]);
+        $user->setFirstname($name[1]);
+
+        $manager->persist($user);
+
+        return $user;
     }
 
     public function createCategorieProduits($manager)
@@ -72,17 +183,6 @@ class AppFixtures extends Fixture
             $categorieProduits->setStatus(0);
             $manager->persist($categorieProduits);
         }
-    }
-
-    public function createUsers($manager)
-    {
-        $user = new User();
-        $user->setEmail('admin@gmail.com');
-        $roles = array('ROLE_USER', 'ROLE_ADMIN', 'ROLE_GESTIONNAIRE');
-        $user->setRoles($roles);
-        $user->setPassword('$2y$13$ZnMYK5fur4weFWRWpF6ecOVoFSM4FhEZTVeH1nzFIl6/68wE2RJ3q');//rootroot
-        $user->setLastname('Admin');
-        $manager->persist($user);
     }
 
     public function RequeteSqlInsertTypeschamps()
@@ -164,13 +264,13 @@ class AppFixtures extends Fixture
         $requete = "INSERT INTO `Entities` (`id`, `libelle`, `status`, `nomProprieteeJointure`) VALUES
             (1, 'formulaire', 0, NULL),
             (2, 'entreprise', 0, 'entreprises'),
-            (3, 'produits', 0, 'Produit'),
-            (4, 'intervenants', 0, 'User'),
-            (7, 'champsFormulaire', 0, 'ChampsFormulaire'),
-            (8, 'categories', 0, 'CategorieProduits'),
-            (9, 'typeschamps', 0, 'Typeschamps'),
-            (10, 'render_vous', 0, 'RenderVous'),
-            (11, 'pointVente', 0, 'PointVente')";
+            (3, 'produits', 1, ''),
+            (4, 'intervenants', 0, 'intervenants'),
+            (7, 'champsFormulaire', 1, ''),
+            (8, 'categories', 1, ''),
+            (9, 'typeschamps', 1, ''),
+            (10, 'render_vous', 0, 'renderVous'),
+            (11, 'pointVente', 1, '')";
 
         return $requete;
     }

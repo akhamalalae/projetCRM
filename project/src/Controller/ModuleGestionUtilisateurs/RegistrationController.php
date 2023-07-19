@@ -75,7 +75,7 @@ class RegistrationController extends BaseController
             return $this->redirectToRoute('intervenants');
         }
 
-        return $this->render('intervenants/index.html.twig', [
+        return $this->render('intervenant/index.html.twig', [
             'menus' => $menus,
             'registrationForm' => $form->createView(),
             'intervenants' => $intervenants,

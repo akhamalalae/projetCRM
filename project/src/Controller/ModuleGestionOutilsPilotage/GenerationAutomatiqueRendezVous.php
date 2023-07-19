@@ -19,6 +19,8 @@ class GenerationAutomatiqueRendezVous extends BaseController
      */
     public function generationAutomatiqueRendezVous(Request $request): Response
     {
+        ini_set('memory_limit','2048M');
+        set_time_limit(600);
         $menus = $this->serviceMenu();
         $user = $this->getUser();
         $dateNoow = new DateTime();
@@ -45,7 +47,7 @@ class GenerationAutomatiqueRendezVous extends BaseController
                     foreach ($pointeVentes as $pointeVente) {
 
                         foreach ($intervenents as $intervenent) {
-                            $dateDebutBeforeModifications = clone $dateDebut;
+                            //$dateDebutBeforeModifications = clone $dateDebut;
                             $dateDebut = $this->getValidDateDebutRendezVous($intervenent, $dateDebut, $ecart);
                             $dateFin = $this->getDateFin($dateDebut, $ecart);
 
@@ -57,7 +59,7 @@ class GenerationAutomatiqueRendezVous extends BaseController
                                 $this->createRendezVous($dateDebut, $dateFin, $pointeVente, $formulaire, $intervenent, $entreprise, $historiqueGenerationAutomatiqueRouting);
                             }
 
-                            $dateDebut = $dateDebutBeforeModifications;
+                            //$dateDebut = $dateDebutBeforeModifications;
                         }
                     }
                 }
@@ -115,7 +117,7 @@ class GenerationAutomatiqueRendezVous extends BaseController
         $this->doctrineFlush();
     }
 
-    public function getValidDateDebutRendezVous($dateDebut, $intervenent, $ecart)
+    public function getValidDateDebutRendezVous($intervenent, $dateDebut, $ecart)
     {
         $nbrRdv = 1;
 
@@ -169,18 +171,19 @@ class GenerationAutomatiqueRendezVous extends BaseController
         return $dateDebut;
     }
 
-    public function checkHolidayAndWeekend($date){
-        if($date->format('l') == 'Saturday'){
+    public function checkHolidayAndWeekend($date)
+    {
+        if($date->format('l') == 'Saturday') {
             $dateDebut = $date->modify('+2 day');
             $dateDebut = $dateDebut->format('Y-m-d') . " 08:00:00";
             $dateDebut = DateTime::createFromFormat('Y-m-d H:i:s', $dateDebut);
             return $dateDebut;
-        }else if($date->format('l') == 'Sunday'){
+        }else if($date->format('l') == 'Sunday') {
             $dateDebut = $date->modify('+1 day');
             $dateDebut = $dateDebut->format('Y-m-d') . " 08:00:00";
             $dateDebut = DateTime::createFromFormat('Y-m-d H:i:s', $dateDebut);
             return $dateDebut;
-        }else{
+        }else {
             //$receivedDate = date('d M', strtotime($date));
             $receivedDate = $date->format('d M');
 
