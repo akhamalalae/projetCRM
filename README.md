@@ -50,20 +50,17 @@ Le CRM permet la configuration et la création automatique des enquêtes de merc
 5. Dépôt local
   - Git
 
-6. Dépôt distant
-  - Github
-
-7. Database
+5. Database
   - MySql
 
-8. API REST
+6. API REST
   - API Platform
 
 
 ## Installation
 
 1 : Clonage du dépôt.
-  - git clone git@github.com:akhamalalae/ProjetTKT.git
+  - git@github.com:akhamalalae/projetCRM.git
 
 2 : Lancer la stack docker-compose
   - docker-compose build
