@@ -119,7 +119,7 @@ class AppFixtures extends Fixture
             }
 
             for ($f = 0; $f < 5; $f++) {
-                $intervenant = $this->createIntervenants($manager);
+                $intervenant = $this->createIntervenants($manager, $f);
                 $formulaire->addIntervenant($intervenant);
             }
 
@@ -192,12 +192,12 @@ class AppFixtures extends Fixture
         return $entreprise;
     }
 
-    public function createIntervenants($manager)
+    public function createIntervenants($manager, $f)
     {
         $generator = Faker\Factory::create('fr_FR');
         $name = explode(" ", $generator->name());
         $user = new User();
-        $user->setEmail($name[0].$name[1].'@gmail.com');
+        $user->setEmail($name[0].$name[1].$f.'@gmail.com');
         $roles = array('ROLE_USER');
         $user->setRoles($roles);
         $user->setPassword('$2y$13$gVbAQ8gYFFPWZT5xOtOOMeptPU92Sbfd738bg/lXLkuWMZatCGswC');

@@ -1,23 +1,18 @@
 <?php
 
-// src/Service/MessageGenerator.php
 namespace App\Services;
-use Symfony\Component\Security\Core\Security;
+
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\MenuCategorie;
 use App\Entity\MenuSousCategorie;
-use App\Repository\MenuCategorieRepository;
-use App\Repository\MenuSousCategorieRepository;
+
 class MenuGenerator
 {
-    private $em;
-
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(private EntityManagerInterface $em)
     {
-        $this->em = $em;
     }
 
-    public function getMenu()
+    public function getMenu(): array
     {
         $menus = array();
 

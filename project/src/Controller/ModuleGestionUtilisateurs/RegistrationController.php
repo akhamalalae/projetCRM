@@ -8,14 +8,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use App\Form\Intervenants\RegistrationFormType;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class RegistrationController extends BaseController
 {
     /**
      * @Route("/intervenant/register", name="app_register")
      */
-    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response
+    public function register(Request $request): Response
     {
         $user = new User();
         $menus = $this->serviceMenu();
@@ -24,7 +23,7 @@ class RegistrationController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $user->setPassword(
-                $passwordEncoder->encodePassword(
+                $this->passwordEncoder->encodePassword(
                     $user,
                     $form->get('plainPassword')->getData()
                 )
@@ -47,7 +46,7 @@ class RegistrationController extends BaseController
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function intervenants(Request $request, UserPasswordEncoderInterface $passwordEncoder)
+    public function intervenants(Request $request)
     {
         $menus = $this->serviceMenu();
         $user = new User();
@@ -58,7 +57,7 @@ class RegistrationController extends BaseController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $user->setPassword(
-                $passwordEncoder->encodePassword(
+                $this->passwordEncoder->encodePassword(
                     $user,
                     $form->get('plainPassword')->getData()
                 )

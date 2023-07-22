@@ -13,7 +13,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 class ChampsFormulaireController extends BaseController
 {
-
     /**
      * @Route("/intervenant/formulaire/champs/{id}/{champ}", name="formulaire_champs")
      */

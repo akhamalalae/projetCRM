@@ -1,6 +1,5 @@
 <?php
 
-// src/Controller/BaseController.php
 namespace App\Controller;
 
 use DateTime;
@@ -9,14 +8,15 @@ use App\Services\MenuGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class BaseController extends AbstractController
 {
-
-    public function __construct(public EntityManagerInterface $em)
-    {
+    public function __construct(public EntityManagerInterface $em,
+            public UserPasswordEncoderInterface $passwordEncoder,
+            public MenuGenerator $menuGenerator,
+    ){
     }
 
     /**
@@ -25,12 +25,8 @@ class BaseController extends AbstractController
     public function index(): Response
     {
         $dateNow = new DateTime();
-        $cache = new FilesystemAdapter();
-        $baseClient = $cache->getItem('baseClient');
-        $manager = $baseClient->get();
 
-        $menuGenerator = new MenuGenerator($this->em);
-        $menus = $menuGenerator->getMenu();
+        $menus = $this->serviceMenu();
 
         $calendarRepository = $this->em->getRepository(RenderVous::class);
         $rendezVous = $calendarRepository->findRendezVousAujourduit($dateNow);
@@ -45,8 +41,8 @@ class BaseController extends AbstractController
 
     public function serviceMenu()
     {
-        $menuGenerator = new MenuGenerator($this->em);
-        $menus = $menuGenerator->getMenu();
+        $menus = $this->menuGenerator->getMenu();
+
         return $menus;
     }
 

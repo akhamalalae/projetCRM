@@ -65,7 +65,7 @@ Le CRM permet la configuration et la création automatique des enquêtes de merc
 2 : Lancer la stack docker-compose
   - docker-compose build
   - docker-compose create
-  - docker-compose start 
+  - docker-compose start
 
 3 : Changer le propriétaire du fichier par l’utilisateur courant pour pouvoir modifier facilement
   - sudo chown -R $USER ./
@@ -73,6 +73,9 @@ Le CRM permet la configuration et la création automatique des enquêtes de merc
 4 : Entrer dans le shell du conteneur “www”
   - docker exec -it www_docker_symfony bash
   - cd project
+
+5 : Installer les dépendances.
+  - composer install
 
 5 : Créer la base de données.
   - php bin/console doctrine:database:create
