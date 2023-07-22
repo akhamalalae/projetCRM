@@ -77,14 +77,14 @@ Le CRM permet la configuration et la création automatique des enquêtes de merc
 5 : Installer les dépendances.
   - composer install
 
-5 : Créer la base de données.
+6 : Créer la base de données.
   - php bin/console doctrine:database:create
 
-6 : Lancer les migrations.
+7 : Lancer les migrations.
   - php bin/console make:migration
   - php bin/console doctrine:migrations:migrate
 
-7 : Lancé les fixtures.
+8 : Lancé les fixtures.
   - php bin/console doctrine:fixtures:load
 
 
