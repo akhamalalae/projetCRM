@@ -14,8 +14,8 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 class BaseController extends AbstractController
 {
     public function __construct(public EntityManagerInterface $em,
-            public UserPasswordEncoderInterface $passwordEncoder,
-            public MenuGenerator $menuGenerator,
+        public UserPasswordEncoderInterface $passwordEncoder,
+        public MenuGenerator $menuGenerator,
     ){
     }
 
@@ -25,11 +25,13 @@ class BaseController extends AbstractController
     public function index(): Response
     {
         $dateNow = new DateTime();
-
+        $user = $this->getUser();
         $menus = $this->serviceMenu();
 
         $calendarRepository = $this->em->getRepository(RenderVous::class);
-        $rendezVous = $calendarRepository->findRendezVousAujourduit($dateNow);
+
+        $rendezVous = $calendarRepository->getListRendezVousToAchieve($dateNow, $user->getId());
+
         $countRendezVous = $calendarRepository->countRendezVous($dateNow);
 
         return $this->render('accueil/index.html.twig', [

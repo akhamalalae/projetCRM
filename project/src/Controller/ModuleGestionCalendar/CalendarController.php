@@ -24,7 +24,7 @@ class CalendarController extends BaseController
         $urlApi = $this->getParameter('urlApi');
         $urlApiGetTokenJWT = $this->getParameter('urlApiGetTokenJWT');
 
-        $events = $this->em->getRepository(RenderVous::class)->findAllRendezVousUtilisateurs($user->getId());
+        $events = $this->em->getRepository(RenderVous::class)->findCalendarRendezVous($user->getId());
         $countRendezVous = $this->countItems($events);
         $data = $this->rdvs($events);
 
@@ -103,7 +103,7 @@ class CalendarController extends BaseController
         $menus = $this->serviceMenu();
         $user = $this->getUser();
 
-        $rendezVous = $this->em->getRepository(RenderVous::class)->findAllRendezVousEffectuerUtilisateurs($user->getId());
+        $rendezVous = $this->em->getRepository(RenderVous::class)->findRealizeRendezVous($user->getId());
 
         return $this->render('calendrierRenderVous/renderVousEffectuer.html.twig', [
             'menus' => $menus,

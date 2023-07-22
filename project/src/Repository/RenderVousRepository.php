@@ -19,7 +19,7 @@ class RenderVousRepository extends ServiceEntityRepository
         parent::__construct($registry, RenderVous::class);
     }
 
-    public function findAllRendezVousUtilisateurs($user)
+    public function findCalendarRendezVous($user)
     {
         $entityManager = $this->getEntityManager();
         $query = $entityManager->createQuery(
@@ -30,6 +30,21 @@ class RenderVousRepository extends ServiceEntityRepository
         );
 
         return $query->getResult();
+    }
+
+    public function getListRendezVousToAchieve($dateNow, $user)
+    {
+        $resultats = $this->createQueryBuilder('r')
+            ->andWhere('r.start >= :dateNow')
+            ->andWhere('r.effectuer != TRUE OR r.effectuer IS NULL')
+            ->andWhere('r.intervenant = :user OR r.userCreateur = :user')
+            ->setParameter('dateNow', $dateNow->format('Y-m-d'))
+            ->setParameter('user', $user)
+            ->orderBy('r.start', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+        return $resultats;
     }
 
     public function findRendezVousByIntervenentBetweenTowDate($dateDebut, $dateFin, $intervenant)
@@ -48,7 +63,7 @@ class RenderVousRepository extends ServiceEntityRepository
         return $resultats;
     }
 
-    public function findAllRendezVousEffectuerUtilisateurs($user)
+    public function findRealizeRendezVous($user)
     {
         $entityManager = $this->getEntityManager();
         $query = $entityManager->createQuery(
@@ -76,18 +91,6 @@ class RenderVousRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
         ;
-    }
-
-    public function findRendezVousAujourduit($dateNow)
-    {
-        $resultats = $this->createQueryBuilder('r')
-            ->andWhere('r.start >= :dateNow')
-            ->setParameter('dateNow', $dateNow->format('Y-m-d'))
-            ->orderBy('r.start', 'ASC')
-            ->getQuery()
-            ->getResult()
-        ;
-        return $resultats;
     }
 
     public function countRendezVous($dateNow)
