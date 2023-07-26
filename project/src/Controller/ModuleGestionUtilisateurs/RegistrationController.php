@@ -42,7 +42,7 @@ class RegistrationController extends BaseController
     }
 
     /**
-     * @Route("/intervenant/intervenants", name="intervenants")
+     * @Route("/intervenant/add", name="intervenants")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -53,6 +53,45 @@ class RegistrationController extends BaseController
 
         $intervenants = $this->em->getRepository(User::class)->findBy([]);
 
+        $form = $this->createForm(RegistrationFormType::class, $user);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user->setPassword(
+                $this->passwordEncoder->encodePassword(
+                    $user,
+                    $form->get('plainPassword')->getData()
+                )
+            );
+
+            $groupe = $form->get('groupe')->getData();
+            foreach ($groupe as $key => $value) {
+                $user->addGroupe($value);
+            }
+
+            $this->em->persist($user);
+            $this->em->flush();
+
+            return $this->redirectToRoute('intervenants');
+        }
+
+        return $this->render('intervenant/index.html.twig', [
+            'menus' => $menus,
+            'registrationForm' => $form->createView(),
+            'intervenants' => $intervenants,
+        ]);
+    }
+
+    /**
+     * @Route("/intervenant/edit/{id}", name="edit_intervenants")
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function edit_intervenants(Request $request, $id)
+    {
+        $menus = $this->serviceMenu();
+        $user = $this->em->getRepository(User::class)->find($id);
+        $intervenants = $this->em->getRepository(User::class)->findBy([]);
+dump($request);
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {

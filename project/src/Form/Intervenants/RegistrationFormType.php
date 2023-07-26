@@ -28,7 +28,11 @@ class RegistrationFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('email')
+            ->add('email',TextType::class,[
+                'label' => 'Email',
+                'attr' => ['class' => 'form-control'],
+                'required' => true,
+            ])
             ->add('lastname',TextType::class,[
                 'label' => 'Nom',
                 'attr' => ['class' => 'form-control'],
@@ -102,23 +106,6 @@ class RegistrationFormType extends AbstractType
         ]);
 
         $builder
-            ->add('region', EntityType::class, [
-                'class' => Region::class,
-                'placeholder' => 'Sélectionnez votre région',
-                'attr' => ['onchange' => 'myFunctionType(0)'],
-                'mapped'      => false,
-                'required'    => true
-        ]);
-
-        $builder
-            ->add('departement', EntityType::class, [
-                'class' => Departement::class,
-                'placeholder' => 'Sélectionnez votre département',
-                'mapped'      => false,
-                'required'    => true
-        ]);
-
-        $builder
             ->add('ville', EntityType::class, [
                 'class' => Ville::class,
                 'placeholder' => 'Sélectionnez votre ville',
@@ -134,6 +121,23 @@ class RegistrationFormType extends AbstractType
                 'label' => 'Complément adresse',
                 'attr' => ['class' => 'form-control'],
                 'required' => false,
+        ]);
+
+        $builder
+            ->add('region', EntityType::class, [
+                'class' => Region::class,
+                'placeholder' => 'Sélectionnez votre région',
+                'attr' => ['onchange' => 'myFunctionType(0)'],
+                'mapped'      => false,
+                'required'    => true
+        ]);
+
+        $builder
+            ->add('departement', EntityType::class, [
+                'class' => Departement::class,
+                'placeholder' => 'Sélectionnez votre département',
+                'mapped'      => false,
+                'required'    => true
         ]);
 
         $builder->get('region')->addEventListener(

@@ -50,11 +50,14 @@ Le CRM permet la configuration et la création automatique des enquêtes de merc
 5. Dépôt local
   - Git
 
-5. Database
+6. Database
   - MySql
 
-6. API REST
+7. API REST
   - API Platform
+
+8. Message Queuing
+  - RabbitMQ
 
 
 ## Installation
@@ -100,3 +103,6 @@ Le CRM permet la configuration et la création automatique des enquêtes de merc
 
 3 : Documentation de l'API
   - http://127.0.0.1:8741/api
+
+4 : RabbitMQ
+  - http://127.0.0.1:15672

@@ -105,7 +105,7 @@
                                     {% endfor %}
                                 </td>
                                 <td>
-                                    <a class="btn btn-danger" href="{{ path('delete_intervenant', {'id': intervenant.id}) }}" aria-label="delet">
+                                    <a class="btn btn-danger" href="{{ path('edit_intervenants', {'id': intervenant.id}) }}" aria-label="delet">
                                         <i class="fa fa-trash" aria-hidden="true"></i>
                                     </a>
                                 </td>
@@ -123,7 +123,6 @@
 {% endblock %}
 {% block javascript %}
 <script>
-
     $(document).on('change', '#registration_form_region, #registration_form_departement', function () {
         let $field = $(this)
         let $regionField = $('#registration_form_region')

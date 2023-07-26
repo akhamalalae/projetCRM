@@ -8,6 +8,11 @@
         <h2>Générateur Automatique Routings
         </h2>
         <hr>
+        {% for message in app.flashes('warning') %}
+            <div class="alert alert-warning">
+                {{ message }}
+            </div>
+        {% endfor %}
         <div class="row">
             {{ include('calendrierRenderVous/sidebar.html.twig') }}
             <div class="col-9">

@@ -100,21 +100,21 @@ class TableauBordController extends BaseController
 
             $warning = false;
             if (count($requeteTableauBord->getRequeteTableauBordFiltres()) == 0) {
-                $this->addFlash('success', 'Veuillez choisir les filtres de la requête!');
+                $this->addFlash('warning', 'Veuillez choisir les filtres de la requête!');
                 $warning = true;
             }
             if (count($requeteTableauBord->getPropertiesEntityChoixChamps()) == 0) {
-                $this->addFlash('success', 'Veuillez choisir les champs a afficher!');
+                $this->addFlash('warning', 'Veuillez choisir les champs a afficher!');
                 $warning = true;
             }
             if (($id == 0) && ($requeteTableauBord->getEnregistrerRequete() == true) && $requeteTableauBord->getLibelle() == '') {
-                $this->addFlash('success', 'Veuillez remplir le nom de la requête!');
+                $this->addFlash('warning', 'Veuillez remplir le nom de la requête!');
                 $warning = true;
             }
 
             $checkValidateSyntaxeChampValeur = $this->checkValidateSyntaxeChampValeur($requeteTableauBord->getRequeteTableauBordFiltres());
             if ($checkValidateSyntaxeChampValeur == true) {
-                $this->addFlash('success', 'Erreur de syntaxe du champ Valeur des filtres, veuillez regarder la documentation!');
+                $this->addFlash('warning', 'Erreur de syntaxe du champ Valeur des filtres, veuillez regarder la documentation!');
                 $warning = true;
             }
 

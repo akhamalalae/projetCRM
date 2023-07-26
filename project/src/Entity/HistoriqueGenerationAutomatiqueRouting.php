@@ -54,6 +54,11 @@ class HistoriqueGenerationAutomatiqueRouting
      */
     private $dateModification;
 
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isGenerer;
+
     public function __construct()
     {
         $this->formulaires = new ArrayCollection();
@@ -175,6 +180,18 @@ class HistoriqueGenerationAutomatiqueRouting
     public function setDateModification(?\DateTimeInterface $dateModification): self
     {
         $this->dateModification = $dateModification;
+
+        return $this;
+    }
+
+    public function getIsGenerer(): ?bool
+    {
+        return $this->isGenerer;
+    }
+
+    public function setIsGenerer(?bool $isGenerer): self
+    {
+        $this->isGenerer = $isGenerer;
 
         return $this;
     }

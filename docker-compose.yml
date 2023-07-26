@@ -25,6 +25,24 @@ services:
         networks:
             - dev
 
+    maildev:
+        image: maildev/maildev
+        container_name: maildev_docker_symfony
+        command: bin/maildev --web 80 --smtp 25 --hide-extensions STARTTLS
+        ports:
+          - "8081:80"
+        restart: always
+        networks:
+            - dev
+
+    rabbit_mq:
+        image: "rabbitmq:3-management"
+        hostname: "rabbitmq-localhost"
+        container_name: rabbitmq
+        ports:
+          - "15672:15672"
+          - "5672:5672"
+
     www:
         build: php
         container_name: www_docker_symfony
