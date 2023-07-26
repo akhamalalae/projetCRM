@@ -75,11 +75,11 @@ class GenerationAutomatiqueRendezVous
         $id = $calendar->getId();
 
         $description = "Rendez vous ". $calendar->getTitle()
-            . " Date Debut" . $calendar->getStart()->format('Y-m-d H:i')
-            . " Date Fin" . $calendar->getEnd()->format('Y-m-d H:i')
-            . " Formulaire" . $calendar->getFormulaire()->getLibelle()
-            . " Entreprise" . $calendar->getEntreprise()->getFormeJuridique()
-            . " Point de vente" . $calendar->getPointeVente()->getLibelle()
+            . " Date Debut " . $calendar->getStart()->format('Y-m-d H:i')
+            . " Date Fin " . $calendar->getEnd()->format('Y-m-d H:i')
+            . " Formulaire " . $calendar->getFormulaire()->getLibelle()
+            . " Entreprise " . $calendar->getEntreprise()->getFormeJuridique()
+            . " Point de vente " . $calendar->getPointeVente()->getLibelle()
         ;
 
         $this->messageBus->dispatch(new MailNotification($description, $id, $email));

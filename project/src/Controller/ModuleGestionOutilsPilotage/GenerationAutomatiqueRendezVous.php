@@ -32,17 +32,12 @@ class GenerationAutomatiqueRendezVous extends BaseController
             $dateDebut = $form->getData()["start"];
             $ecart = $form->getData()["nbrMinutes"];
             $formulaires = $form->getData()["formulaires"];
+            $dateExecution = $form->getData()["dateExecution"];
 
             if (intval($dateDebut->format('H')) < 8 || intval($dateDebut->format('H')) > 18) {
                 $this->addFlash('warning', "L'heure de la date  de début doit être comprise entre 08h et 18H!");
             }else {
-                $historiqueGenerationAutomatiqueRouting = $this->historiqueGenerationAutomatiqueRouting($dateDebut, $ecart, $formulaires, $dateNoow);
-
-                $this->generationAutomatiqueRendezVous->create($historiqueGenerationAutomatiqueRouting);
-                $historiqueGenerationAutomatiqueRouting->setIsGenerer(true);
-
-                $this->doctrinePersist($historiqueGenerationAutomatiqueRouting);
-                $this->doctrineFlush();
+                $this->historiqueGenerationAutomatiqueRouting($dateDebut, $ecart, $formulaires, $dateNoow, $dateExecution);
 
                 return $this->redirectToRoute('generation_automatique_rendez_vous');
             }
@@ -56,10 +51,11 @@ class GenerationAutomatiqueRendezVous extends BaseController
         ]);
     }
 
-    public function historiqueGenerationAutomatiqueRouting($dateDebut, $ecart, $formulaires, $dateNow)
+    public function historiqueGenerationAutomatiqueRouting($dateDebut, $ecart, $formulaires, $dateNow, $dateExecution)
     {
         $historiqueGenerationAutomatiqueRouting = new HistoriqueGenerationAutomatiqueRouting();
         $historiqueGenerationAutomatiqueRouting->setDateDebut($dateDebut);
+        $historiqueGenerationAutomatiqueRouting->setDateExecution($dateExecution);
         $historiqueGenerationAutomatiqueRouting->setEcartEnMunites($ecart);
         $historiqueGenerationAutomatiqueRouting->setDateCreation($dateNow);
         $historiqueGenerationAutomatiqueRouting->setIsGenerer(false);

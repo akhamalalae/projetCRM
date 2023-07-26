@@ -38,6 +38,13 @@ class GenerationAutomatiqueRendezVousType extends AbstractType
     {
 
         $builder
+
+            ->add('dateExecution', DateTimeType::class, [
+                'widget' => 'single_text',
+                'label' => 'Date d\'exécution',
+                'attr' => ['class' => 'form-control'],
+            ])
+
             ->add('start', DateTimeType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date de début',
