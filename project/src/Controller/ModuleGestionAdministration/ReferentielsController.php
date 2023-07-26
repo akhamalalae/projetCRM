@@ -17,7 +17,7 @@ class ReferentielsController extends BaseController
     public function referentiels()
     {
         $menus = $this->serviceMenu();
-        $referentiels = $this->em->getRepository(Referentiels::class)->findBy([]);
+        $referentiels = $this->em->getRepository(Referentiels::class)->findBy(['status' => false]);
 
         return $this->render('referentiels/index.html.twig', [
             'menus' => $menus,

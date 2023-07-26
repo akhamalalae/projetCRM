@@ -54,19 +54,19 @@ class CalendarController extends BaseController
         $formulaire = array();
         $pointeVente = array();
 
-        foreach ($form->getData()["intervenants"] as $key => $value) {
+        foreach ($form->getData()["intervenants"] as $value) {
             array_push($intervenants, $value->getId());
         }
 
-        foreach ($form->getData()["entreprises"] as $key => $value) {
+        foreach ($form->getData()["entreprises"] as $value) {
             array_push($entreprises, $value->getId());
         }
 
-        foreach ($form->getData()["formulaire"] as $key => $value) {
+        foreach ($form->getData()["formulaire"] as $value) {
             array_push($formulaire, $value->getId());
         }
 
-        foreach ($form->getData()["pointeVente"] as $key => $value) {
+        foreach ($form->getData()["pointeVente"] as $value) {
             array_push($pointeVente, $value->getId());
         }
 

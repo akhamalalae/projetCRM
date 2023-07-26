@@ -20,7 +20,9 @@ class FormulaireController extends BaseController
     {
         $menus = $this->serviceMenu();
         $user = $this->getUser();
-        $formulaires = $this->em->getRepository(Formulaire::class)->findBy(['user' => $user,'status' => 0]);
+        $formulaires = $this->em->getRepository(Formulaire::class)->findBy(
+            ['user' => $user,'status' => 0]
+        );
         $countformulaires = $this->countItems($formulaires);
 
         return $this->render('formulaire/index.html.twig', [
@@ -29,15 +31,6 @@ class FormulaireController extends BaseController
             'countformulaires' => $countformulaires,
             'formulaires' => $formulaires
         ]);
-    }
-
-    /**
-     * @Route("/intervenant/formulaire/search/{chaine}", name="search_formulaire")
-     */
-    public function search_formulaire($chaine)
-    {
-
-        return $this->redirectToRoute('formulaire');
     }
 
     /**
@@ -50,7 +43,9 @@ class FormulaireController extends BaseController
         }
 
         $formulaire = $this->em->getRepository(Formulaire::class)->find($id);
-        $enregistrementFormulaire = $this->em->getRepository(EnregistrementFormulaire::class)->findBy(['formulaires' => $formulaire]);
+        $enregistrementFormulaire = $this->em->getRepository(EnregistrementFormulaire::class)->findBy(
+            ['formulaires' => $formulaire]
+        );
 
         if($formulaire != null){
             if($formulaire->getChampFormulaire()){
@@ -80,12 +75,13 @@ class FormulaireController extends BaseController
     {
         $menus = $this->serviceMenu();
         $user = $this->getUser();
-        $listeFormulaires = $this->em->getRepository(Formulaire::class)->findBy(['user' => $user,'status' => 0]);
+        $listeFormulaires = $this->em->getRepository(Formulaire::class)->findBy(
+            ['user' => $user,'status' => 0]
+        );
         $countformulaires = $this->countItems($listeFormulaires);
 
         $formulaire = new Formulaire();
-        // save the records that are in the database first to compare them with the new one
-        // make sure this line comes before the $form->handleRequest();
+
         $orignalChampsFormulaire = new ArrayCollection();
         foreach ($formulaire->getChampFormulaire() as $champ) {
             $orignalChampsFormulaire->add($champ);
@@ -101,6 +97,7 @@ class FormulaireController extends BaseController
                     $this->em->remove($champ);
                 }
             }
+
             $this->doctrinePersist($formulaire);
             $this->doctrineFlush();
 
@@ -126,12 +123,11 @@ class FormulaireController extends BaseController
         $countformulaires = $this->countItems($listeFormulaires);
         $formulaire = $this->em->getRepository(Formulaire::class)->find($id);
 
-        // save the records that are in the database first to compare them with the new one
-        // make sure this line comes before the $form->handleRequest();
         $orignalChampsFormulaire = new ArrayCollection();
         foreach ($formulaire->getChampFormulaire() as $champ) {
             $orignalChampsFormulaire->add($champ);
         }
+
         $form = $this->createForm(FormulaireType::class, $formulaire);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {

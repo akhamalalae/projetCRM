@@ -2,38 +2,16 @@
 
 namespace App\Form\TableauBord;
 
-//use Doctrine\DBAL\Types\TextType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\ColorType;
-use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\MoneyType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
-
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Doctrine\ORM\EntityRepository;
-use App\Entity\User;
-use App\Entity\Entreprise;
-use App\Entity\Formulaire;
-use App\Entity\Produit;
-use App\Entity\CategorieProduits;
-use App\Entity\ChampsFormulaire;
-use App\Entity\Typeschamps;
-use App\Entity\RenderVous;
-use App\Entity\PointVente;
-use App\Entity\Departments;
-use App\Entity\RequeteTableauBord;
 use App\Entity\EntitiesPropriete;
-use App\Entity\Entities;
 
 class TableauBordType extends AbstractType
 {

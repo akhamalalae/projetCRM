@@ -4,6 +4,7 @@ namespace App\Controller\ModuleGestionFormulaires;
 
 use DateTime;
 use App\Entity\Formulaire;
+use App\Entity\Typeschamps;
 use App\Entity\ChampsFormulaire;
 use App\Controller\BaseController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,10 +17,11 @@ class ChampsFormulaireController extends BaseController
     /**
      * @Route("/intervenant/formulaire/champs/{id}/{champ}", name="formulaire_champs")
      */
-    public function listeChampsFormulaire(Request $request,$id,$champ=null)
+    public function listeChampsFormulaire(Request $request, $id, $champ=null)
     {
         $menus = $this->serviceMenu();
         $statusOptionsChamps = false;
+        $choiceType = Typeschamps::CHOICETYPE;
 
         $listechampsFormulaires = $this->em->getRepository(ChampsFormulaire::class)->findBy(
             ['formulaire' => $id,'status' => 0]
@@ -30,7 +32,7 @@ class ChampsFormulaireController extends BaseController
         if($champ != null) {
             $champsFormulaire = $this->em->getRepository(ChampsFormulaire::class)->find($champ);
             $editChamps = true;
-            if ($champsFormulaire->getType()->getId() == 5) {
+            if ($champsFormulaire->getType()->getId() == $choiceType) {
                 $statusOptionsChamps = true;
             }else {
                 $statusOptionsChamps = false;
@@ -61,7 +63,7 @@ class ChampsFormulaireController extends BaseController
             }
 
             if ($editChamps == true) {
-                if ($champsFormulaire->getType()->getId() != 5) {
+                if ($champsFormulaire->getType()->getId() != $choiceType) {
                     foreach ($champsFormulaire->getOptions() as $option) {
                         $this->em->remove($option);
                     }

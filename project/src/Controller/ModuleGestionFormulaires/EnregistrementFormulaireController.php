@@ -65,58 +65,7 @@ class EnregistrementFormulaireController extends BaseController
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            foreach ($form->getData() as $key => $value) {
-                $isFile = '';
-                if (str_contains($key, 'files')) {
-                    //cas champs files
-                    $explodeChampId = explode("_", $key);
-                    $key = $explodeChampId[1];
-                    $isFile = $explodeChampId[0];
-                }
-                foreach ($champsFormulaires as $champ) {
-                    $champId = $champ->getId();
-                    if ($champId == $key) {
-                        if ($isFile == 'files') {
-                            // On récupère les files transmises
-                            $listeFichiers = $form->get($isFile.'_'.$key)->getData();
-                            // On boucle sur les files
-                            foreach($listeFichiers as $un_fichier) {
-                                // On génère un nouveau nom de fichier
-                                $fichier = md5(uniqid()).'.'.$un_fichier->guessExtension();
-
-                                // On copie le fichier dans le dossier uploads
-                                $un_fichier->move(
-                                    $this->getParameter('files_directory'),
-                                    $fichier
-                                );
-
-                                // On crée la file dans la base de données
-                                $file = new Files();
-                                $file->setDateCreation(new DateTime());
-                                $file->setDateModification(new DateTime());
-                                $file->setFile($fichier);
-                                $champsFormulaire = $this->em->getRepository(ChampsFormulaire::class)->find($key);
-                                $file->setChampsFormulaire($champsFormulaire);
-                                $file->setName($un_fichier->getClientOriginalName());
-                                $enregistrementFormulaire->addFile($file);
-                            }
-                            $resultats[$champId] = "files";
-                        }else {
-                            if (is_object($value) && ($value instanceof DateTime) ) {
-                                $resultats[$champId] = $value->format('Y-m-d H:i:s');
-                            }else {
-                                if($value === true) {
-                                    $resultats[$champId] = "OUI";
-                                }elseif($value === false) {
-                                    $resultats[$champId] = "NON";
-                                }else {
-                                    $resultats[$champId] = $value;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            $resultats = $this->getResultats($form, $champsFormulaires, $enregistrementFormulaire);
             $enregistrementFormulaire->setDateCreation(new DateTime());
             $enregistrementFormulaire->setDateModification(new DateTime());
             $enregistrementFormulaire->setFormulaires($formulaire);
@@ -124,6 +73,7 @@ class EnregistrementFormulaireController extends BaseController
             $enregistrementFormulaire->setResultats($resultats);
             $enregistrementFormulaire->setCalanderRendezVous($calander_rendez_vous);
             $calander_rendez_vous->setEffectuer(true);
+
             $this->em->persist($enregistrementFormulaire);
             $this->em->persist($calander_rendez_vous);
             $this->em->flush();
@@ -136,6 +86,59 @@ class EnregistrementFormulaireController extends BaseController
             'formulaire' => $formulaire,
             'form' => $form->createView(),
         ]);
+    }
+
+    public function getResultats($form, $champsFormulaires, $enregistrementFormulaire): array
+    {
+        foreach ($form->getData() as $key => $value) {
+            $isFile = '';
+            if (str_contains($key, 'files')) {
+                //cas champs files
+                $explodeChampId = explode("_", $key);
+                $key = $explodeChampId[1];
+                $isFile = $explodeChampId[0];
+            }
+            foreach ($champsFormulaires as $champ) {
+                $champId = $champ->getId();
+                if ($champId == $key) {
+                    if ($isFile == 'files') {
+                        $listeFichiers = $form->get($isFile.'_'.$key)->getData();
+                        foreach($listeFichiers as $un_fichier) {
+                            $fichier = md5(uniqid()).'.'.$un_fichier->guessExtension();
+
+                            $un_fichier->move(
+                                $this->getParameter('files_directory'),
+                                $fichier
+                            );
+
+                            $file = new Files();
+                            $file->setDateCreation(new DateTime());
+                            $file->setDateModification(new DateTime());
+                            $file->setFile($fichier);
+                            $champsFormulaire = $this->em->getRepository(ChampsFormulaire::class)->find($key);
+                            $file->setChampsFormulaire($champsFormulaire);
+                            $file->setName($un_fichier->getClientOriginalName());
+                            $enregistrementFormulaire->addFile($file);
+                        }
+                        $resultats[$champId] = "files";
+                    }else {
+                        if (is_object($value) && ($value instanceof DateTime) ) {
+                            $resultats[$champId] = $value->format('Y-m-d H:i:s');
+                        }else {
+                            if($value === true) {
+                                $resultats[$champId] = "OUI";
+                            }elseif($value === false) {
+                                $resultats[$champId] = "NON";
+                            }else {
+                                $resultats[$champId] = $value;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $resultats;
     }
 
     /**
@@ -168,18 +171,13 @@ class EnregistrementFormulaireController extends BaseController
 
         $data = json_decode($request->getContent(), true);
 
-        // On vérifie si le token est valide
         if($this->isCsrfTokenValid('delete'.$image->getId(), $data['_token'])) {
-            // On récupère le nom de l'image
             $nom = $image->getFile();
-            // On supprime le fichier
             unlink($this->getParameter('files_directory').'/'.$nom);
 
-            // On supprime l'entrée de la base
             $this->em->remove($image);
             $this->em->flush();
 
-            // On répond en json
             return new JsonResponse(['success' => 1]);
         }else {
             return new JsonResponse(['error' => 'Token Invalide'], 400);
@@ -201,13 +199,11 @@ class EnregistrementFormulaireController extends BaseController
 
         foreach ($enregistrementFormulaire[0]->getResultats() as $key => $value) {
             $champsformulaire = $this->em->getRepository(ChampsFormulaire::class)->find($key);
-            // Column
             $fields = $fields.$champsformulaire->getLibelle().",";
         }
 
         foreach ($enregistrementFormulaire as $key => $value) {
-            foreach ($value->getResultats() as $keyEnregistrementFormulaire  => $valueEnregistrementFormulaire) {
-                // Output each row of the data
+            foreach ($value->getResultats() as $valueEnregistrementFormulaire) {
                 if(is_array($valueEnregistrementFormulaire)){
                     $valueEnregistrementFormulaire = $valueEnregistrementFormulaire["date"];
                 }
@@ -218,20 +214,13 @@ class EnregistrementFormulaireController extends BaseController
 
         $res = $fields."\n".$lineData;
 
-        // Excel file name for download formulaire
         $fileNameExel = "resultats_formulaire_".$formulaire->getLibelle()."_".date('Y-m-d') . ".xls";
         $fileNameExel = "resultats_formulaire_".$formulaire->getLibelle()."_".date('Y-m-d') . ".csv";
 
-        //We give the variable in string to the response, we set the HTTP code to 200
         return new Response(
             $res,
             200,
-            [
-            //Defines the content of the query as an Excel file
-                'Content-Type' => 'application/vnd.ms-excel',
-            //We indicate that the file will be in attachment so opening the download box, as well as the definition of the name of the file
-                "Content-disposition" => "attachment; filename=$fileNameExel"
-            ]
+            ['Content-Type' => 'application/vnd.ms-excel', "Content-disposition" => "attachment; filename=$fileNameExel"]
         );
     }
 

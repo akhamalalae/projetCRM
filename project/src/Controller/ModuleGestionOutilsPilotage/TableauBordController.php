@@ -78,8 +78,7 @@ class TableauBordController extends BaseController
         }else{
             //'Charger un tableau de Bord' => 1,
             $requeteTableauBord = $this->em->getRepository(RequeteTableauBord::class)->find($id);
-            // save the records that are in the database first to compare them with the new one
-            // make sure this line comes before the $form->handleRequest();
+
             foreach ($requeteTableauBord->getRequeteTableauBordFiltres() as $champ) {
                 $orignalRequeteTableauBordFiltres->add($champ);
             }

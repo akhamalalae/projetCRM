@@ -13,6 +13,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
  */
 class Typeschamps
 {
+    const CHOICETYPE = 5;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

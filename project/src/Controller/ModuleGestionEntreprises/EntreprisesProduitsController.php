@@ -22,7 +22,7 @@ class EntreprisesProduitsController extends BaseController
     public function entreprise(Request $request): Response
     {
         $menus = $this->serviceMenu();
-        $entreprises = $this->em->getRepository(Entreprise::class)->findBy([]);
+        $entreprises = $this->em->getRepository(Entreprise::class)->findAll();
 
         return $this->render('entrepriseProduits/index.html.twig', [
             'menus' => $menus,
@@ -44,12 +44,9 @@ class EntreprisesProduitsController extends BaseController
         $categorieProduits = new CategorieProduits();
 
         $form = $this->createForm(CategorieProduitsType::class, $categorieProduits);
-
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-
             $this->em->persist($categorieProduits);
-
             $this->em->flush();
 
             return $this->redirectToRoute('categoriesProduits');
@@ -163,5 +160,4 @@ class EntreprisesProduitsController extends BaseController
 
         return $this->json(array('listePointeVentes' => $listePointeVentes));
     }
-
 }

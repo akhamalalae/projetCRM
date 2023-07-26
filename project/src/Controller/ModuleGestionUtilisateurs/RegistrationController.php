@@ -91,7 +91,7 @@ class RegistrationController extends BaseController
         $menus = $this->serviceMenu();
         $user = $this->em->getRepository(User::class)->find($id);
         $intervenants = $this->em->getRepository(User::class)->findBy([]);
-dump($request);
+
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
