@@ -13,7 +13,15 @@ use Symfony\Component\Serializer\Annotation\Groups;
  */
 class Typeschamps
 {
+    const TEXTTYPE = 1;
+    const ZONETEXTTYPE = 2;
+    const ENTIERTYPE = 3;
+    const MONEYTYPE = 4;
     const CHOICETYPE = 5;
+    const REFERENTIELTYPE = 6;
+    const DATETYPE = 9;
+    const FICHIERTYPE = 10;
+    const BOOLEANTYPE = 11;
 
     /**
      * @ORM\Id

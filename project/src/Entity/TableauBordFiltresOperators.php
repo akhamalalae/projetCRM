@@ -12,6 +12,12 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class TableauBordFiltresOperators
 {
+    const OPERATEUREGAL = 1;
+    const OPERATEURCONTIENT = 2;
+    const OPERATEURSUPERIEUR = 3;
+    const OPERATEURINFERIEUR = 4;
+    const OPERATEURDIFFERENT = 5;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

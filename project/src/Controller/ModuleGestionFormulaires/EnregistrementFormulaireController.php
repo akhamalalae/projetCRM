@@ -98,6 +98,7 @@ class EnregistrementFormulaireController extends BaseController
                 $key = $explodeChampId[1];
                 $isFile = $explodeChampId[0];
             }
+
             foreach ($champsFormulaires as $champ) {
                 $champId = $champ->getId();
                 if ($champId == $key) {
@@ -144,7 +145,7 @@ class EnregistrementFormulaireController extends BaseController
     /**
      * @Route("/gestionnaire/resultats/formulaire/{id}", name="resultats_formulaire", methods={"GET","POST"})
      */
-    public function resultats_formulaire(Request $request,$id): Response
+    public function resultats_formulaire($id): Response
     {
         $menus = $this->serviceMenu();
 

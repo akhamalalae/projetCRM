@@ -6,6 +6,7 @@ use DateTimeImmutable;
 use App\Entity\Entities;
 use App\Entity\Formulaire;
 use App\Entity\RenderVous;
+use App\Entity\Typeschamps;
 use App\Entity\EntitiesPropriete;
 use App\Controller\BaseController;
 use App\Entity\RequeteTableauBord;
@@ -127,7 +128,7 @@ class TableauBordController extends BaseController
 
                 $resultatsRequeteTableauBord = $this->changeLabelFormatResultats($resultatsRequeteTableauBord);
 
-                // Ne pas enregistrer la requête dans la base
+                // Ne pas enregistrer la requête
                 if (($id == 0) && ($requeteTableauBord->getEnregistrerRequete() == false)) {
                     $this->doctrineRemove($requeteTableauBord);
                     $this->doctrineFlush();
@@ -220,7 +221,7 @@ class TableauBordController extends BaseController
 
     public function createJoint($champ, $entity_libelle, $jointure)
     {
-        if($champ->getEntitieJoiture() != null&&
+        if($champ->getEntitieJoiture() != null &&
             ! array_key_exists($entity_libelle, $jointure)
         ) {
             $property_entity_jointure = $champ->getEntitieJoiture()->getLibelle();
@@ -238,7 +239,7 @@ class TableauBordController extends BaseController
         foreach ($filtres as $filtre) {
             $valeur = $filtre->getValeur();
 
-            if ($filtre->getEntitiesPropriete()->getTypesChamps()->getId() === 9) { //type date
+            if ($filtre->getEntitiesPropriete()->getTypesChamps()->getId() === Typeschamps::DATETYPE) {
                 $format = 'Y/m/d H:i';
                 $checkDateFormat = DateTimeImmutable::createFromFormat($format, $valeur);
                 if($checkDateFormat === false) {
@@ -247,7 +248,7 @@ class TableauBordController extends BaseController
                 }
             }
 
-            if ($filtre->getEntitiesPropriete()->getTypesChamps()->getId() === 11) { //type boolean
+            if ($filtre->getEntitiesPropriete()->getTypesChamps()->getId() === Typeschamps::BOOLEANTYPE) {
                 $valeur = $valeur === '0'? 0: 1;
             }
         }
@@ -281,22 +282,35 @@ class TableauBordController extends BaseController
 
         $entitiesProprietes = $this->em->getRepository(EntitiesPropriete::class)->find($idEntitePropriete);
 
-        $arrayOperators = [1, 2, 3, 4, 5];
+        $arrayOperators = array();
 
-        if($entitiesProprietes->getTypesChamps()->getId() == 9){
-            unset($arrayOperators[1]);
+        if($entitiesProprietes->getTypesChamps()->getId() == Typeschamps::DATETYPE) {
+            array_push($arrayOperators, TableauBordFiltresOperators::OPERATEUREGAL,
+                TableauBordFiltresOperators::OPERATEURSUPERIEUR,
+                TableauBordFiltresOperators::OPERATEURINFERIEUR,
+                TableauBordFiltresOperators::OPERATEURDIFFERENT
+            );
         }
 
-        if($entitiesProprietes->getTypesChamps()->getId() == 1 || $entitiesProprietes->getTypesChamps()->getId() == 2){
-            unset($arrayOperators[2], $arrayOperators[3]);
+        if($entitiesProprietes->getTypesChamps()->getId() == Typeschamps::TEXTTYPE || $entitiesProprietes->getTypesChamps()->getId() == Typeschamps::ZONETEXTTYPE) {
+            array_push($arrayOperators, TableauBordFiltresOperators::OPERATEUREGAL,
+                TableauBordFiltresOperators::OPERATEURDIFFERENT,
+                TableauBordFiltresOperators::OPERATEURCONTIENT
+            );
         }
 
-        if($entitiesProprietes->getTypesChamps()->getId() == 3 || $entitiesProprietes->getTypesChamps()->getId() == 4){
-            unset($arrayOperators[1]);
+        if($entitiesProprietes->getTypesChamps()->getId() == Typeschamps::ENTIERTYPE || $entitiesProprietes->getTypesChamps()->getId() == Typeschamps::MONEYTYPE) {
+            array_push($arrayOperators, TableauBordFiltresOperators::OPERATEUREGAL,
+                TableauBordFiltresOperators::OPERATEURSUPERIEUR,
+                TableauBordFiltresOperators::OPERATEURINFERIEUR,
+                TableauBordFiltresOperators::OPERATEURDIFFERENT
+            );
         }
 
-        if($entitiesProprietes->getTypesChamps()->getId() == 11){
-            unset($arrayOperators[1], $arrayOperators[2], $arrayOperators[3], $arrayOperators[4]);
+        if($entitiesProprietes->getTypesChamps()->getId() == Typeschamps::BOOLEANTYPE ) {
+            array_push($arrayOperators, TableauBordFiltresOperators::OPERATEUREGAL,
+                TableauBordFiltresOperators::OPERATEURDIFFERENT
+            );
         }
 
         $operators = $this->em->getRepository(TableauBordFiltresOperators::class)->getOperators($arrayOperators);

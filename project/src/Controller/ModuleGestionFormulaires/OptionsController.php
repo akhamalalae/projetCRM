@@ -12,7 +12,7 @@ class OptionsController extends BaseController
     /**
      * @Route("/intervenant/option/formulaire/delete/{id}", name="option_delete", methods={"GET","POST"})
      */
-    public function delete(Request $request,$id)
+    public function delete($id)
     {
         if(!$id) {
             throw $this->createNotFoundException('No ID found');

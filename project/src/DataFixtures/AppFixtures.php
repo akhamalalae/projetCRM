@@ -290,7 +290,10 @@ class AppFixtures extends Fixture
     {
         $requete = "INSERT INTO `GroupUsers` (`id`, `libelle`, `status`, `description`, `dateCreation`, `dateModification`) VALUES
             (1, 'Groupe 01', 0, 'Groupe 01', NULL, NULL),
-            (2, 'Groupe 02', 0, 'Groupe 02', NULL, NULL)";
+            (2, 'Groupe 02', 0, 'Groupe 01', NULL, NULL),
+            (3, 'Groupe 03', 0, 'Groupe 01', NULL, NULL),
+            (4, 'Groupe 04', 0, 'Groupe 01', NULL, NULL),
+            (5, 'Groupe 05', 0, 'Groupe 02', NULL, NULL)";
 
         return $requete;
     }

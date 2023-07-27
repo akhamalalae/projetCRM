@@ -19,7 +19,7 @@ class EntreprisesProduitsController extends BaseController
     /**
      * @Route("/gestionnaire/entreprise", name="entreprise", methods={"GET","POST"})
      */
-    public function entreprise(Request $request): Response
+    public function entreprise(): Response
     {
         $menus = $this->serviceMenu();
         $entreprises = $this->em->getRepository(Entreprise::class)->findAll();
@@ -39,7 +39,7 @@ class EntreprisesProduitsController extends BaseController
     {
         $menus = $this->serviceMenu();
 
-        $listeCategorieProduits = $this->em->getRepository(CategorieProduits::class)->findBy([]);
+        $listeCategorieProduits = $this->em->getRepository(CategorieProduits::class)->findAll();
 
         $categorieProduits = new CategorieProduits();
 
