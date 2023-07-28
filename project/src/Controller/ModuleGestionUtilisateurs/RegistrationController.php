@@ -84,7 +84,7 @@ class RegistrationController extends BaseController
     /**
      * @Route("/intervenant/delete/{id}", name="delete_intervenant")
      */
-    public function delete_intervenant($id): Response
+    public function deleteIntervenant($id): Response
     {
         if(!$id) {
             throw $this->createNotFoundException('No ID found');

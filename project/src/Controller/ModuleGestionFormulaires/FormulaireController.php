@@ -71,7 +71,7 @@ class FormulaireController extends BaseController
     /**
      * @Route("/intervenant/add/formulaire", name="add_formulaire", methods={"GET","POST"})
      */
-    public function add_formulaire(Request $request)
+    public function addFormulaire(Request $request)
     {
         $menus = $this->serviceMenu();
         $user = $this->getUser();
@@ -115,7 +115,7 @@ class FormulaireController extends BaseController
      /**
      * @Route("/intervenant/edit/formulaire/{id}", name="formulaire_edit", methods={"GET","POST"})
      */
-    public function edit_formulaire(Request $request,$id)
+    public function editFormulaire(Request $request,$id)
     {
         $menus = $this->serviceMenu();
         $user = $this->getUser();

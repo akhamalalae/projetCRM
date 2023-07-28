@@ -46,7 +46,7 @@
                 </div>
 
                 <div class="d-grid gap-2">
-                    <button class="btn btn-lg btn-success btn-block" type="submit">
+                    <button id="btn-save" class="btn btn-lg btn-success btn-block" type="submit">
                         Se connecter
                     </button>
                 </div>
@@ -64,4 +64,16 @@
     </form>
 </div>
 
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        $('#btn-save').click(function(){
+            var username = $('#inputEmail').val();
+            var password = $('#inputPassword').val();
+
+            localStorage.setItem('username', username);
+            localStorage.setItem('password', password);
+        });
+    </script>
 {% endblock %}

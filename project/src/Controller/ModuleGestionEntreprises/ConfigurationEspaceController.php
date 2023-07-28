@@ -17,7 +17,7 @@ class ConfigurationEspaceController extends BaseController
     /**
      * @Route("/gestionnaires/list/espace", name="list_espace", methods={"GET","POST"})
      */
-    public function ListEspace(Request $request): Response
+    public function ListEspace(): Response
     {
         $menus = $this->serviceMenu();
 
@@ -45,6 +45,7 @@ class ConfigurationEspaceController extends BaseController
                 }elseif($explodeKey[2] == "y"){
                     $configurationEspace->setY($val);
                 }
+
                 $this->em->persist($configurationEspace);
                 $this->em->flush();
             }
@@ -69,6 +70,7 @@ class ConfigurationEspaceController extends BaseController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $configurationEspace->setPointVente($pointVente);
+
             $this->em->persist($configurationEspace);
             $this->em->flush();
         }
@@ -98,6 +100,7 @@ class ConfigurationEspaceController extends BaseController
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $configurationObjet->setConfigurationEspace($configurationEspace);
+
             $this->em->persist($configurationObjet);
             $this->em->flush();
         }

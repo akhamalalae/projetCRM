@@ -98,7 +98,7 @@ class CalendarController extends BaseController
     /**
      * @Route("/intervenant/calendar/rendezVous/effectuer", name="render_vous_effectuer", methods={"GET","POST"})
      */
-    public function renderVousEffectuer(Request $request): Response
+    public function renderVousEffectuer(): Response
     {
         $menus = $this->serviceMenu();
         $user = $this->getUser();
@@ -152,11 +152,9 @@ class CalendarController extends BaseController
         $id = $request->get('id');
         $calendar = $this->em->getRepository(RenderVous::class)->findOneById($id);
 
-        $this->em = $this->getDoctrine()->getManager();
         $this->em->remove($calendar);
         $this->em->flush();
 
         return $this->redirectToRoute('calendar_vue_agenda');
     }
-
 }

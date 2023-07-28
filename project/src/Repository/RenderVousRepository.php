@@ -78,16 +78,29 @@ class RenderVousRepository extends ServiceEntityRepository
 
     public function agendaFiltres($intervenants, $entreprises, $formulaire, $pointeVente)
     {
-        return $this->createQueryBuilder('r')
-            ->andwhere('r.intervenant IN (:intervenants)')
-            ->andwhere('r.entreprise IN (:entreprises)')
-            ->andwhere('r.formulaire IN (:formulaire)')
-            ->andwhere('r.pointeVente IN (:pointeVente)')
-            ->setParameter('intervenants', $intervenants)
-            ->setParameter('entreprises', $entreprises)
-            ->setParameter('formulaire', $formulaire)
-            ->setParameter('pointeVente', $pointeVente)
-            ->orderBy('r.id', 'ASC')
+        $qb = $this->createQueryBuilder('r');
+
+        if($intervenants) {
+            $qb->andwhere('r.intervenant IN (:intervenants)');
+            $qb->setParameter('intervenants', $intervenants);
+        }
+
+        if($entreprises) {
+            $qb->andwhere('r.entreprise IN (:entreprises)');
+            $qb->setParameter('entreprises', $entreprises);
+        }
+
+        if($formulaire) {
+            $qb->andwhere('r.formulaire IN (:formulaire)');
+            $qb->setParameter('formulaire', $formulaire);
+        }
+
+        if($pointeVente) {
+            $qb->andwhere('r.pointeVente IN (:pointeVente)');
+            $qb->setParameter('pointeVente', $pointeVente);
+        }
+
+        return $qb->orderBy('r.id', 'ASC')
             ->getQuery()
             ->getResult()
         ;

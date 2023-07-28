@@ -28,7 +28,7 @@ class ReferentielsController extends BaseController
     /**
      * @Route("/intervenant/add/referentiels/{id}", name="add_referentiels", methods={"GET","POST"})
      */
-    public function add_edite_referentiels(Request $request,$id)
+    public function addEditeReferentiels(Request $request,$id)
     {
         $menus = $this->serviceMenu();
 
@@ -44,6 +44,7 @@ class ReferentielsController extends BaseController
             $referentiels->setStatus($form->getData()->getStatus());
             $referentiels->setDescription($form->getData()->getDescription());
             $referentiels->setDateCreation(new DateTime());
+
             $this->em->persist($referentiels);
             $this->em->flush();
 

@@ -46,6 +46,7 @@ class EntreprisesProduitsController extends BaseController
         $form = $this->createForm(CategorieProduitsType::class, $categorieProduits);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+
             $this->em->persist($categorieProduits);
             $this->em->flush();
 
@@ -99,7 +100,7 @@ class EntreprisesProduitsController extends BaseController
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function add_edite_entreprise_produits(Request $request,$id)
+    public function addEditeEntrepriseProduits(Request $request,$id)
     {
         $menus = $this->serviceMenu();
 
@@ -112,6 +113,7 @@ class EntreprisesProduitsController extends BaseController
         $form = $this->createForm(EntrepriseType::class, $entreprise);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+
             $this->em->persist($entreprise);
             $this->em->flush();
 
@@ -127,7 +129,7 @@ class EntreprisesProduitsController extends BaseController
     /**
     * @Route("/gestionnaire/produits/formulaires", name="getProduitsFormulairesOptions", methods={"GET","POST"})
     */
-    public function get_produits_formulaires(Request $request)
+    public function getProduitsFormulaires(Request $request)
     {
         $idEntreprises = $request->get('idEntreprises');
 
@@ -145,7 +147,7 @@ class EntreprisesProduitsController extends BaseController
     /**
      * @Route("/gestionnaire/point/ventes/calander", name="get_point_ventes_calander", methods={"GET","POST"})
      */
-    public function get_point_ventes_calander(Request $request)
+    public function getPointVentesCalander(Request $request)
     {
         $selected = $request->get('selected');
         $listePointeVentes = "";

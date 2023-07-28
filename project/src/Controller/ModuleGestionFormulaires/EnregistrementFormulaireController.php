@@ -45,7 +45,7 @@ class EnregistrementFormulaireController extends BaseController
     /**
      * @Route("/intervenant/remplir/formulaire/{id}", name="remplir_formulaire", methods={"GET","POST"})
      */
-    public function remplir_formulaire(Request $request,$id): Response
+    public function remplirFormulaire(Request $request,$id): Response
     {
         $menus = $this->serviceMenu();
         $user = $this->getUser();
@@ -145,7 +145,7 @@ class EnregistrementFormulaireController extends BaseController
     /**
      * @Route("/gestionnaire/resultats/formulaire/{id}", name="resultats_formulaire", methods={"GET","POST"})
      */
-    public function resultats_formulaire($id): Response
+    public function resultatsFormulaire($id): Response
     {
         $menus = $this->serviceMenu();
 
@@ -188,7 +188,7 @@ class EnregistrementFormulaireController extends BaseController
     /**
      * @Route("/gestionnaire/resultats/excel/{id}", name="telecharger_excel", methods={"GET","POST"})
      */
-    public function telecharger_excel(Request $request,$id)
+    public function telechargerExcel(Request $request,$id)
     {
         $fields = "";
         $lineData = "";

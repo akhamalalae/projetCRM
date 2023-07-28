@@ -125,7 +125,9 @@
             });
             calendar.render()
             $('#modal').on('hidden.bs.modal', function () {
-                calendar.refetchEvents();
+                console.log("modal");
+                //calendar.refetchEvents();
+                location.reload();
             });
 
             function editRenderVous(id){
@@ -298,6 +300,8 @@
         }
 
         function apiGetJWTToken(){
+            var username = localStorage.getItem('username');
+            var password = localStorage.getItem('password');
             var settings = {
                 "url": urlApiGetTokenJWT,
                 "method": "POST",
@@ -306,8 +310,8 @@
                     "Content-Type": "application/json"
                 },
                 "data": JSON.stringify({
-                    "username": "admin@gmail.com",
-                    "password": "rootroot"
+                    "username": username,
+                    "password": password
                 }),
             };
 
