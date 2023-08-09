@@ -40,7 +40,7 @@ class GenerationAutomatiqueRendezVousCommand extends Command
             $em->flush();
         }
 
-        $output->writeln(count($historiques) . ' villes importées');
+        $output->writeln(' nombre des historiques créés par la commande : '.count($historiques));
 
         return Command::SUCCESS;
     }
