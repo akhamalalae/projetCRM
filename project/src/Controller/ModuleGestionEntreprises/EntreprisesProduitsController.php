@@ -71,7 +71,8 @@ class EntreprisesProduitsController extends BaseController
         }
 
         $formulaire = $this->em->getRepository(Formulaire::class)->find($id);
-        $enregistrementFormulaire = $this->em->getRepository(EnregistrementFormulaire::class)->findBy(['formulaires' => $formulaire]);
+        $enregistrementFormulaire = $this->em->getRepository(EnregistrementFormulaire::class)
+                                    ->findBy(['formulaires' => $formulaire]);
 
         if($formulaire != null) {
             if($formulaire->getChampFormulaire()) {
@@ -145,7 +146,7 @@ class EntreprisesProduitsController extends BaseController
     }
 
     /**
-     * @Route("/gestionnaire/point/ventes/calander", name="get_point_ventes_calander", methods={"GET","POST"})
+     * @Route("/intervenant/point/ventes/calander", name="get_point_ventes_calander", methods={"GET","POST"})
      */
     public function getPointVentesCalander(Request $request)
     {

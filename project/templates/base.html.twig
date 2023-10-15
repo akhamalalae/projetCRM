@@ -88,10 +88,18 @@
                         </ul>
 
                         <li class="nav-item dropdown">
+                            <a class="btn btn-dark" href="">
+                                <i class="fa fa-user-circle-o" aria-hidden="true">  {{ app.user.firstname }} {{ app.user.lastname }}</i>
+                            </a>
+                        </li>
+
+                        <li class="nav-item dropdown">
                             <a class="btn btn-dark" href="{{ path('app_logout') }}">
                                <i class="fa fa-sign-out fa-1x" aria-hidden="true"></i>
                             </a>
                         </li>
+
+
                     </div>
                 </div>
             </nav>

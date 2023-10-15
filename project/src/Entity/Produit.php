@@ -23,6 +23,7 @@ use App\ApiPlatform\ProductsAttachementAction;
     itemOperations: [
         'get',
         'put',
+        'patch',
         'delete',
         'post_attachment' => [
             'method' => 'POST',
@@ -99,8 +100,26 @@ class Produit
     /**
      * @ORM\OneToMany(targetEntity=Attachement::class, mappedBy="produit")
      */
-    #[Groups(['produit:read'])]
+    #[Groups(['produit:read', 'produit:write'])]
     private $attachement;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    #[Groups(['produit:read', 'produit:write'])]
+    private $libelle;
+
+    /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    #[Groups(['produit:read', 'produit:write'])]
+    private $price;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    #[Groups(['produit:read', 'produit:write'])]
+    private $description;
 
     public function __construct()
     {
@@ -126,16 +145,16 @@ class Produit
     }
 
 	public function getFields()
-    {
-        $fields = array();
-
-        if (isset($this->id)) {
-            $fields['id_product'] = intval($this->id);
-            $fields['name'] = $this->name;
-        }
-
-        return $fields;
-    }
+                               {
+                                   $fields = array();
+                           
+                                   if (isset($this->id)) {
+                                       $fields['id_product'] = intval($this->id);
+                                       $fields['name'] = $this->name;
+                                   }
+                           
+                                   return $fields;
+                               }
 
     public function getEntreprises(): ?Entreprise
     {
@@ -235,6 +254,42 @@ class Produit
                 $attachement->setProduit(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getLibelle(): ?string
+    {
+        return $this->libelle;
+    }
+
+    public function setLibelle(?string $libelle): self
+    {
+        $this->libelle = $libelle;
+
+        return $this;
+    }
+
+    public function getPrice(): ?int
+    {
+        return $this->price;
+    }
+
+    public function setPrice(?int $price): self
+    {
+        $this->price = $price;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
 
         return $this;
     }

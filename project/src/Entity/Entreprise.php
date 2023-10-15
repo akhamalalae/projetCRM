@@ -14,6 +14,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * @ORM\Entity(repositoryClass=EntrepriseRepository::class)
  */
 #[ApiResource(
+    normalizationContext: ['groups' => ['entreprise:read']],
+    denormalizationContext: ['groups' => ['entreprise:write']]
 )]
 class Entreprise extends Adresse
 {
@@ -22,51 +24,61 @@ class Entreprise extends Adresse
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
+    #[Groups(['entreprise:read', 'entreprise:write'])]
     private $id;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
+    #[Groups(['entreprise:read', 'entreprise:write'])]
     private $dateCreationEntreprise;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
+    #[Groups(['entreprise:read', 'entreprise:write'])]
     private $formeJuridique;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
+    #[Groups(['entreprise:read', 'entreprise:write'])]
     private $nomsCommerciaux;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
+    #[Groups(['entreprise:read', 'entreprise:write'])]
     private $numeroSIREN;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
+    #[Groups(['entreprise:read', 'entreprise:write'])]
     private $NumeroSIRET;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
+    #[Groups(['entreprise:read', 'entreprise:write'])]
     private $numerosRCS;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
+    #[Groups(['entreprise:read', 'entreprise:write'])]
     private $dateImmatriculationRCS;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
+    #[Groups(['entreprise:read', 'entreprise:write'])]
     private $dateEnregistrementINSEE;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
+    #[Groups(['entreprise:read', 'entreprise:write'])]
     private $capitalSocial;
 
     /**
@@ -97,11 +109,13 @@ class Entreprise extends Adresse
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
+    #[Groups(['entreprise:read', 'entreprise:write'])]
     private $dateCreation;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
+    #[Groups(['entreprise:read', 'entreprise:write'])]
     private $dateModification;
 
     public function __construct()

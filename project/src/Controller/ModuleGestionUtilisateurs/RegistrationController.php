@@ -92,6 +92,22 @@ class RegistrationController extends BaseController
 
         $user = $this->em->getRepository(User::class)->find($id);
 
+        foreach ($user->getIntervenantsFormulaires() as $intervenantsFormulaires) {
+            $user->removeIntervenantsFormulaire($intervenantsFormulaires);
+        }
+        foreach ($user->getRenderVous() as $renderVous) {
+            $user->removeRenderVou($renderVous);
+        }
+        foreach ($user->getRenderVousUserCreateur() as $renderVousUserCreateur) {
+            $user->removeRenderVousUserCreateur($renderVousUserCreateur);
+        }
+        foreach ($user->getHistoriqueGenerationAutomatiqueRoutings() as $histo) {
+            $user->removeHistoriqueGenerationAutomatiqueRouting($histo);
+        }
+        foreach ($user->getFormulaire() as $formulaire) {
+            $user->removeFormulaire($formulaire);
+        }
+
         if($user != null) {
             $this->em->remove($user);
             $this->em->flush();

@@ -1,0 +1,7 @@
+project/vendor
+project/migrations
+project/public/attachement
+project/public/bundles/apiplatform
+project/var
+rabbitmq
+typesense-data

@@ -79,6 +79,7 @@
                                 <th>Email</th>
                                 <th>Roles</th>
                                 <th>Groupes</th>
+                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -102,6 +103,11 @@
                                     {% for group in intervenant.groupe %}
                                         <span class="badge rounded-pill bg-primary">{{ group.libelle }}</span>
                                     {% endfor %}
+                                </td>
+                                 <td>
+                                    <a class="btn btn-danger" href="{{ path('delete_intervenant', {'id': intervenant.id}) }}" aria-label="delet">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                    </a>
                                 </td>
                             </tr>
                         {% else %}

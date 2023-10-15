@@ -43,6 +43,15 @@ services:
           - "15672:15672"
           - "5672:5672"
 
+    typesense:
+        image: typesense/typesense:0.25.0
+        restart: on-failure
+        ports:
+        - "8108:8108"
+        volumes:
+        - ./typesense-data:/data
+        command: '--data-dir /data --api-key=xyz --enable-cors'
+
     www:
         build: php
         container_name: www_docker_symfony

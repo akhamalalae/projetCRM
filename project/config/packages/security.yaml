@@ -68,3 +68,4 @@ security:
          - { path: ^/api/formulaires, roles: ROLE_ADMIN }
          - { path: ^/api/render_vouses, roles: ROLE_ADMIN }
          - { path: ^/api/produits, roles: ROLE_ADMIN }
+         - { path: ^/api/categorie_produits, roles: ROLE_ADMIN }

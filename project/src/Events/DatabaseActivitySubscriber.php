@@ -2,12 +2,10 @@
 
 namespace App\Events;
 
-use App\Entity\Produit;
 use Doctrine\ORM\Events;
-use App\Entity\Entreprise;
-use App\Entity\Formulaire;
-use App\Entity\RenderVous;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\PostRemoveEventArgs;
+use Doctrine\ORM\Event\PostUpdateEventArgs;
+use Doctrine\ORM\Event\PostPersistEventArgs;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 
 class DatabaseActivitySubscriber implements EventSubscriberInterface
@@ -24,46 +22,45 @@ class DatabaseActivitySubscriber implements EventSubscriberInterface
     }
 
     // callback methods must be called exactly like the events they listen to;
-    // they receive an argument of type LifecycleEventArgs, which gives you access
+    // they receive an argument of type Post*EventArgs, which gives you access
     // to both the entity object of the event and the entity manager itself
-    public function postPersist(LifecycleEventArgs $args): void
+    public function postPersist(PostPersistEventArgs $args): void
     {
-        $this->logActivity('persist', $args);
+        $this->logActivityPostPersist($args);
     }
 
-    public function postRemove(LifecycleEventArgs $args): void
+    public function postRemove(PostRemoveEventArgs $args): void
     {
-        $this->logActivity('remove', $args);
+        $this->logActivityPostRemove($args);
     }
 
-    public function postUpdate(LifecycleEventArgs $args): void
+    public function postUpdate(PostUpdateEventArgs $args): void
     {
-        $this->logActivity('update', $args);
+        $this->logActivityPostUpdate($args);
     }
 
-    private function logActivity(string $action, LifecycleEventArgs $args): void
+    private function logActivityPostPersist($args): void
     {
         $entity = $args->getObject();
 
-        // if this subscriber only applies to certain entity types,
-        // add some code to check the entity type as early as possible
-        // ... get the entity information and log it somehow
-
-        switch ($action) {
-            case 'persist':
-                if ($entity instanceof Produit) {
-                } elseif ($entity instanceof Entreprise) {
-                } elseif ($entity instanceof Formulaire) {
-                } elseif ($entity instanceof RenderVous) {
-                    if ($entity->getTitle() == "string") {
-                        throw new \Exception('Invalid name passed ', 500);
-                    }
-                }
-                break;
-            case 'remove':
-                break;
-            case 'update':
-                break;
+        /*
+        switch ($entity) {
+            case $entity instanceof Produit:
+                //break;
+            case $entity instanceof Entreprise:
+                //break;
         }
+        */
+    }
+
+    private function logActivityPostRemove($args): void
+    {
+        $entity = $args->getObject();
+
+    }
+
+    private function logActivityPostUpdate($args): void
+    {
+        $entity = $args->getObject();
     }
 }

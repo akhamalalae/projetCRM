@@ -7,15 +7,17 @@
         "php": ">=8.0.0",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "acseo/typesense-bundle": "*",
         "api-platform/core": "^2.6",
         "composer/package-versions-deprecated": "1.11.99.4",
         "doctrine/annotations": "^1.0",
         "doctrine/doctrine-bundle": "^2.4",
         "doctrine/doctrine-migrations-bundle": "^3.1",
         "doctrine/orm": "^2.9",
-        "friendsofsymfony/elastica-bundle": "^6.0",
+        "enqueue/fs": "^0.10.18",
         "lexik/jwt-authentication-bundle": "^2.19",
         "nelmio/cors-bundle": "^2.1",
+        "nyholm/psr7": "^1.8",
         "phpdocumentor/reflection-docblock": "^5.2",
         "sensio/framework-extra-bundle": "^6.1",
         "symfony/amqp-messenger": "5.3.*",
@@ -44,6 +46,7 @@
         "symfony/string": "5.3.*",
         "symfony/translation": "5.3.*",
         "symfony/twig-bundle": "5.3.*",
+        "symfony/ux-live-component": "^2.0",
         "symfony/validator": "5.3.*",
         "symfony/web-link": "5.3.*",
         "symfony/yaml": "5.3.*",
@@ -71,7 +74,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "symfony/flex": true,
-            "symfony/runtime": true
+            "symfony/runtime": true,
+            "php-http/discovery": true
         }
     },
     "autoload": {

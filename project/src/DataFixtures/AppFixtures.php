@@ -99,6 +99,7 @@ class AppFixtures extends Fixture
 
     public function createFormulaires($manager)
     {
+        $generator = Faker\Factory::create('fr_FR');
         $dateNoow = new DateTime();
         $type = $manager->getRepository(Typeschamps::class)->find(1);
         $user = $this->createUserAdmin($manager);
@@ -106,7 +107,7 @@ class AppFixtures extends Fixture
         for ($i = 0; $i < 20; $i++) {
             $formulaire = new Formulaire();
             $formulaire->setLibelle("Formulaire ". $i);
-            $formulaire->setDescription("Description Formulaire ". $i);
+            $formulaire->setDescription("Formulaire" . $i);
             $formulaire->setDateCreation($dateNoow);
             $formulaire->setDateDebut($dateNoow);
             $formulaire->setDateFin($dateNoow->modify('+1 day'));

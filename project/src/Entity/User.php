@@ -12,6 +12,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use ApiPlatform\Metadata\Delete;
+use App\State\UserDeleteProcessor;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -21,6 +23,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']],
 )]
+#[Delete(processor: UserDeleteProcessor::class)]
 class User extends Adresse implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
@@ -101,11 +104,13 @@ class User extends Adresse implements UserInterface, PasswordAuthenticatedUserIn
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
+    #[Groups(['user:read'])]
     private $dateCreation;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
+    #[Groups(['user:read'])]
     private $dateModification;
 
     public function __construct()
@@ -288,22 +293,22 @@ class User extends Adresse implements UserInterface, PasswordAuthenticatedUserIn
         return $this->renderVous;
     }
 
-    public function addRenderVou(RenderVous $renderVou): self
+    public function addRenderVou(RenderVous $renderVous): self
     {
-        if (!$this->renderVous->contains($renderVou)) {
-            $this->renderVous[] = $renderVou;
-            $renderVou->setIntervenant($this);
+        if (!$this->renderVous->contains($renderVous)) {
+            $this->renderVous[] = $renderVous;
+            $renderVous->setIntervenant($this);
         }
 
         return $this;
     }
 
-    public function removeRenderVou(RenderVous $renderVou): self
+    public function removeRenderVou(RenderVous $renderVous): self
     {
-        if ($this->renderVous->removeElement($renderVou)) {
+        if ($this->renderVous->removeElement($renderVous)) {
             // set the owning side to null (unless already changed)
-            if ($renderVou->getIntervenant() === $this) {
-                $renderVou->setIntervenant(null);
+            if ($renderVous->getIntervenant() === $this) {
+                $renderVous->setIntervenant(null);
             }
         }
 

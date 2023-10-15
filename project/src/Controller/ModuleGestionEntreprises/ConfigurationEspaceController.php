@@ -73,6 +73,8 @@ class ConfigurationEspaceController extends BaseController
 
             $this->em->persist($configurationEspace);
             $this->em->flush();
+
+            return $this->redirectToRoute('configuration_espace', ['id' => $id]);
         }
 
         return $this->render('configurationEspace/configurationEspace.html.twig', [
