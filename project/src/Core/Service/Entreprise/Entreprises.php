@@ -16,7 +16,7 @@ class Entreprises implements RenderInterface
     //RenderInterface
 
     /**
-     * Save form data
+     * view
      *
      * @return string
      */
@@ -36,7 +36,7 @@ class Entreprises implements RenderInterface
     }
 
     /**
-     * Save specific data
+     * parameters
      *
      * @return array
      */

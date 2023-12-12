@@ -31,4 +31,11 @@ interface CreateFormInterface
      * @return array
      */
     public function formOptions();
+
+    /**
+     * Set options create form
+     *
+     * @return array
+     */
+    public function formOtherOptions();
 }

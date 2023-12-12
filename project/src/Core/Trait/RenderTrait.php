@@ -6,7 +6,13 @@ trait RenderTrait {
 
     public function renderTrait($request, $service, $params) {
         $service->init($params);
-        $form = $this->createForm($service->formType(), $service->formData(), $service->formOptions());
+
+        $form = $this->createForm($service->formType(),
+            $service->formData(),
+            $service->formOptions(),
+            $service->FormOtherOptions()
+        );
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

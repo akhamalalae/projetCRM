@@ -37,7 +37,7 @@ class AddDemoEnregistrementFormulaire implements RenderInterface, Initialisation
     //RenderInterface
 
     /**
-     * Save form data
+     * view
      *
      * @return string
      */
@@ -47,7 +47,7 @@ class AddDemoEnregistrementFormulaire implements RenderInterface, Initialisation
     }
 
     /**
-     * Save specific data
+     * parameters
      *
      * @return array
      */
@@ -101,5 +101,15 @@ class AddDemoEnregistrementFormulaire implements RenderInterface, Initialisation
     public function formOptions()
     {
         return ['champsFormulaires' => $this->datachampsFormulaires];
+    }
+
+    /**
+     * Set options create form
+     *
+     * @return array
+     */
+    public function formOtherOptions()
+    {
+        return [];
     }
 }

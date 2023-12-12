@@ -40,7 +40,7 @@ class AddConfigurationEspaceObject implements InitialisationInterface, CreateFor
     //RenderInterface
 
     /**
-     * Save form data
+     * view
      *
      * @return string
      */
@@ -50,7 +50,7 @@ class AddConfigurationEspaceObject implements InitialisationInterface, CreateFor
     }
 
     /**
-     * Save specific data
+     * parameters
      *
      * @return array
      */
@@ -103,6 +103,16 @@ class AddConfigurationEspaceObject implements InitialisationInterface, CreateFor
      * @return array
      */
     public function formOptions()
+    {
+        return [];
+    }
+
+    /**
+     * Set options create form
+     *
+     * @return array
+     */
+    public function formOtherOptions()
     {
         return [];
     }

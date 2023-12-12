@@ -55,7 +55,7 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
     //RenderInterface
 
     /**
-     * Save form data
+     * view
      *
      * @return string
      */
@@ -65,7 +65,7 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
     }
 
     /**
-     * Save specific data
+     * parameters
      *
      * @return array
      */
@@ -117,6 +117,16 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
     public function formOptions()
     {
         return ['champsFormulaires' => $this->datachampsFormulaires];
+    }
+
+    /**
+     * Set options create form
+     *
+     * @return array
+     */
+    public function formOtherOptions()
+    {
+        return [];
     }
 
     //SubmittedFormInterface

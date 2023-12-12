@@ -105,6 +105,16 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
         return [];
     }
 
+    /**
+     * Set options create form
+     *
+     * @return array
+     */
+    public function formOtherOptions()
+    {
+        return [];
+    }
+
     //SubmittedFormInterface
 
     /**

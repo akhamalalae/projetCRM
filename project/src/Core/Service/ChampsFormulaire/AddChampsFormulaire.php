@@ -57,7 +57,7 @@ class AddChampsFormulaire implements InitialisationInterface, CreateFormInterfac
     //RenderInterface
 
     /**
-     * Save form data
+     * view
      *
      * @return string
      */
@@ -67,7 +67,7 @@ class AddChampsFormulaire implements InitialisationInterface, CreateFormInterfac
     }
 
     /**
-     * Save specific data
+     * parameters
      *
      * @return array
      */
@@ -137,6 +137,16 @@ class AddChampsFormulaire implements InitialisationInterface, CreateFormInterfac
      * @return array
      */
     public function formOptions()
+    {
+        return [];
+    }
+
+    /**
+     * Set options create form
+     *
+     * @return array
+     */
+    public function formOtherOptions()
     {
         return [];
     }

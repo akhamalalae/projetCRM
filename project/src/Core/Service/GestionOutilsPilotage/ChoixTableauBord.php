@@ -1,21 +1,22 @@
 <?php
 
-namespace App\Core\Service\Entreprise;
+namespace App\Core\Service\GestionOutilsPilotage;
 
 use App\Core\Interface\AddFlashInterface;
 use App\Core\Interface\CreateFormInterface;
 use App\Core\Interface\InitialisationInterface;
 use App\Core\Interface\RenderInterface;
 use App\Core\Interface\SubmittedFormInterface;
-use App\Entity\Entreprise;
-use App\Form\Entreprises\EntrepriseType;
+use App\Entity\RequeteTableauBord;
+use App\Form\TableauBord\ChoixTableauBordType;
 use App\Services\MenuGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 
-class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface,
+class ChoixTableauBord implements InitialisationInterface, CreateFormInterface,
                         SubmittedFormInterface, RenderInterface, AddFlashInterface
 {
-    private int $id = 0;
+    private int     $choix;
+    private object  $requeteTableauBord;
 
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
@@ -31,7 +32,6 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      */
     public function init($param)
     {
-        $this->id = $param['id'];
     }
 
     //RenderInterface
@@ -43,7 +43,7 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      */
     public function view()
     {
-        return 'entrepriseProduits/entreprisesProduits.html.twig';
+        return 'tableauBord/choixTableauBord.html.twig';
     }
 
     /**
@@ -54,7 +54,8 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
     public function parameters()
     {
         return [
-            'menus' => $this->menuGenerator->getMenu()
+            'menus'        => $this->menuGenerator->getMenu(),
+            'current_page' => 'formulaire'
         ];
     }
 
@@ -67,7 +68,7 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      */
     public function formType()
     {
-        return EntrepriseType::class;
+        return ChoixTableauBordType::class;
     }
 
     /**
@@ -77,11 +78,7 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      */
     public function formData()
     {
-        if ($this->id === 0) {
-            return  $this->createNewObject();
-        }
-
-        return $this->em->getRepository(Entreprise::class)->find($this->id);
+        return  null;
     }
 
     /**
@@ -91,7 +88,7 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      */
     public function createNewObject()
     {
-        return new Entreprise();
+        return new RequeteTableauBord();
     }
 
      /**
@@ -124,8 +121,7 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      */
     public function save($form)
     {
-        $this->em->persist($form->getData());
-        $this->em->flush();
+        $this->saveSpecific($form);
     }
 
     /**
@@ -136,6 +132,9 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      */
     public function saveSpecific($form)
     {
+        $data                       = $form->getData();
+        $this->requeteTableauBord   = $data["RequeteTableauBord"] ? $data["RequeteTableauBord"] : $this->requeteTableauBord = $this->createNewObject();
+        $this->choix                = $data["choix"];
     }
 
     /**
@@ -155,7 +154,7 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      */
     public function route()
     {
-        return 'entreprise';
+        return 'tableau_de_bord';
     }
 
     /**
@@ -165,7 +164,13 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      */
     public function parametersRoute()
     {
-        return [];
+        if ($this->choix === 0) {
+            //'Créer un nouveau tableau de Bord' => 0,
+            return ['id' => 0];
+        }
+
+        //'Charger un tableau de Bord' => 1,
+        return ['id' => $this->requeteTableauBord->getId()];
     }
 
     //AddFlashInterface
@@ -187,6 +192,6 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      */
     public function message()
     {
-        return 'Enregistrement effectué avec succès ';
+        return 'Enregistrement effectué avec succès';
     }
 }

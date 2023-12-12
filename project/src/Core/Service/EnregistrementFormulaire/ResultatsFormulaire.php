@@ -32,7 +32,7 @@ class ResultatsFormulaire implements RenderInterface, InitialisationInterface
     //RenderInterface
 
     /**
-     * Save form data
+     * view
      *
      * @return string
      */
@@ -42,7 +42,7 @@ class ResultatsFormulaire implements RenderInterface, InitialisationInterface
     }
 
     /**
-     * Save specific data
+     * parameters
      *
      * @return array
      */

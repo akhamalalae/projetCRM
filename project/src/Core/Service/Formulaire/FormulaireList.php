@@ -30,7 +30,7 @@ class FormulaireList implements RenderInterface, InitialisationInterface
     //RenderInterface
 
     /**
-     * Save form data
+     * view
      *
      * @return string
      */
@@ -40,7 +40,7 @@ class FormulaireList implements RenderInterface, InitialisationInterface
     }
 
     /**
-     * Save specific data
+     * parameters
      *
      * @return array
      */

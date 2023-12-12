@@ -55,7 +55,7 @@ class AddEditeFormulaire implements InitialisationInterface, CreateFormInterface
     //RenderInterface
 
     /**
-     * Save form data
+     * view
      *
      * @return string
      */
@@ -69,7 +69,7 @@ class AddEditeFormulaire implements InitialisationInterface, CreateFormInterface
     }
 
     /**
-     * Save specific data
+     * parameters
      *
      * @return array
      */
@@ -129,6 +129,16 @@ class AddEditeFormulaire implements InitialisationInterface, CreateFormInterface
      * @return array
      */
     public function formOptions()
+    {
+        return [];
+    }
+
+    /**
+     * Set options create form
+     *
+     * @return array
+     */
+    public function formOtherOptions()
     {
         return [];
     }

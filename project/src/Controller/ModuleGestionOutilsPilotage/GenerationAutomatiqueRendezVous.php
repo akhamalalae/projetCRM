@@ -22,7 +22,7 @@ class GenerationAutomatiqueRendezVous extends AbstractController
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function generationAutomatiqueRendezVous(Request $request, GenerationAutomatiqueCalender $service,):Response
+    public function generationAutomatiqueRendezVous(Request $request, GenerationAutomatiqueCalender $service):Response
     {
         ini_set('memory_limit','2048M');
         set_time_limit(600);

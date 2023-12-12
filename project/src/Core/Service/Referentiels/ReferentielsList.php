@@ -16,7 +16,7 @@ class ReferentielsList implements RenderInterface
     //RenderInterface
 
     /**
-     * Save form data
+     * view
      *
      * @return string
      */
@@ -26,7 +26,7 @@ class ReferentielsList implements RenderInterface
     }
 
     /**
-     * Save specific data
+     * parameters
      *
      * @return array
      */

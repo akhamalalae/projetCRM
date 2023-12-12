@@ -33,7 +33,7 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
     //RenderInterface
 
     /**
-     * Save form data
+     * view
      *
      * @return string
      */
@@ -53,7 +53,7 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
     }
 
     /**
-     * Save specific data
+     * parameters
      *
      * @return array
      */
@@ -106,6 +106,16 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
      * @return array
      */
     public function formOptions()
+    {
+        return [];
+    }
+
+    /**
+     * Set options create form
+     *
+     * @return array
+     */
+    public function formOtherOptions()
     {
         return [];
     }
