@@ -5,7 +5,7 @@ namespace App\Core\Interface;
 interface InitialisationInterface
 {
     /**
-     * Name route
+     * Initialisation
      *
      * @param array $params
      * @return void

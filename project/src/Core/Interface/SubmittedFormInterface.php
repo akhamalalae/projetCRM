@@ -23,7 +23,8 @@ interface SubmittedFormInterface
     public function saveSpecific($form);
 
     /**
-     * Save
+     * Save other data
+     *
      * @return void
      */
     public function saveBeforeSubmitFormData();

@@ -2,21 +2,19 @@
 
 namespace App\Controller\ModuleGestionFormulaires;
 
-use DateTime;
 use App\Entity\Files;
 use App\Entity\Formulaire;
-use App\Entity\RenderVous;
 use App\Entity\ChampsFormulaire;
 use App\Controller\BaseController;
 use App\Core\Service\EnregistrementFormulaire\AddDemoEnregistrementFormulaire;
 use App\Core\Service\EnregistrementFormulaire\AddEnregistrementFormulaire;
+use App\Core\Service\EnregistrementFormulaire\ResultatsFormulaire;
 use App\Core\Trait\RenderTrait;
 use App\Entity\EnregistrementFormulaire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Form\Formulaires\EnregistrementFormulaireType;
 
 class EnregistrementFormulaireController extends BaseController
 {
@@ -58,25 +56,17 @@ class EnregistrementFormulaireController extends BaseController
 
     /**
      * @Route("/gestionnaire/resultats/formulaire/{id}", name="resultats_formulaire", methods={"GET","POST"})
+     *
+     * @param Request $request
+     * @param ResultatsFormulaire $service
+     * @param int $id
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function resultatsFormulaire($id): Response
+    public function resultatsFormulaire(Request $request, ResultatsFormulaire $service, $id):Response
     {
-        $menus = $this->serviceMenu();
-
-        $formulaire = $this->em->getRepository(Formulaire::class)->find($id);
-        $champsFormulaires = $this->em->getRepository(ChampsFormulaire::class)->findBy(
-            ['formulaire' => $id,'status' => 0]
-        );
-        $enregistrementFormulaire = $this->em->getRepository(EnregistrementFormulaire::class)->findBy(
-            ['formulaires' => $id]
-        );
-
-        return $this->render('enregistrementFormulaire/formulaireResultats.html.twig', [
-            'menus' => $menus,
-            'formulaire' => $formulaire,
-            'enregistrementFormulaire' => $enregistrementFormulaire,
-            'champsFormulaires' => $champsFormulaires
-        ]);
+        $service->init(['id' => $id]);
+        return $this->render($service->view(), $service->parameters());
     }
 
     /**

@@ -5,14 +5,14 @@ namespace App\Core\Interface;
 interface RenderInterface
 {
     /**
-     * Save form data
+     * view
      *
      * @return string
      */
     public function view();
 
     /**
-     * Save specific data
+     * parameters
      *
      * @return array
      */

@@ -20,9 +20,6 @@ class SearchController extends AbstractController
         // Get Doctrine Hydrated objects
         $results = $this->entreprisesFinder->rawQuery($query)->getResults();
 
-        dump($results);
-        
-        die;
         return $this->render('search/index.html.twig', [
             'results' => $results,
         ]);
