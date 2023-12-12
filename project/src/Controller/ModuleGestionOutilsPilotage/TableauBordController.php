@@ -57,7 +57,6 @@ class TableauBordController extends BaseController
         ]);
     }
 
-
     /**
      * @Route("/gestionnaire/tableau_de_bord/{id}", name="tableau_de_bord", methods={"GET","POST"})
      */
@@ -175,7 +174,7 @@ class TableauBordController extends BaseController
             $entity_libelle = $champ->getEntitie()->getLibelle();
 
             if ($clauseSelect == '') {
-            }else{
+            } else {
                 $clauseSelect .= " ,";
             }
 

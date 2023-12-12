@@ -1,43 +1,42 @@
 <?php
 
-namespace App\Controller\ModuleGestionAdministration;
+namespace App\Controller\ModuleGestionEntreprises;
 
-use App\Core\Service\Referentiels\AddEditeReferentiel;
-use App\Core\Service\Referentiels\ReferentielsList;
+use App\Core\Service\Entreprise\AddEditeEntreprise;
+use App\Core\Service\Entreprise\Entreprises;
 use App\Core\Trait\RenderTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class ReferentielsController extends AbstractController
+class EntreprisesController extends AbstractController
 {
     use RenderTrait;
 
     /**
-     * @Route("/intervenant/referentiels", name="referentiels")
+     * @Route("/gestionnaire/entreprise", name="entreprise", methods={"GET","POST"})
      *
-     * @param ReferentielsList $service
+     * @param Entreprises $service
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function referentiels(ReferentielsList $service):Response
+    public function entreprise(Entreprises $service): Response
     {
         return $this->render($service->view(), $service->parameters());
     }
 
     /**
-     * @Route("/intervenant/add/referentiels/{id}", name="add_referentiels", methods={"GET","POST"})
+     * @Route("/gestionnaire/add/entreprise/produits/{id}", name="entreprise_produits", methods={"GET","POST"})
      *
      * @param Request $request
-     * @param AddEditeReferentiel $service
+     * @param AddEditeEntreprise $service
      * @param int $id
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function addEditeReferentiels(Request $request, AddEditeReferentiel $service, $id):Response
+    public function addEditeEntreprise(Request $request, AddEditeEntreprise $service, $id):Response
     {
         return $this->renderTrait($request, $service, ['id' => $id]);
     }
 }
-

@@ -2,93 +2,31 @@
 
 namespace App\Controller\ModuleGestionFormulaires;
 
-use DateTime;
-use App\Entity\Formulaire;
-use App\Entity\Typeschamps;
 use App\Entity\ChampsFormulaire;
 use App\Controller\BaseController;
+use App\Core\Service\ChampsFormulaire\AddChampsFormulaire;
+use App\Core\Trait\RenderTrait;
 use Symfony\Component\HttpFoundation\Request;
-use App\Form\Formulaires\ChampsFormulaireType;
 use Symfony\Component\Routing\Annotation\Route;
-use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\HttpFoundation\Response;
 
 class ChampsFormulaireController extends BaseController
 {
+    use RenderTrait;
+
     /**
      * @Route("/intervenant/formulaire/champs/{id}/{champ}", name="formulaire_champs")
+     *
+     * @param Request $request
+     * @param AddChampsFormulaire $service
+     * @param int $id
+     * @param $champ
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function listeChampsFormulaire(Request $request, $id, $champ=null)
+    public function listeChampsFormulaire(Request $request, AddChampsFormulaire $service, $id, $champ = null):Response
     {
-        $menus = $this->serviceMenu();
-        $statusOptionsChamps = false;
-        $choiceType = Typeschamps::CHOICETYPE;
-
-        $listechampsFormulaires = $this->em->getRepository(ChampsFormulaire::class)->findBy(
-            ['formulaire' => $id,'status' => 0]
-        );
-        $countChampsFormulaires = count($listechampsFormulaires);
-        $formulaire = $this->em->getRepository(Formulaire::class)->find($id);
-
-        if($champ != null) {
-            $champsFormulaire = $this->em->getRepository(ChampsFormulaire::class)->find($champ);
-            $editChamps = true;
-            if ($champsFormulaire->getType()->getId() == $choiceType) {
-                $statusOptionsChamps = true;
-            }else {
-                $statusOptionsChamps = false;
-            }
-        }else {
-            $champsFormulaire = new ChampsFormulaire();
-            $editChamps = false;
-            $statusOptionsChamps = false;
-        }
-
-        $orignalOptions = new ArrayCollection();
-        foreach ($champsFormulaire->getOptions() as $champ) {
-            $orignalOptions->add($champ);
-        }
-
-        $form = $this->createForm(ChampsFormulaireType::class, $champsFormulaire);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $champsFormulaire->setFormulaire($formulaire);
-            $champsFormulaire->setStatus(0);
-            $champsFormulaire->setDateCreation(new DateTime());
-            $champsFormulaire->setDateModification(new DateTime());
-
-            foreach ($orignalOptions as $champ) {
-                if ($champsFormulaire->getOptions()->contains($champ) === false) {
-                    $this->em->remove($champ);
-                }
-            }
-
-            if ($editChamps == true) {
-                if ($champsFormulaire->getType()->getId() != $choiceType) {
-                    foreach ($champsFormulaire->getOptions() as $option) {
-                        $this->em->remove($option);
-                    }
-                }
-            }
-
-            $this->em->persist($champsFormulaire);
-            $this->em->flush();
-
-            return $this->redirectToRoute('formulaire_champs', array(
-                'id' => $id,
-                'champ' => null,
-            ));
-        }
-
-        return $this->render('champsFormulaire/champsFormulaire.html.twig', [
-            'menus' => $menus,
-            'statusOptionsChamps' => $statusOptionsChamps,
-            'editChamps' => $editChamps,
-            'formulaire' => $formulaire,
-            'countChampsFormulaires' => $countChampsFormulaires,
-            'current_page' => 'listeChampsFormulaire',
-            'champsFormulaires' => $listechampsFormulaires,
-            'form' => $form->createView(),
-        ]);
+        return $this->renderTrait($request, $service,['id' => $id, 'champ' => $champ]);
     }
 
     /**

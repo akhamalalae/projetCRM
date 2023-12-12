@@ -25,7 +25,6 @@ class RenderVousRepository extends ServiceEntityRepository
         $query = $entityManager->createQuery(
             "SELECT r FROM App\Entity\RenderVous r
                 WHERE (r.effectuer != TRUE OR r.effectuer IS NULL)
-                AND (r.userCreateur = ".$user." OR r.intervenant = ".$user.")
             "
         );
 

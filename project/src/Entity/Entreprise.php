@@ -87,7 +87,7 @@ class Entreprise extends Adresse
     private $produits;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Formulaire::class, mappedBy="entreprises", orphanRemoval=true)
+     * @ORM\ManyToMany(targetEntity=Formulaire::class, mappedBy="entreprises", cascade={"persist"},orphanRemoval=true)
      */
     private $fromFormulaires;
 

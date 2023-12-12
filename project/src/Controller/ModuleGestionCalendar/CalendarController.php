@@ -4,144 +4,76 @@
 namespace App\Controller\ModuleGestionCalendar;
 
 use App\Entity\RenderVous;
-use App\Form\RenderVous\RenderVousType;
-use App\Controller\BaseController;
+use App\Core\Service\Calendar\AddEditeCalendar;
+use App\Core\Service\Calendar\Calendar;
+use App\Core\Service\Calendar\CalendarList;
+use App\Core\Trait\RenderTrait;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Form\Intervenants\AgendaFiltreIntervenantsType;
 
-class CalendarController extends BaseController
+class CalendarController extends AbstractController
 {
+    use RenderTrait;
+
     /**
      * @Route("/intervenant/calendar", name="calendar_vue_agenda", methods={"GET","POST"})
+     *
+     * @param Request $request
+     * @param Calendar $service
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function vueAgenda(Request $request): Response
+    public function vueAgenda(Request $request, Calendar $service):Response
     {
-        $menus = $this->serviceMenu();
-        $user = $this->getUser();
-        $defaultData = ['message' => 'defaultData'];
-        $urlApi = $this->getParameter('urlApi');
-        $urlApiGetTokenJWT = $this->getParameter('urlApiGetTokenJWT');
-
-        $events = $this->em->getRepository(RenderVous::class)->findCalendarRendezVous($user->getId());
-        $countRendezVous = $this->countItems($events);
-        $data = $this->rdvs($events);
-
-        $form = $this->createForm(AgendaFiltreIntervenantsType::class, $defaultData);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $events = $this->agendaFiltres($form);
-            $countRendezVous = $this->countItems($events);
-            $data = $this->rdvs($events);
-        }
-
-        return $this->render('calendrierRenderVous/renderVous.html.twig', [
-            'menus' => $menus,
-            'current_page' => '',
-            'countRendezVous' => $countRendezVous,
-            'data' => $data,
-            'urlApi' => $urlApi,
-            "urlApiGetTokenJWT" => $urlApiGetTokenJWT,
-            'form' => $form->createView(),
-        ]);
+        return $this->renderTrait($request, $service,
+            [
+                'user'              => $this->getUser(),
+                'urlApi'            => $this->getParameter('urlApi'),
+                'urlApiGetTokenJWT' => $this->getParameter('urlApiGetTokenJWT')
+            ]
+        );
     }
 
-    public function agendaFiltres($form)
-    {
-        $intervenants = array();
-        $entreprises = array();
-        $formulaire = array();
-        $pointeVente = array();
-
-        foreach ($form->getData()["intervenants"] as $value) {
-            array_push($intervenants, $value->getId());
-        }
-
-        foreach ($form->getData()["entreprises"] as $value) {
-            array_push($entreprises, $value->getId());
-        }
-
-        foreach ($form->getData()["formulaire"] as $value) {
-            array_push($formulaire, $value->getId());
-        }
-
-        foreach ($form->getData()["pointeVente"] as $value) {
-            array_push($pointeVente, $value->getId());
-        }
-
-        $events = $this->em->getRepository(RenderVous::class)->agendaFiltres($intervenants, $entreprises, $formulaire, $pointeVente);
-
-        return $events;
-    }
-
-    public function rdvs($events)
-    {
-        $rdvs = [];
-        foreach($events as $event){
-            $rdvs[] = [
-                'id' => $event->getId(),
-                'start' => $event->getStart()->format('Y-m-d H:i:s'),
-                'end' => $event->getEnd()->format('Y-m-d H:i:s'),
-                'title' => $event->getTitle(),
-                'description' => $event->getDescription(),
-                'backgroundColor' => $event->getBackgroundColor(),
-                'borderColor' => $event->getBorderColor(),
-                'textColor' => $event->getTextColor(),
-                'allDay' => $event->getAllDay(),
-            ];
-        }
-
-        return json_encode($rdvs);
-    }
-
-    /**
+     /**
      * @Route("/intervenant/calendar/rendezVous/effectuer", name="render_vous_effectuer", methods={"GET","POST"})
+     *
+     * @param CalendarList $service
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function renderVousEffectuer(): Response
+    public function renderVousEffectuer(CalendarList $service):Response
     {
-        $menus = $this->serviceMenu();
-        $user = $this->getUser();
-
-        $rendezVous = $this->em->getRepository(RenderVous::class)->findRealizeRendezVous($user->getId());
-
-        return $this->render('calendrierRenderVous/renderVousEffectuer.html.twig', [
-            'menus' => $menus,
-            'current_page' => '',
-            'rendezVous' => $rendezVous,
-        ]);
+        $service->init(['user' => $this->getUser()]);
+        return $this->render($service->view(), $service->parameters());
     }
+
 
     /**
      * @Route("/intervenant/calendar/add", name="calendar_add", methods={"GET"})
-    */
-    public function addRDV(Request $request): Response
+     *
+     * @param Request $request
+     * @param AddEditeCalendar $service
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function addRDV(Request $request, AddEditeCalendar $service):Response
     {
-        $calendar = new RenderVous();
-        $form = $this->createForm(RenderVousType::class, $calendar);
-        $form->handleRequest($request);
-
-        return $this->render('calendrierRenderVous/addRendezVousForm.html.twig', [
-            'calendar' => $calendar,
-            'form' => $form->createView()
-        ]);
+        return $this->renderTrait($request, $service, ['id' => 0, 'user' => $this->getUser()]);
     }
 
     /**
      * @Route("/intervenant/calendar/edit", name="calendar_edit", methods={"GET"})
+     *
+     * @param Request $request
+     * @param AddEditeCalendar $service
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function editRDV(Request $request): Response
+    public function editRDV(Request $request, AddEditeCalendar $service):Response
     {
-        $id = $request->get('id');
-        $calendar = $this->em->getRepository(RenderVous::class)->findOneById($id);
-
-        $form = $this->createForm(RenderVousType::class, $calendar);
-        $form->handleRequest($request);
-
-        return $this->render('calendrierRenderVous/editRendezVousForm.html.twig', [
-            'calendar' => $calendar,
-            'form' => $form->createView()
-        ]);
+        return $this->renderTrait($request, $service, ['id' => $request->get('id'), 'user' => $this->getUser()]);
     }
 
     /**

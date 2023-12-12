@@ -4,7 +4,6 @@ namespace App\Controller\ModuleGestionFormulaires;
 
 use App\Entity\ChampsFormulaire;
 use App\Controller\BaseController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 class OptionsController extends BaseController

@@ -8,6 +8,9 @@ use App\Entity\Formulaire;
 use App\Entity\RenderVous;
 use App\Entity\ChampsFormulaire;
 use App\Controller\BaseController;
+use App\Core\Service\EnregistrementFormulaire\AddDemoEnregistrementFormulaire;
+use App\Core\Service\EnregistrementFormulaire\AddEnregistrementFormulaire;
+use App\Core\Trait\RenderTrait;
 use App\Entity\EnregistrementFormulaire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,129 +20,40 @@ use App\Form\Formulaires\EnregistrementFormulaireType;
 
 class EnregistrementFormulaireController extends BaseController
 {
-    /**
+    use RenderTrait;
+
+     /**
      * @Route("/gestionnaire/demo/formulaire/{id}", name="demo_formulaire", methods={"GET","POST"})
+     *
+     * @param Request $request
+     * @param AddDemoEnregistrementFormulaire $service
+     * @param int $id
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function formulaire(Request $request,$id): Response
+    public function formulaireDemo(Request $request, AddDemoEnregistrementFormulaire $service, $id):Response
     {
-        $menus = $this->serviceMenu();
-
-        $formulaire = $this->em->getRepository(Formulaire::class)->find($id);
-        $champsFormulaires = $this->em->getRepository(ChampsFormulaire::class)->findBy(
-            ['formulaire' => $id,'status' => 0],
-            ['ordre' => 'ASC']
-        );
-
-        $form = $this->createForm(EnregistrementFormulaireType::class, $champsFormulaires, [
-            'champsFormulaires' => $champsFormulaires,
-        ]);
-        $form->handleRequest($request);
-
-        return $this->render('enregistrementFormulaire/index.html.twig', [
-            'menus' => $menus,
-            'formulaire' => $formulaire,
-            'form' => $form->createView(),
-        ]);
+        return $this->renderTrait($request, $service, ['id' => $id]);
     }
 
     /**
      * @Route("/intervenant/remplir/formulaire/{id}", name="remplir_formulaire", methods={"GET","POST"})
+     *
+     * @param Request $request
+     * @param AddEnregistrementFormulaire $service
+     * @param int $id
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function remplirFormulaire(Request $request,$id): Response
+    public function remplirFormulaire(Request $request, AddEnregistrementFormulaire $service, $id):Response
     {
-        $menus = $this->serviceMenu();
-        $user = $this->getUser();
-        $resultats = array();
-
-        $calander_rendez_vous = $this->em->getRepository(RenderVous::class)->find($id);
-        $formulaire = $this->em->getRepository(Formulaire::class)->find($calander_rendez_vous->getFormulaire());
-        $champsFormulaires = $this->em->getRepository(ChampsFormulaire::class)->findBy(
-            ['formulaire' => $formulaire,'status' => 0],
-            ['ordre' => 'ASC']
+        return $this->renderTrait($request, $service,
+                [
+                    'id' => $id,
+                    'directory' => $this->getParameter('files_directory'),
+                    'user' => $this->getUser()
+                ]
         );
-
-        $enregistrementFormulaire = new EnregistrementFormulaire();
-
-        $form = $this->createForm(EnregistrementFormulaireType::class, $champsFormulaires, [
-            'champsFormulaires' => $champsFormulaires,
-        ]);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $resultats = $this->getResultats($form, $champsFormulaires, $enregistrementFormulaire);
-            $enregistrementFormulaire->setDateCreation(new DateTime());
-            $enregistrementFormulaire->setDateModification(new DateTime());
-            $enregistrementFormulaire->setFormulaires($formulaire);
-            $enregistrementFormulaire->setIntervenant($user);
-            $enregistrementFormulaire->setResultats($resultats);
-            $enregistrementFormulaire->setCalanderRendezVous($calander_rendez_vous);
-            $calander_rendez_vous->setEffectuer(true);
-
-            $this->em->persist($enregistrementFormulaire);
-            $this->em->persist($calander_rendez_vous);
-            $this->em->flush();
-
-            return $this->redirectToRoute('calendar_vue_agenda');
-        }
-
-        return $this->render('enregistrementFormulaire/index.html.twig', [
-            'menus' => $menus,
-            'formulaire' => $formulaire,
-            'form' => $form->createView(),
-        ]);
-    }
-
-    public function getResultats($form, $champsFormulaires, $enregistrementFormulaire): array
-    {
-        foreach ($form->getData() as $key => $value) {
-            $isFile = '';
-            if (str_contains($key, 'files')) {
-                //cas champs files
-                $explodeChampId = explode("_", $key);
-                $key = $explodeChampId[1];
-                $isFile = $explodeChampId[0];
-            }
-
-            foreach ($champsFormulaires as $champ) {
-                $champId = $champ->getId();
-                if ($champId == $key) {
-                    if ($isFile == 'files') {
-                        $listeFichiers = $form->get($isFile.'_'.$key)->getData();
-                        foreach($listeFichiers as $un_fichier) {
-                            $fichier = md5(uniqid()).'.'.$un_fichier->guessExtension();
-
-                            $un_fichier->move(
-                                $this->getParameter('files_directory'),
-                                $fichier
-                            );
-
-                            $file = new Files();
-                            $file->setDateCreation(new DateTime());
-                            $file->setDateModification(new DateTime());
-                            $file->setFile($fichier);
-                            $champsFormulaire = $this->em->getRepository(ChampsFormulaire::class)->find($key);
-                            $file->setChampsFormulaire($champsFormulaire);
-                            $file->setName($un_fichier->getClientOriginalName());
-                            $enregistrementFormulaire->addFile($file);
-                        }
-                        $resultats[$champId] = "files";
-                    }else {
-                        if (is_object($value) && ($value instanceof DateTime) ) {
-                            $resultats[$champId] = $value->format('Y-m-d H:i:s');
-                        }else {
-                            if($value === true) {
-                                $resultats[$champId] = "OUI";
-                            }elseif($value === false) {
-                                $resultats[$champId] = "NON";
-                            }else {
-                                $resultats[$champId] = $value;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return $resultats;
     }
 
     /**
@@ -224,5 +138,4 @@ class EnregistrementFormulaireController extends BaseController
             ['Content-Type' => 'application/vnd.ms-excel', "Content-disposition" => "attachment; filename=$fileNameExel"]
         );
     }
-
 }

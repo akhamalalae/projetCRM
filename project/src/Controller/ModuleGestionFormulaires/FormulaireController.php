@@ -5,36 +5,60 @@ namespace App\Controller\ModuleGestionFormulaires;
 use App\Entity\Formulaire;
 use App\Entity\ChampsFormulaire;
 use App\Controller\BaseController;
+use App\Core\Service\Formulaire\AddEditeFormulaire;
+use App\Core\Service\Formulaire\FormulaireList;
+use App\Core\Trait\RenderTrait;
 use App\Entity\EnregistrementFormulaire;
-use App\Form\Formulaires\FormulaireType;
-use App\Repository\EntrepriseRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\HttpFoundation\Response;
 
 class FormulaireController extends BaseController
 {
-    /**
-     * @Route("/gestionnaire/formulaires", name="formulaire", methods={"GET","POST"})
-     */
-    public function formulaire()
-    {
-        $menus = $this->serviceMenu();
-        $user = $this->getUser();
-        $formulaires = $this->em->getRepository(Formulaire::class)->findBy(
-            ['user' => $user,'status' => 0]
-        );
-        $countformulaires = $this->countItems($formulaires);
+    use RenderTrait;
 
-        return $this->render('formulaire/index.html.twig', [
-            'menus' => $menus,
-            'current_page' => 'formulaire',
-            'countformulaires' => $countformulaires,
-            'formulaires' => $formulaires
-        ]);
+     /**
+     * @Route("/gestionnaire/formulaires", name="formulaire", methods={"GET","POST"})
+     *
+     * @param FormulaireList $service
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function formulaire(FormulaireList $service):Response
+    {
+        $service->init(['user' => $this->getUser()]);
+        return $this->render($service->view(), $service->parameters());
     }
 
     /**
+     * @Route("/intervenant/add/formulaire", name="add_formulaire", methods={"GET","POST"})
+     *
+     * @param Request $request
+     * @param AddEditeFormulaire $service
+     * @param int $id
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function addFormulaire(Request $request, AddEditeFormulaire $service):Response
+    {
+        return $this->renderTrait($request, $service,['id' => 0, 'user' => $this->getUser()]);
+    }
+
+    /**
+     * @Route("/intervenant/edit/formulaire/{id}", name="formulaire_edit", methods={"GET","POST"})
+     *
+     * @param Request $request
+     * @param AddEditeFormulaire $service
+     * @param int $id
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function editFormulaire(Request $request, AddEditeFormulaire $service, $id):Response
+    {
+        return $this->renderTrait($request, $service,['id' => $id, 'user' => $this->getUser()]);
+    }
+
+     /**
      * @Route("/intervenant/formulaire/delete/{id}", name="formulaire_delete")
      */
     public function delete($id)
@@ -68,91 +92,5 @@ class FormulaireController extends BaseController
 
         return $this->redirectToRoute('formulaire');
     }
-
-    /**
-     * @Route("/intervenant/add/formulaire", name="add_formulaire", methods={"GET","POST"})
-     */
-    public function addFormulaire(Request $request)
-    {
-        $menus = $this->serviceMenu();
-        $user = $this->getUser();
-        $listeFormulaires = $this->em->getRepository(Formulaire::class)->findBy(
-            ['user' => $user,'status' => 0]
-        );
-        $countformulaires = $this->countItems($listeFormulaires);
-
-        $formulaire = new Formulaire();
-
-        $orignalChampsFormulaire = new ArrayCollection();
-        foreach ($formulaire->getChampFormulaire() as $champ) {
-            $orignalChampsFormulaire->add($champ);
-        }
-        $form = $this->createForm(FormulaireType::class, $formulaire);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $formulaire->setUser($user);
-            $formulaire->setStatus(0);
-
-            foreach ($orignalChampsFormulaire as $champ) {
-                if ($formulaire->getChampFormulaire()->contains($champ) === false) {
-                    $this->em->remove($champ);
-                }
-            }
-
-            $this->doctrinePersist($formulaire);
-            $this->doctrineFlush();
-
-            return $this->redirectToRoute('formulaire');
-        }
-
-        return $this->render('formulaire/addFormulaire.html.twig', [
-            'menus' => $menus,
-            'current_page' => "add_formulaire",
-            'countformulaires' => $countformulaires,
-            'form' => $form->createView(),
-        ]);
-    }
-
-     /**
-     * @Route("/intervenant/edit/formulaire/{id}", name="formulaire_edit", methods={"GET","POST"})
-     */
-    public function editFormulaire(Request $request,$id)
-    {
-        $menus = $this->serviceMenu();
-        $user = $this->getUser();
-        $listeFormulaires = $this->em->getRepository(Formulaire::class)->findBy(['user' => $user,'status' => 0]);
-        $countformulaires = $this->countItems($listeFormulaires);
-        $formulaire = $this->em->getRepository(Formulaire::class)->find($id);
-
-        $orignalChampsFormulaire = new ArrayCollection();
-        foreach ($formulaire->getChampFormulaire() as $champ) {
-            $orignalChampsFormulaire->add($champ);
-        }
-
-        $form = $this->createForm(FormulaireType::class, $formulaire);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $formulaire->setUser($user);
-            $formulaire->setStatus($form->getData()->getStatus());
-
-            foreach ($orignalChampsFormulaire as $champ) {
-                if ($formulaire->getChampFormulaire()->contains($champ) === false) {
-                    $this->em->remove($champ);
-                }
-            }
-            $this->doctrinePersist($formulaire);
-            $this->doctrineFlush();
-
-            return $this->redirectToRoute('formulaire');
-        }
-
-        return $this->render('formulaire/editFormulaire.html.twig', [
-            'menus' => $menus,
-            'current_page' => "add_formulaire",
-            'champsFormulaire' => $formulaire->getChampFormulaire(),
-            'countformulaires' => $countformulaires,
-            'form' => $form->createView(),
-        ]);
-    }
-
 }
+

@@ -2,31 +2,58 @@
 
 namespace App\Controller\ModuleGestionEntreprises;
 
-use App\Entity\PointVente;
 use App\Controller\BaseController;
-use App\Entity\ConfigurationObjet;
+use App\Core\Service\ConfigurationEspace\AddConfigurationEspace;
+use App\Core\Service\ConfigurationEspace\AddConfigurationEspaceObject;
+use App\Core\Service\ConfigurationEspace\ConfigurationEspaceList;
+use App\Core\Trait\RenderTrait;
 use App\Entity\ConfigurationEspace;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Form\ConfigurationEspace\ConfigurationObjetType;
-use App\Form\ConfigurationEspace\ConfigurationEspacePointVenteType;
 
 class ConfigurationEspaceController extends BaseController
 {
-    /**
+    use RenderTrait;
+
+     /**
      * @Route("/gestionnaires/list/espace", name="list_espace", methods={"GET","POST"})
+     *
+     * @param ConfigurationEspaceList $service
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function ListEspace(): Response
+    public function ListEspace(ConfigurationEspaceList $service):Response
     {
-        $menus = $this->serviceMenu();
+        return $this->render($service->view(), $service->parameters());
+    }
 
-        $pointVente = $this->em->getRepository(PointVente::class)->findAll();
+    /**
+     * @Route("/gestionnaires/configuration/espace/{id}", name="configuration_espace", methods={"GET","POST"})
+     *
+     * @param Request $request
+     * @param AddConfigurationEspace $service
+     * @param int $id
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function ConfigurationEspace(Request $request, AddConfigurationEspace $service, $id):Response
+    {
+        return $this->renderTrait($request, $service,['id' => $id]);
+    }
 
-        return $this->render('configurationEspace/index.html.twig', [
-            'menus' => $menus,
-            'pointVente' => $pointVente,
-        ]);
+    /**
+     * @Route("/gestionnaires/configuration/objet/{id}", name="configuration_objet", methods={"GET","POST"})
+     *
+     * @param Request $request
+     * @param AddConfigurationEspaceObject $service
+     * @param int $id
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function ConfigurationObjets(Request $request, AddConfigurationEspaceObject $service, $id):Response
+    {
+        return $this->renderTrait($request, $service,['id' => $id]);
     }
 
      /**
@@ -52,67 +79,5 @@ class ConfigurationEspaceController extends BaseController
         }
         return $this->json(array('objCoordonnees' => $objCoordonnees));
     }
-
-    /**
-     * @Route("/gestionnaires/configuration/espace/{id}", name="configuration_espace", methods={"GET","POST"})
-     */
-    public function ConfigurationEspace(Request $request,$id): Response
-    {
-        $menus = $this->serviceMenu();
-
-        $pointVente = $this->em->getRepository(PointVente::class)->find($id);
-
-        $configurationEspacePointVente = $this->em->getRepository(ConfigurationEspace::class)->findBypointVente($pointVente);
-
-        $configurationEspace = new ConfigurationEspace();
-
-        $form = $this->createForm(ConfigurationEspacePointVenteType::class, $configurationEspace);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $configurationEspace->setPointVente($pointVente);
-
-            $this->em->persist($configurationEspace);
-            $this->em->flush();
-
-            return $this->redirectToRoute('configuration_espace', ['id' => $id]);
-        }
-
-        return $this->render('configurationEspace/configurationEspace.html.twig', [
-            'menus' => $menus,
-            'configurationEspacePointVente' => $configurationEspacePointVente,
-            'form' => $form->createView(),
-        ]);
-    }
-
-
-    /**
-     * @Route("/gestionnaires/configuration/objet/{id}", name="configuration_objet", methods={"GET","POST"})
-     */
-    public function ConfigurationObjets(Request $request,$id): Response
-    {
-        $menus = $this->serviceMenu();
-
-        $configurationEspace = $this->em->getRepository(ConfigurationEspace::class)->find($id);
-
-        $configurationObjets = $this->em->getRepository(ConfigurationObjet::class)->findByConfigurationEspace($configurationEspace);
-
-        $configurationObjet = new ConfigurationObjet();
-
-        $form = $this->createForm(ConfigurationObjetType::class, $configurationObjet);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $configurationObjet->setConfigurationEspace($configurationEspace);
-
-            $this->em->persist($configurationObjet);
-            $this->em->flush();
-        }
-
-        return $this->render('configurationEspace/configurationObjet.html.twig', [
-            'menus' => $menus,
-            'configurationEspace' => $configurationEspace,
-            'configurationObjets' => $configurationObjets,
-            'form' => $form->createView(),
-        ]);
-    }
-
 }
+
