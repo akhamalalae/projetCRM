@@ -16,11 +16,6 @@
         </h2>
         <hr>
         <br>
-        {% for message in app.flashes('success') %}
-            <div class="alert alert-success">
-                {{ message }}
-            </div>
-        {% endfor %}
         {{ form_start(form) }}
         <div class="row">
             <div class="col-12">
