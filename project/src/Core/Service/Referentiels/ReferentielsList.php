@@ -13,6 +13,8 @@ class ReferentielsList implements RenderInterface
     {
     }
 
+    const VIEW_PATH         = 'referentiels/index.html.twig';
+
     //RenderInterface
 
     /**
@@ -22,7 +24,7 @@ class ReferentielsList implements RenderInterface
      */
     public function view()
     {
-        return 'referentiels/index.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**
@@ -35,7 +37,7 @@ class ReferentielsList implements RenderInterface
         $referentiels = $this->em->getRepository(Referentiels::class)->findBy(['status' => false]);
 
         return [
-            'menus' => $this->menuGenerator->getMenu(),
+            'menus'        => $this->menuGenerator->getMenu(),
             'referentiels' => $referentiels,
         ];
     }

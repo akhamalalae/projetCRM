@@ -12,6 +12,9 @@ class FormulaireList implements RenderInterface, InitialisationInterface
 {
     private object $user;
 
+    const VIEW_PATH     = 'formulaire/index.html.twig';
+    const CURRENT_PAGE  = 'formulaire';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -36,7 +39,7 @@ class FormulaireList implements RenderInterface, InitialisationInterface
      */
     public function view()
     {
-        return 'formulaire/index.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**
@@ -52,7 +55,7 @@ class FormulaireList implements RenderInterface, InitialisationInterface
 
         return [
             'menus'             => $this->menuGenerator->getMenu(),
-            'current_page'      => 'formulaire',
+            'current_page'      => self::CURRENT_PAGE,
             'countformulaires'  => count($formulaires),
             'formulaires'       => $formulaires
         ];

@@ -14,6 +14,8 @@ class ResultatsFormulaire implements RenderInterface, InitialisationInterface
 {
     private int $id;
 
+    const VIEW_PATH         = 'enregistrementFormulaire/formulaireResultats.html.twig';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -38,7 +40,7 @@ class ResultatsFormulaire implements RenderInterface, InitialisationInterface
      */
     public function view()
     {
-        return 'enregistrementFormulaire/formulaireResultats.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**
@@ -58,9 +60,10 @@ class ResultatsFormulaire implements RenderInterface, InitialisationInterface
         );
 
         return [
-            'formulaire' => $formulaire,
-            'enregistrementFormulaire' => $enregistrementFormulaire,
-            'champsFormulaires' => $champsFormulaires
+            'menus'                     => $this->menuGenerator->getMenu(),
+            'formulaire'                => $formulaire,
+            'enregistrementFormulaire'  => $enregistrementFormulaire,
+            'champsFormulaires'         => $champsFormulaires
         ];
     }
 }

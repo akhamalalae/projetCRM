@@ -57,13 +57,12 @@ class EnregistrementFormulaireController extends BaseController
     /**
      * @Route("/gestionnaire/resultats/formulaire/{id}", name="resultats_formulaire", methods={"GET","POST"})
      *
-     * @param Request $request
      * @param ResultatsFormulaire $service
      * @param int $id
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function resultatsFormulaire(Request $request, ResultatsFormulaire $service, $id):Response
+    public function resultatsFormulaire(ResultatsFormulaire $service, $id):Response
     {
         $service->init(['id' => $id]);
         return $this->render($service->view(), $service->parameters());

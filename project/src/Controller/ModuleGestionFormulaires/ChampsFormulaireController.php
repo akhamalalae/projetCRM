@@ -2,10 +2,11 @@
 
 namespace App\Controller\ModuleGestionFormulaires;
 
-use App\Entity\ChampsFormulaire;
 use App\Controller\BaseController;
 use App\Core\Service\ChampsFormulaire\AddChampsFormulaire;
+use App\Core\Service\ChampsFormulaire\DeleteChampsFormulaire;
 use App\Core\Trait\RenderTrait;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,24 +32,23 @@ class ChampsFormulaireController extends BaseController
 
     /**
      * @Route("/intervenant/champ/formulaire/delete/{id}", name="champ_formulaire_delete", methods={"GET","POST"})
+     *
+     * @param DeleteChampsFormulaire $service
+     * @param int $id
+     *
+     * @return RedirectResponse
      */
-    public function delete($id)
+    public function delete(DeleteChampsFormulaire $service, $id):RedirectResponse
     {
         if(!$id) {
             throw $this->createNotFoundException('No ID found');
         }
 
-        $champsFormulaire = $this->em->getRepository(ChampsFormulaire::class)->find($id);
+        $service->init(['id' => $id]);
 
-        if($champsFormulaire != null) {
-            $this->em->remove($champsFormulaire);
-            $this->em->flush();
-        }
+        $service->delete();
 
-        return $this->redirectToRoute('formulaire_champs', array(
-            'id' => $champsFormulaire->getFormulaire()->getId(),
-            'champ' => null,
-        ));
+        return $this->redirectToRoute($service->route(), $service->parametersRoute());
     }
-
 }
+

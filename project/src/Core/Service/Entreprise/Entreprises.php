@@ -9,6 +9,9 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class Entreprises implements RenderInterface
 {
+    const VIEW_PATH         = 'entrepriseProduits/index.html.twig';
+    const CURRENT_PAGE      = 'entreprise';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -22,17 +25,7 @@ class Entreprises implements RenderInterface
      */
     public function view()
     {
-        return 'entrepriseProduits/index.html.twig';
-    }
-
-    /**
-     * current_page
-     *
-     * @return string
-     */
-    public function getCurrentPage()
-    {
-        return 'entreprise';
+        return self::VIEW_PATH;
     }
 
     /**
@@ -45,9 +38,9 @@ class Entreprises implements RenderInterface
         $entreprises = $this->em->getRepository(Entreprise::class)->findAll();
 
         return [
-            'menus' => $this->menuGenerator->getMenu(),
-            'current_page' => $this->getCurrentPage(),
-            'entreprises' => $entreprises,
+            'menus'         => $this->menuGenerator->getMenu(),
+            'current_page'  => self::CURRENT_PAGE,
+            'entreprises'   => $entreprises,
         ];
     }
 }

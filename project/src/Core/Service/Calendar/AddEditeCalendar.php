@@ -19,6 +19,9 @@ class AddEditeCalendar implements InitialisationInterface, CreateFormInterface,
     private int     $id = 0;
     private object  $user;
 
+    const VIEW_PATH_ADD    =  'calendrierRenderVous/addRendezVousForm.html.twig';
+    const VIEW_PATH_EDITE  =  'calendrierRenderVous/editRendezVousForm.html.twig';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -47,10 +50,10 @@ class AddEditeCalendar implements InitialisationInterface, CreateFormInterface,
     public function view()
     {
         if ($this->id === 0) {
-            return 'calendrierRenderVous/addRendezVousForm.html.twig';
+            return self::VIEW_PATH_ADD;
         }
 
-        return 'calendrierRenderVous/editRendezVousForm.html.twig';
+        return self::VIEW_PATH_EDITE;
     }
 
     /**
@@ -88,7 +91,7 @@ class AddEditeCalendar implements InitialisationInterface, CreateFormInterface,
             return  $this->createNewObject();
         }
 
-        return $this->em->getRepository(RenderVous::class)->findOneById($this->id);;
+        return $this->em->getRepository(RenderVous::class)->findOneById($this->id);
     }
 
     /**
@@ -131,11 +134,9 @@ class AddEditeCalendar implements InitialisationInterface, CreateFormInterface,
      */
     public function save($form)
     {
-        if ($this->id !== 0) {
-            $this->saveSpecific($form);
-            $this->em->persist($form->getData());
-            $this->em->flush();
-        }
+        $this->saveSpecific($form);
+        $this->em->persist($form->getData());
+        $this->em->flush();
     }
 
     /**
@@ -146,8 +147,14 @@ class AddEditeCalendar implements InitialisationInterface, CreateFormInterface,
      */
     public function saveSpecific($form)
     {
-        $form->getData()->setUserCreateur($this->user);
-        $form->getData()->setDateCreation(new DateTime());
+        if ($this->id === 0) {
+            $form->getData()->setUserCreateur($this->user);
+            $form->getData()->setDateCreation(new DateTime());
+        }
+
+        if ($this->id !== 0) {
+            $form->getData()->setDateModification(new DateTime());
+        }
     }
 
     /**

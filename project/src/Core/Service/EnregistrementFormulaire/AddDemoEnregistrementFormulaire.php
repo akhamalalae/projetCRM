@@ -16,6 +16,8 @@ class AddDemoEnregistrementFormulaire implements RenderInterface, Initialisation
     private int     $id;
     private array   $datachampsFormulaires = [];
 
+    const VIEW_PATH         = 'enregistrementFormulaire/index.html.twig';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -43,7 +45,7 @@ class AddDemoEnregistrementFormulaire implements RenderInterface, Initialisation
      */
     public function view()
     {
-        return 'enregistrementFormulaire/index.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**

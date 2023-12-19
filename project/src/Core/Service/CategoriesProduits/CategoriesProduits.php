@@ -14,6 +14,12 @@ use Doctrine\ORM\EntityManagerInterface;
 class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
                         RenderInterface, InitialisationInterface
 {
+    const VIEW_PATH         = 'entrepriseProduits/categoriesProduits.html.twig';
+    const CURRENT_PAGE      = 'categoriesProduits';
+    const ROUTE             = 'categoriesProduits';
+    const TYPE_FLASH        = 'warning';
+    const MESSAGE_FLASH     = 'Enregistrement effectué avec succès';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -39,17 +45,7 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
      */
     public function view()
     {
-        return 'entrepriseProduits/categoriesProduits.html.twig';
-    }
-
-    /**
-     * current_page
-     *
-     * @return string
-     */
-    public function getCurrentPage()
-    {
-        return 'categoriesProduits';
+        return self::VIEW_PATH;
     }
 
     /**
@@ -62,8 +58,8 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
         $listeCategorieProduits = $this->em->getRepository(CategorieProduits::class)->findAll();
 
         return [
-            'menus' => $this->menuGenerator->getMenu(),
-            'current_page' => $this->getCurrentPage(),
+            'menus'                  => $this->menuGenerator->getMenu(),
+            'current_page'           => self::CURRENT_PAGE,
             'listeCategorieProduits' => $listeCategorieProduits,
         ];
     }
@@ -161,7 +157,7 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
      */
     public function route()
     {
-        return 'categoriesProduits';
+        return self::ROUTE;
     }
 
     /**
@@ -183,7 +179,7 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
      */
     public function type()
     {
-        return 'warning';
+        return self::TYPE_FLASH;
     }
 
     /**
@@ -193,6 +189,6 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
      */
     public function message()
     {
-        return 'Enregistrement effectué avec succès ';
+        return self::MESSAGE_FLASH;
     }
 }

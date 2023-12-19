@@ -26,7 +26,13 @@ class AddChampsFormulaire implements InitialisationInterface, CreateFormInterfac
     private object          $datachampsFormulaire;
     private string          $choiceType;
     private ArrayCollection $orignalOptions;
-    private                 $champ;
+    private int|null        $champ = null;
+
+    const VIEW_PATH         =  'champsFormulaire/champsFormulaire.html.twig';
+    const CURRENT_PAGE      =  'listeChampsFormulaire';
+    const ROUTE             =  'formulaire_champs';
+    const TYPE_FLASH        =  'warning';
+    const MESSAGE_FLASH     =  'Enregistrement effectué avec succès';
 
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
@@ -45,8 +51,14 @@ class AddChampsFormulaire implements InitialisationInterface, CreateFormInterfac
         $this->id                   = $param['id'];
         $this->champ                = $param['champ'];
         $this->choiceType           = Typeschamps::CHOICETYPE;
-        $this->dataFormulaire       = $this->em->getRepository(Formulaire::class)->find($this->id);
-        $this->datachampsFormulaire = $this->em->getRepository(ChampsFormulaire::class)->find($this->champ);
+
+        if($this->id !== 0) {
+            $this->dataFormulaire   = $this->em->getRepository(Formulaire::class)->find($this->id);
+        }
+
+        if($this->champ !== null) {
+            $this->datachampsFormulaire = $this->getChampFormulaire();
+        }
 
         $this->orignalOptions = new ArrayCollection();
         foreach ($this->datachampsFormulaire->getOptions() as $champ) {
@@ -63,7 +75,7 @@ class AddChampsFormulaire implements InitialisationInterface, CreateFormInterfac
      */
     public function view()
     {
-        return 'champsFormulaire/champsFormulaire.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**
@@ -73,9 +85,11 @@ class AddChampsFormulaire implements InitialisationInterface, CreateFormInterfac
      */
     public function parameters()
     {
-        $listechampsFormulaires = $this->em->getRepository(ChampsFormulaire::class)->findBy(
-            ['formulaire' => $this->id,'status' => 0]
-        );
+        if($this->id !== 0) {
+            $listechampsFormulaires = $this->em->getRepository(ChampsFormulaire::class)->findBy(
+                ['formulaire' => $this->id,'status' => 0]
+            );
+        }
 
         if($this->champ !== null) {
             $this->editChamps = true;
@@ -90,7 +104,7 @@ class AddChampsFormulaire implements InitialisationInterface, CreateFormInterfac
             'editChamps'             => $this->editChamps,
             'formulaire'             => $this->dataFormulaire,
             'countChampsFormulaires' => count($listechampsFormulaires),
-            'current_page'           => 'listeChampsFormulaire',
+            'current_page'           => self::CURRENT_PAGE,
             'champsFormulaires'      => $listechampsFormulaires
         ];
     }
@@ -114,8 +128,8 @@ class AddChampsFormulaire implements InitialisationInterface, CreateFormInterfac
      */
     public function formData()
     {
-        if($this->champ != null) {
-            return $this->em->getRepository(ChampsFormulaire::class)->find($this->champ);
+        if($this->champ !== null) {
+            return $this->getChampFormulaire();
         }
 
         return  $this->createNewObject();
@@ -174,10 +188,11 @@ class AddChampsFormulaire implements InitialisationInterface, CreateFormInterfac
      */
     public function saveSpecific($form)
     {
-        $form->getData()->setFormulaire($this->dataFormulaire);
-        $form->getData()->setStatus(0);
-        $form->getData()->setDateCreation(new DateTime());
-        $form->getData()->setDateModification(new DateTime());
+        $form->getData()->setFormulaire($this->dataFormulaire)
+            ->setStatus(0)
+            ->setDateCreation(new DateTime())
+            ->setDateModification(new DateTime())
+        ;
 
         foreach ($this->orignalOptions as $champ) {
             if ($form->getData()->getOptions()->contains($champ) === false) {
@@ -209,7 +224,7 @@ class AddChampsFormulaire implements InitialisationInterface, CreateFormInterfac
      */
     public function route()
     {
-        return 'formulaire_champs';
+        return self::ROUTE;
     }
 
     /**
@@ -231,7 +246,7 @@ class AddChampsFormulaire implements InitialisationInterface, CreateFormInterfac
      */
     public function type()
     {
-        return 'warning';
+        return self::TYPE_FLASH;
     }
 
     /**
@@ -241,6 +256,16 @@ class AddChampsFormulaire implements InitialisationInterface, CreateFormInterfac
      */
     public function message()
     {
-        return 'Enregistrement effectué avec succès';
+        return self::MESSAGE_FLASH;
+    }
+
+    /**
+     * get champ formulaire
+     *
+     * @return ChampsFormulaire
+     */
+    public function getChampFormulaire():ChampsFormulaire
+    {
+        return $this->em->getRepository(ChampsFormulaire::class)->find($this->champ);
     }
 }

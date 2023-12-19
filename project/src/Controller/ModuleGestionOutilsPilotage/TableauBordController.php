@@ -53,10 +53,15 @@ class TableauBordController extends BaseController
         $idEntite = $request->get('idEntite');
         $listes_EntitiesPropriete  = "";
 
-        $entitiesProprietes = $this->em->getRepository(EntitiesPropriete::class)->findBy(['entitie' => $idEntite, 'status' => 0]);
+        $entitiesProprietes = $this->em->getRepository(EntitiesPropriete::class)->findBy(
+            ['entitie' => $idEntite, 'status' => 0]
+        );
 
         foreach ($entitiesProprietes as $une_prop) {
-            $listes_EntitiesPropriete .= "<option value=".$une_prop->getId()." >".$une_prop->getName()."( ".$une_prop->getTypesChamps()->getLibelle()." )"."</option>";
+            $listes_EntitiesPropriete .= "<option value=".$une_prop->getId()
+                                ." >".$une_prop->getName()
+                                ."( ".$une_prop->getTypesChamps()->getLibelle()
+                                ." )"."</option>";
         }
 
         return $this->json(array('listes_EntitiesPropriete' => $listes_EntitiesPropriete));
@@ -126,5 +131,5 @@ class TableauBordController extends BaseController
             'rendezVous' => $rendezVous,
         ]);
     }
-
 }
+

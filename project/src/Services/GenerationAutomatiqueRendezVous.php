@@ -35,15 +35,27 @@ class GenerationAutomatiqueRendezVous
                         $dateDebut = $this->getValidDate($intervenent, $dateDebut, $ecart);
                         $dateFin = $this->getDateFin($dateDebut, $ecart);
 
-                        $this->createRendezVous($dateDebut, $dateFin, $pointeVente, $formulaire, $intervenent, $entreprise, $historiqueGenerationAutomatiqueRouting, $user);
+                        $this->createRendezVous(
+                            $dateDebut,
+                            $dateFin,
+                            $pointeVente,
+                            $formulaire,
+                            $intervenent,
+                            $entreprise,
+                            $historiqueGenerationAutomatiqueRouting,
+                            $user
+                        );
                     }
                 }
             }
         }
     }
 
-    public function createRendezVous($dateDebut, $dateFin, $pointeVente, $formulaire, $intervenent, $entreprise, $historiqueGenerationAutomatiqueRouting, $user)
-    {
+    public function createRendezVous($dateDebut,$dateFin,
+                                    $pointeVente, $formulaire,
+                                    $intervenent, $entreprise,
+                                    $historiqueGenerationAutomatiqueRouting, $user
+    ){
         $calendar = new RenderVous();
         $calendar->setTitle('[' . $intervenent->getLastname() . '] ' . $pointeVente->getLibelle());
         $calendar->setStart($dateDebut);

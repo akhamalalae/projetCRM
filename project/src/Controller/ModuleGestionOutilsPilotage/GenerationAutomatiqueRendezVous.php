@@ -3,11 +3,11 @@
 namespace App\Controller\ModuleGestionOutilsPilotage;
 
 use App\Core\Service\GestionOutilsPilotage\GenerationAutomatiqueCalender;
-use App\Core\Trait\RenderTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Core\Trait\RenderTrait;
 
 class GenerationAutomatiqueRendezVous extends AbstractController
 {

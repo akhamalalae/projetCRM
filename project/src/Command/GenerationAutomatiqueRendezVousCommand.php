@@ -17,7 +17,8 @@ use App\Entity\HistoriqueGenerationAutomatiqueRouting;
 )]
 class GenerationAutomatiqueRendezVousCommand extends Command
 {
-    public function __construct(private EntityManagerInterface $entityManager, private GenerationAutomatiqueRendezVous $generationAutomatiqueRendezVous)
+    public function __construct(private EntityManagerInterface $entityManager,
+            private GenerationAutomatiqueRendezVous $generationAutomatiqueRendezVous)
     {
         parent::__construct();
     }

@@ -30,6 +30,13 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
     private array|null     $resultatsRequeteTableauBord = null;
     private bool            $checkValidateSyntaxe = false;
 
+    const VIEW_PATH         = 'tableauBord/index.html.twig';
+    const CURRENT_PAGE      = 'formulaire';
+    const MESSAGE_FLASH_1   = "Veuillez choisir les filtres de la requête!";
+    const MESSAGE_FLASH_2   = "Veuillez choisir les champs a afficher!";
+    const MESSAGE_FLASH_3   = "Veuillez remplir le nom de la requête!";
+    const MESSAGE_FLASH_4   = "Erreur de syntaxe du champ Valeur des filtres, veuillez regarder la documentation!";
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -77,7 +84,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
      */
     public function view()
     {
-        return 'tableauBord/index.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**
@@ -88,8 +95,8 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
     public function parameters()
     {
         return [
-            'menus' => $this->menuGenerator->getMenu(),
-            'current_page'                  => 'formulaire',
+            'menus'                         => $this->menuGenerator->getMenu(),
+            'current_page'                  => self::CURRENT_PAGE,
             'resultatsRequeteTableauBord'   => $this->resultatsRequeteTableauBord,
             'listes_champs'                 => $this->listesChamps ,
             'listes_entities'               => $this->listesEntities,
@@ -146,7 +153,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
     {
         return [
             'listes_champs' => $this->listesChamps,
-            'em' => $this->em,
+            'em'            => $this->em,
         ];
     }
 
@@ -364,7 +371,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
      */
     public function type()
     {
-        return 'warning';
+        return self::TYPE_FLASH;
     }
 
     /**
@@ -375,19 +382,25 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
     public function message()
     {
         if (count($this->requeteTableauBord->getRequeteTableauBordFiltres()) == 0) {
-            return ('Veuillez choisir les filtres de la requête!');
+            return self::MESSAGE_FLASH_1;
         }
 
         if (count($this->requeteTableauBord->getPropertiesEntityChoixChamps()) == 0) {
-            return('Veuillez choisir les champs a afficher!');
+            return self::MESSAGE_FLASH_2;
         }
 
-        if (($this->id == 0) && ($this->requeteTableauBord->getEnregistrerRequete() === true) && $this->requeteTableauBord->getLibelle() === '') {
-            return('Veuillez remplir le nom de la requête!');
+        if (
+            ($this->id == 0)
+            && ($this->requeteTableauBord->getEnregistrerRequete() === true)
+            && $this->requeteTableauBord->getLibelle() === ''
+        ) {
+            return self::MESSAGE_FLASH_3;
         }
 
         if ($this->checkValidateSyntaxe === true) {
-            return ('Erreur de syntaxe du champ Valeur des filtres, veuillez regarder la documentation!');
+            return self::MESSAGE_FLASH_4;
         }
+
+        return '';
     }
 }

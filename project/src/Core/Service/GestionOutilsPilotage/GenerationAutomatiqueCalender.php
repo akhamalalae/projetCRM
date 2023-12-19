@@ -9,6 +9,7 @@ use App\Core\Interface\RenderInterface;
 use App\Core\Interface\SubmittedFormInterface;
 use App\Entity\HistoriqueGenerationAutomatiqueRouting;
 use App\Form\Planning\GenerationAutomatiqueRendezVousType;
+use App\Services\GenerationAutomatiqueRendezVous;
 use App\Services\MenuGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use DateTime;
@@ -19,7 +20,14 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
     private object   $user;
     private DateTime $dateDebut;
 
-    public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
+    const VIEW_PATH         = 'calendrierRenderVous/generationAutomatiqueRendezVous.html.twig';
+    const CURRENT_PAGE      = 'automatisation_routing';
+    const ROUTE             = 'generation_automatique_rendez_vous';
+    const TYPE_FLASH        = 'warning';
+    const MESSAGE_FLASH     = "L'heure de la date  de début doit être comprise entre 08h et 18H!";
+
+    public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator,
+        public GenerationAutomatiqueRendezVous $generationAutomatique)
     {
     }
 
@@ -43,7 +51,7 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
      */
     public function view()
     {
-        return 'calendrierRenderVous/generationAutomatiqueRendezVous.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**
@@ -58,8 +66,9 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
         );
 
         return [
-            'current_page' => 'automatisation_routing',
-            'routings' => $routings
+            'menus'        => $this->menuGenerator->getMenu(),
+            'current_page' => self::CURRENT_PAGE,
+            'routings'     => $routings
         ];
     }
 
@@ -92,7 +101,7 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
      */
     public function createNewObject()
     {
-        return null;
+        return new HistoriqueGenerationAutomatiqueRouting();
     }
 
      /**
@@ -136,11 +145,11 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
      */
     public function saveSpecific($form)
     {
-        $this->dateDebut = $form->getData()["start"];
-        $ecart = $form->getData()["nbrMinutes"];
-        $formulaires = $form->getData()["formulaires"];
-        $dateExecution = $form->getData()["dateExecution"];
-        $dateNoow = new DateTime();
+        $this->dateDebut    = $form->getData()["start"];
+        $ecart              = $form->getData()["nbrMinutes"];
+        $formulaires        = $form->getData()["formulaires"];
+        $dateExecution      = $form->getData()["dateExecution"];
+        $dateNoow           = new DateTime();
 
         if (intval($this->dateDebut->format('H')) > 8 || intval($this->dateDebut->format('H')) < 18) {
             $this->historiqueGenerationAutomatiqueRouting(
@@ -166,16 +175,21 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
      */
     public function historiqueGenerationAutomatiqueRouting($dateDebut, $ecart, $formulaires, $dateNow, $dateExecution)
     {
-        $historiqueGenerationAutomatiqueRouting = new HistoriqueGenerationAutomatiqueRouting();
-        $historiqueGenerationAutomatiqueRouting->setDateDebut($dateDebut);
-        $historiqueGenerationAutomatiqueRouting->setDateExecution($dateExecution);
-        $historiqueGenerationAutomatiqueRouting->setEcartEnMunites($ecart);
-        $historiqueGenerationAutomatiqueRouting->setDateCreation($dateNow);
-        $historiqueGenerationAutomatiqueRouting->setIsGenerer(false);
-        $historiqueGenerationAutomatiqueRouting->setUserCreateur($this->user);
+        $historiqueGenerationAutomatiqueRouting = $this->createNewObject();
+        $historiqueGenerationAutomatiqueRouting->setDateDebut($dateDebut)
+            ->setDateExecution($dateExecution)
+            ->setEcartEnMunites($ecart)
+            ->setDateCreation($dateNow)
+            ->setIsGenerer(false)
+            ->setUserCreateur($this->user);
+
         foreach ($formulaires as $formulaire) {
             $historiqueGenerationAutomatiqueRouting->addFormulaire($formulaire);
         }
+
+        $this->generationAutomatique->create($historiqueGenerationAutomatiqueRouting);
+        $historiqueGenerationAutomatiqueRouting->setIsGenerer(true);
+
         $this->em->persist($historiqueGenerationAutomatiqueRouting);
         $this->em->flush();
     }
@@ -198,8 +212,10 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
     public function route()
     {
         if (intval($this->dateDebut->format('H')) > 8 || intval($this->dateDebut->format('H')) < 18) {
-            return 'generation_automatique_rendez_vous';
+            return self::ROUTE;
         }
+
+        return '';
     }
 
     /**
@@ -222,8 +238,10 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
     public function type()
     {
         if (intval($this->dateDebut->format('H')) < 8 || intval($this->dateDebut->format('H')) > 18) {
-            return 'warning';
+            return self::TYPE_FLASH;
         }
+
+        return '';
     }
 
     /**
@@ -233,6 +251,6 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
      */
     public function message()
     {
-        return "L'heure de la date  de début doit être comprise entre 08h et 18H!";
+        return self::MESSAGE_FLASH;
     }
 }

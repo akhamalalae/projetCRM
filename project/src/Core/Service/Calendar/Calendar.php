@@ -22,6 +22,8 @@ class Calendar implements InitialisationInterface, CreateFormInterface,
     private $data;
     private $form;
 
+    const VIEW_PATH   =  'calendrierRenderVous/renderVous.html.twig';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -54,7 +56,7 @@ class Calendar implements InitialisationInterface, CreateFormInterface,
      */
     public function view()
     {
-        return 'calendrierRenderVous/renderVous.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**

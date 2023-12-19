@@ -17,6 +17,11 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
 {
     private int $id = 0;
 
+    const VIEW_PATH         = 'entrepriseProduits/entreprisesProduits.html.twig';
+    const ROUTE             = 'entreprise';
+    const TYPE_FLASH        = 'warning';
+    const MESSAGE_FLASH     = 'Enregistrement effectué avec succès';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -43,7 +48,7 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      */
     public function view()
     {
-        return 'entrepriseProduits/entreprisesProduits.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**
@@ -155,7 +160,7 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      */
     public function route()
     {
-        return 'entreprise';
+        return self::ROUTE;
     }
 
     /**
@@ -177,7 +182,7 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      */
     public function type()
     {
-        return 'warning';
+        return self::TYPE_FLASH;
     }
 
     /**
@@ -187,6 +192,6 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      */
     public function message()
     {
-        return 'Enregistrement effectué avec succès ';
+        return self::MESSAGE_FLASH;
     }
 }

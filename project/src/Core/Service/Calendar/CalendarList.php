@@ -12,6 +12,8 @@ class CalendarList implements RenderInterface, InitialisationInterface
 {
     private object  $user;
 
+    const VIEW_PATH     = 'calendrierRenderVous/renderVousEffectuer.html.twig';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -38,7 +40,7 @@ class CalendarList implements RenderInterface, InitialisationInterface
      */
     public function view()
     {
-        return 'calendrierRenderVous/renderVousEffectuer.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**

@@ -21,6 +21,13 @@ class AddEditeFormulaire implements InitialisationInterface, CreateFormInterface
     private object          $dataFormulaire;
     private ArrayCollection $orignalOptions;
 
+    const VIEW_PATH_ADD     = 'formulaire/addFormulaire.html.twig';
+    const VIEW_PATH_EDITE   = 'formulaire/editFormulaire.html.twig';
+    const CURRENT_PAGE      = 'add_formulaire';
+    const ROUTE             = 'formulaire';
+    const TYPE_FLASH        = 'warning';
+    const MESSAGE_FLASH     = 'Enregistrement effectué avec succès';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -62,10 +69,10 @@ class AddEditeFormulaire implements InitialisationInterface, CreateFormInterface
     public function view()
     {
         if($this->id !== 0) {
-            return 'formulaire/editFormulaire.html.twig';
+            return self::VIEW_PATH_EDITE;
         }
 
-        return 'formulaire/addFormulaire.html.twig';
+        return self::VIEW_PATH_ADD;
     }
 
     /**
@@ -81,7 +88,7 @@ class AddEditeFormulaire implements InitialisationInterface, CreateFormInterface
 
         return [
             'menus'             => $this->menuGenerator->getMenu(),
-            'current_page'      => "add_formulaire",
+            'current_page'      => self::CURRENT_PAGE,
             'countformulaires'  => count($listeFormulaires),
             'champsFormulaire'  => $this->dataFormulaire ->getChampFormulaire(),
         ];
@@ -193,7 +200,7 @@ class AddEditeFormulaire implements InitialisationInterface, CreateFormInterface
      */
     public function route()
     {
-        return 'formulaire';
+        return self::ROUTE;
     }
 
     /**
@@ -215,7 +222,7 @@ class AddEditeFormulaire implements InitialisationInterface, CreateFormInterface
      */
     public function type()
     {
-        return 'warning';
+        return self::TYPE_FLASH;
     }
 
     /**
@@ -225,6 +232,6 @@ class AddEditeFormulaire implements InitialisationInterface, CreateFormInterface
      */
     public function message()
     {
-        return 'Enregistrement effectué avec succès';
+        return self::MESSAGE_FLASH;
     }
 }

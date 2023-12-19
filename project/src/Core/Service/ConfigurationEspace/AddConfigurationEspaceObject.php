@@ -19,6 +19,11 @@ class AddConfigurationEspaceObject implements InitialisationInterface, CreateFor
     private int    $id = 0;
     private object $data;
 
+    const VIEW_PATH         = 'configurationEspace/configurationObjet.html.twig';
+    const ROUTE             = 'configuration_espace';
+    const TYPE_FLASH        = 'warning';
+    const MESSAGE_FLASH     = 'Enregistrement effectué avec succès';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -46,7 +51,7 @@ class AddConfigurationEspaceObject implements InitialisationInterface, CreateFor
      */
     public function view()
     {
-        return 'configurationEspace/configurationObjet.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**
@@ -59,7 +64,7 @@ class AddConfigurationEspaceObject implements InitialisationInterface, CreateFor
         $objets = $this->em->getRepository(ConfigurationObjet::class)->findByConfigurationEspace($this->data);
 
         return [
-            'menus' => $this->menuGenerator->getMenu(),
+            'menus'               => $this->menuGenerator->getMenu(),
             'configurationEspace' => $this->data,
             'configurationObjets' => $objets,
         ];
@@ -160,7 +165,7 @@ class AddConfigurationEspaceObject implements InitialisationInterface, CreateFor
      */
     public function route()
     {
-        return 'configuration_espace';
+        return self::ROUTE;
     }
 
     /**
@@ -182,7 +187,7 @@ class AddConfigurationEspaceObject implements InitialisationInterface, CreateFor
      */
     public function type()
     {
-        return 'warning';
+        return self::TYPE_FLASH;
     }
 
     /**
@@ -192,6 +197,6 @@ class AddConfigurationEspaceObject implements InitialisationInterface, CreateFor
      */
     public function message()
     {
-        return 'Enregistrement effectué avec succès';
+        return self::MESSAGE_FLASH;
     }
 }

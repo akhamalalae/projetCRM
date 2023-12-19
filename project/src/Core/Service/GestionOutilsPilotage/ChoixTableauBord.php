@@ -18,6 +18,12 @@ class ChoixTableauBord implements InitialisationInterface, CreateFormInterface,
     private int     $choix;
     private object  $requeteTableauBord;
 
+    const VIEW_PATH         = 'tableauBord/choixTableauBord.html.twig';
+    const CURRENT_PAGE      = 'formulaire';
+    const ROUTE             = 'tableau_de_bord';
+    const TYPE_FLASH        = 'warning';
+    const MESSAGE_FLASH     = 'Enregistrement effectué avec succès';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -43,7 +49,7 @@ class ChoixTableauBord implements InitialisationInterface, CreateFormInterface,
      */
     public function view()
     {
-        return 'tableauBord/choixTableauBord.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**
@@ -55,7 +61,7 @@ class ChoixTableauBord implements InitialisationInterface, CreateFormInterface,
     {
         return [
             'menus'        => $this->menuGenerator->getMenu(),
-            'current_page' => 'formulaire'
+            'current_page' => self::CURRENT_PAGE
         ];
     }
 
@@ -133,7 +139,7 @@ class ChoixTableauBord implements InitialisationInterface, CreateFormInterface,
     public function saveSpecific($form)
     {
         $data                       = $form->getData();
-        $this->requeteTableauBord   = $data["RequeteTableauBord"] ? $data["RequeteTableauBord"] : $this->requeteTableauBord = $this->createNewObject();
+        $this->requeteTableauBord   = $data["RequeteTableauBord"] ? $data["RequeteTableauBord"] : $this->createNewObject();
         $this->choix                = $data["choix"];
     }
 
@@ -154,7 +160,7 @@ class ChoixTableauBord implements InitialisationInterface, CreateFormInterface,
      */
     public function route()
     {
-        return 'tableau_de_bord';
+        return self::ROUTE;
     }
 
     /**
@@ -182,7 +188,7 @@ class ChoixTableauBord implements InitialisationInterface, CreateFormInterface,
      */
     public function type()
     {
-        return 'warning';
+        return self::TYPE_FLASH;
     }
 
     /**
@@ -192,6 +198,6 @@ class ChoixTableauBord implements InitialisationInterface, CreateFormInterface,
      */
     public function message()
     {
-        return 'Enregistrement effectué avec succès';
+        return self::MESSAGE_FLASH;
     }
 }

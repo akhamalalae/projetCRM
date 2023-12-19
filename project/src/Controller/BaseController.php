@@ -8,7 +8,6 @@ use App\Services\MenuGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Request;
 use App\Services\GenerationAutomatiqueRendezVous;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -20,15 +19,6 @@ class BaseController extends AbstractController
         public MenuGenerator $menuGenerator,
         public GenerationAutomatiqueRendezVous $generationAutomatiqueRendezVous,
     ){
-    }
-
-
-    /**
-     * @Route("/intervenant/testquery/{id}", name="app_testquery")
-     */
-    public function testquery(Request $request)
-    {
-        dump($request); die();
     }
 
     /**

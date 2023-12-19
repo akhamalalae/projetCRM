@@ -19,6 +19,11 @@ class AddConfigurationEspace implements InitialisationInterface, CreateFormInter
     private int    $id = 0;
     private object $data;
 
+    const VIEW_PATH         = 'configurationEspace/configurationEspace.html.twig';
+    const ROUTE             = 'configuration_espace';
+    const TYPE_FLASH        = 'warning';
+    const MESSAGE_FLASH     = 'Enregistrement effectué avec succès';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -46,7 +51,7 @@ class AddConfigurationEspace implements InitialisationInterface, CreateFormInter
      */
     public function view()
     {
-        return 'configurationEspace/configurationEspace.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**
@@ -159,7 +164,7 @@ class AddConfigurationEspace implements InitialisationInterface, CreateFormInter
      */
     public function route()
     {
-        return 'configuration_espace';
+        return self::ROUTE;
     }
 
     /**
@@ -181,7 +186,7 @@ class AddConfigurationEspace implements InitialisationInterface, CreateFormInter
      */
     public function type()
     {
-        return 'warning';
+        return self::TYPE_FLASH;
     }
 
     /**
@@ -191,6 +196,6 @@ class AddConfigurationEspace implements InitialisationInterface, CreateFormInter
      */
     public function message()
     {
-        return 'Enregistrement effectué avec succès';
+        return self::MESSAGE_FLASH;
     }
 }

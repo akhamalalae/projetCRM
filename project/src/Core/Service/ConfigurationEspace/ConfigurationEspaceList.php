@@ -13,6 +13,8 @@ class ConfigurationEspaceList implements RenderInterface
     {
     }
 
+    const VIEW_PATH         = 'configurationEspace/index.html.twig';
+
     //RenderInterface
 
     /**
@@ -22,7 +24,7 @@ class ConfigurationEspaceList implements RenderInterface
      */
     public function view()
     {
-        return 'configurationEspace/index.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**

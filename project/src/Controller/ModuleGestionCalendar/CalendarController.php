@@ -3,17 +3,17 @@
 // src/Controller/BaseController.php
 namespace App\Controller\ModuleGestionCalendar;
 
+use App\Controller\BaseController;
 use App\Entity\RenderVous;
 use App\Core\Service\Calendar\AddEditeCalendar;
 use App\Core\Service\Calendar\Calendar;
 use App\Core\Service\Calendar\CalendarList;
 use App\Core\Trait\RenderTrait;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class CalendarController extends AbstractController
+class CalendarController extends BaseController
 {
     use RenderTrait;
 
@@ -46,6 +46,7 @@ class CalendarController extends AbstractController
     public function renderVousEffectuer(CalendarList $service):Response
     {
         $service->init(['user' => $this->getUser()]);
+
         return $this->render($service->view(), $service->parameters());
     }
 

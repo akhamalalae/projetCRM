@@ -29,6 +29,11 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
     private array   $datachampsFormulaires = [];
     private array   $resultats = [];
 
+    const VIEW_PATH         = 'enregistrementFormulaire/index.html.twig';
+    const ROUTE             = 'calendar_vue_agenda';
+    const TYPE_FLASH        = 'warning';
+    const MESSAGE_FLASH     = 'Enregistrement effectué avec succès';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -61,7 +66,7 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      */
     public function view()
     {
-        return 'enregistrementFormulaire/index.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**
@@ -248,7 +253,7 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      */
     public function route()
     {
-        return 'calendar_vue_agenda';
+        return self::ROUTE;
     }
 
     /**
@@ -270,7 +275,7 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      */
     public function type()
     {
-        return 'warning';
+        return self::TYPE_FLASH;
     }
 
     /**
@@ -280,6 +285,6 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      */
     public function message()
     {
-        return 'Enregistrement effectué avec succès';
+        return self::MESSAGE_FLASH;
     }
 }

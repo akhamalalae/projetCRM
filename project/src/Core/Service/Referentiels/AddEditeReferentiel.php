@@ -18,6 +18,11 @@ class AddEditeReferentiel implements InitialisationInterface, CreateFormInterfac
 {
     private int $id = 0;
 
+    const VIEW_PATH         = 'referentiels/addReferentiels.html.twig';
+    const ROUTE             = 'referentiels';
+    const TYPE_FLASH        = 'warning';
+    const MESSAGE_FLASH     = 'Enregistrement effectué avec succès';
+
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
     }
@@ -44,7 +49,7 @@ class AddEditeReferentiel implements InitialisationInterface, CreateFormInterfac
      */
     public function view()
     {
-        return 'referentiels/addReferentiels.html.twig';
+        return self::VIEW_PATH;
     }
 
     /**
@@ -158,7 +163,7 @@ class AddEditeReferentiel implements InitialisationInterface, CreateFormInterfac
      */
     public function route()
     {
-        return 'referentiels';
+        return self::ROUTE;
     }
 
     /**
@@ -180,7 +185,7 @@ class AddEditeReferentiel implements InitialisationInterface, CreateFormInterfac
      */
     public function type()
     {
-        return 'warning';
+        return self::TYPE_FLASH;
     }
 
     /**
@@ -190,6 +195,6 @@ class AddEditeReferentiel implements InitialisationInterface, CreateFormInterfac
      */
     public function message()
     {
-        return 'Enregistrement effectué avec succès ';
+        return self::MESSAGE_FLASH;
     }
 }
