@@ -17,6 +17,7 @@ use App\Services\MenuGenerator;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\PersistentCollection;
 
 class TableauBord implements InitialisationInterface, CreateFormInterface,
                         SubmittedFormInterface, RenderInterface, AddFlashInterface
@@ -166,7 +167,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
      */
     public function formOtherOptions()
     {
-        return $this->listesChamps;
+        return [];
     }
 
     //SubmittedFormInterface
@@ -183,7 +184,6 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
 
         if ($this->warning === false) {
             $this->em->persist($form->getData());
-            $this->em->flush();
 
             $requeteSQL = $this->createRequete($form->getData());
 
@@ -192,10 +192,11 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
             );
 
             // Ne pas enregistrer la requête
-            if (($this->id === 0) && ($form->getData()->getEnregistrerRequete() === false)) {
+            if ($this->id === 0 && $form->getData()->getEnregistrerRequete() === false) {
                 $this->em->remove($form->getData());
-                $this->em->flush();
             }
+
+            $this->em->flush();
         }
     }
 
@@ -216,8 +217,8 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
         }
 
         if (
-            ($this->id == 0)
-            && ($this->requeteTableauBord->getEnregistrerRequete() === true)
+            $this->id == 0
+            && $this->requeteTableauBord->getEnregistrerRequete() === true
             && $this->requeteTableauBord->getLibelle() === ''
         ) {
             $this->warning = true;
@@ -288,8 +289,8 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
         }
 
         if (
-            ($this->id === 0)
-            && ($this->requeteTableauBord->getEnregistrerRequete() === true)
+            $this->id === 0
+            && $this->requeteTableauBord->getEnregistrerRequete() === true
             && $this->requeteTableauBord->getLibelle() === ''
         ) {
             $message = self::MESSAGE_FLASH_3;
@@ -303,6 +304,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
     }
 
     /**
+     * réécrire le format de résultat de la requete
      *
      * @param array $resultatsRequeteTableauBord
      *
@@ -328,12 +330,13 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
     }
 
     /**
+     * vérifier la valeur saisie dans les filtres de la requete
      *
-     * @param array $filtres
+     * @param PersistentCollection $filtres
      *
      * @return bool
      */
-    public function checkValidateSyntaxeChampValeur(array $filtres)
+    public function checkValidateSyntaxeChampValeur(PersistentCollection $filtres)
     {
         $erreur = false;
 
@@ -358,6 +361,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
     }
 
     /**
+     * creation requete sql
      *
      * @param RequeteTableauBord $requeteTableauBord
      *
@@ -372,15 +376,15 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
         foreach ($requeteTableauBord->getPropertiesEntityChoixChamps() as $champ) {
             $property = $champ->getLibelle();
             $id = $champ->getId();
-            $entity_libelle = $champ->getEntitie()->getLibelle();
+            $entityLibelle = $champ->getEntitie()->getLibelle();
 
             if ($clauseSelect !== '') {
                 $clauseSelect .= " ,";
             }
 
-            $clauseSelect .= lcfirst($entity_libelle) . "." . $property . " AS " . $property . "_" . $id;
+            $clauseSelect .= lcfirst($entityLibelle) . "." . $property . " AS " . $property . "_" . $id;
 
-            $jointure = $this->createJoint($champ, $entity_libelle, $jointure);
+            $jointure = $this->createJoint($champ, $entityLibelle, $jointure);
         }
 
         foreach ($requeteTableauBord->getRequeteTableauBordFiltres() as $filtre) {
@@ -398,45 +402,44 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
                 $condition = $filtre->getTableauBordFiltreCondition()->getLibelle();
             }
 
-            $nom_jointure_filtre = lcfirst($filtre->getEntitiesPropriete()->getEntitie()->getLibelle());
+            $nomJointureFiltre = lcfirst($filtre->getEntitiesPropriete()->getEntitie()->getLibelle());
 
-            $clauseWhere .= " $condition $nom_jointure_filtre.$property $operator '$valeur' ";
+            $clauseWhere .= " $condition $nomJointureFiltre.$property $operator '$valeur' ";
 
             $champ = $filtre->getEntitiesPropriete();
-            $entity_libelle = $filtre->getEntitie()->getLibelle();
+            $entityLibelle = $filtre->getEntitie()->getLibelle();
 
-            $jointure = $this->createJoint($champ, $entity_libelle, $jointure);
+            $jointure = $this->createJoint($champ, $entityLibelle, $jointure);
         }
 
         $clauseJiointures = "";
-        foreach ($jointure as $une_jointure) {
-            $clauseJiointures .= " $une_jointure";
+        foreach ($jointure as $uneJointure) {
+            $clauseJiointures .= " $uneJointure";
         }
 
-        $requete = "SELECT $clauseSelect FROM App\Entity\Formulaire formulaire $clauseJiointures WHERE $clauseWhere";
-
-        return $requete;
+        return "SELECT $clauseSelect FROM App\Entity\Formulaire formulaire $clauseJiointures WHERE $clauseWhere";
     }
 
     /**
+     * creation des joitures de la requete sql
      *
      * @param EntitiesPropriete $champ
-     * @param string $entity_libelle
+     * @param string $entityLibelle
      * @param array $jointure
      *
      * @return array
      */
-    public function createJoint(EntitiesPropriete $champ, string $entity_libelle, array $jointure)
+    public function createJoint(EntitiesPropriete $champ, string $entityLibelle, array $jointure)
     {
-        if ($champ->getEntitieJoiture() != null && ! array_key_exists($entity_libelle, $jointure)) {
-            $property_entity_jointure = $champ->getEntitieJoiture()->getLibelle();
-            $entity_nom_jointure = $champ->getEntitie()->getNomProprieteeJointure();
+        if ($champ->getEntitieJoiture() != null && ! array_key_exists($entityLibelle, $jointure)) {
+            $propertyEntityJointure = $champ->getEntitieJoiture()->getLibelle();
+            $entityNomJointure = $champ->getEntitie()->getNomProprieteeJointure();
 
-            $jointure[$entity_libelle] =
+            $jointure[$entityLibelle] =
                 " LEFT JOIN "
-                . lcfirst($property_entity_jointure)
-                . "." . $entity_nom_jointure
-                . " " . lcfirst($entity_libelle);
+                . lcfirst($propertyEntityJointure)
+                . "." . $entityNomJointure
+                . " " . lcfirst($entityLibelle);
         }
 
         return $jointure;

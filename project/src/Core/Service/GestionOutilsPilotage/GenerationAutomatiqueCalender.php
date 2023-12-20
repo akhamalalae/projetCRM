@@ -163,38 +163,6 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
     }
 
     /**
-     * Save specific data
-     *
-     * @param DateTime $dateDebut
-     * @param int $ecart
-     * @param array $formulaires
-     * @param DateTime $dateNow
-     * @param DateTime $dateExecution
-     *
-     * @return void
-     */
-    public function historiqueGenerationAutomatiqueRouting($dateDebut, $ecart, $formulaires, $dateNow, $dateExecution)
-    {
-        $historiqueGenerationAutomatiqueRouting = $this->createNewObject();
-        $historiqueGenerationAutomatiqueRouting->setDateDebut($dateDebut)
-            ->setDateExecution($dateExecution)
-            ->setEcartEnMunites($ecart)
-            ->setDateCreation($dateNow)
-            ->setIsGenerer(false)
-            ->setUserCreateur($this->user);
-
-        foreach ($formulaires as $formulaire) {
-            $historiqueGenerationAutomatiqueRouting->addFormulaire($formulaire);
-        }
-
-        $this->generationAutomatique->create($historiqueGenerationAutomatiqueRouting);
-        $historiqueGenerationAutomatiqueRouting->setIsGenerer(true);
-
-        $this->em->persist($historiqueGenerationAutomatiqueRouting);
-        $this->em->flush();
-    }
-
-    /**
      * Save
      * @return void
      */
@@ -252,5 +220,37 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
     public function message()
     {
         return self::MESSAGE_FLASH;
+    }
+
+    /**
+     * Save specific data
+     *
+     * @param DateTime $dateDebut
+     * @param int $ecart
+     * @param array $formulaires
+     * @param DateTime $dateNow
+     * @param DateTime $dateExecution
+     *
+     * @return void
+     */
+    public function historiqueGenerationAutomatiqueRouting($dateDebut, $ecart, $formulaires, $dateNow, $dateExecution)
+    {
+        $historiqueGenerationAutomatiqueRouting = $this->createNewObject();
+        $historiqueGenerationAutomatiqueRouting->setDateDebut($dateDebut)
+            ->setDateExecution($dateExecution)
+            ->setEcartEnMunites($ecart)
+            ->setDateCreation($dateNow)
+            ->setIsGenerer(false)
+            ->setUserCreateur($this->user);
+
+        foreach ($formulaires as $formulaire) {
+            $historiqueGenerationAutomatiqueRouting->addFormulaire($formulaire);
+        }
+
+        $this->generationAutomatique->create($historiqueGenerationAutomatiqueRouting);
+        $historiqueGenerationAutomatiqueRouting->setIsGenerer(true);
+
+        $this->em->persist($historiqueGenerationAutomatiqueRouting);
+        $this->em->flush();
     }
 }
