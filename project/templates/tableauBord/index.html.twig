@@ -230,7 +230,7 @@
         idEntite = $("#tableau_bord_requeteTableauBordFiltres_"+indice+"_entitie").val();
         $.ajax({
             //L'URL de la requête
-            url: "{{ path('getEntitiesProprieteConditionByEntities') }}",
+            url: "{{ path('getlistEntitiesPropriete') }}",
             //La méthode d'envoi (type de requête)
             method: "GET",
             data: {'idEntite':idEntite},

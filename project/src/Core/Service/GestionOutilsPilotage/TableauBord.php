@@ -17,7 +17,6 @@ use App\Services\MenuGenerator;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\PersistentCollection;
 
 class TableauBord implements InitialisationInterface, CreateFormInterface,
                         SubmittedFormInterface, RenderInterface, AddFlashInterface
@@ -29,7 +28,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
     private object          $requeteTableauBord;
     private bool            $warning = false;
     private array|null      $resultatsRequeteTableauBord = null;
-    private bool            $checkValidateSyntaxe = false;
+    private bool            $checkIfValid = false;
 
     const VIEW_PATH         = 'tableauBord/index.html.twig';
     const CURRENT_PAGE      = 'formulaire';
@@ -72,10 +71,6 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
                 $this->orignalRequeteTableauBordFiltres->add($champ);
             }
         }
-
-        $this->checkValidateSyntaxe = $this->checkValidateSyntaxeChampValeur(
-            $this->requeteTableauBord->getRequeteTableauBordFiltres()
-        );
     }
 
     //RenderInterface
@@ -208,6 +203,10 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
      */
     public function saveSpecific($form)
     {
+        $this->checkIfValid = $this->checkValidSyntaxe(
+            $this->requeteTableauBord->getRequeteTableauBordFiltres()
+        );
+
         if (count($this->requeteTableauBord->getRequeteTableauBordFiltres()) === 0) {
             $this->warning = true;
         }
@@ -224,7 +223,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
             $this->warning = true;
         }
 
-        if ($this->checkValidateSyntaxe  === true) {
+        if ($this->checkIfValid  === true) {
             $this->warning = true;
         }
     }
@@ -296,7 +295,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
             $message = self::MESSAGE_FLASH_3;
         }
 
-        if ($this->checkValidateSyntaxe === true) {
+        if ($this->checkIfValid === true) {
             $message = self::MESSAGE_FLASH_4;
         }
 
@@ -332,11 +331,9 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
     /**
      * vérifier la valeur saisie dans les filtres de la requete
      *
-     * @param PersistentCollection $filtres
-     *
      * @return bool
      */
-    public function checkValidateSyntaxeChampValeur(PersistentCollection $filtres)
+    public function checkValidSyntaxe($filtres)
     {
         $erreur = false;
 
