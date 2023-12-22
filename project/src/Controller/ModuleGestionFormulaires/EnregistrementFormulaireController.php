@@ -2,21 +2,20 @@
 
 namespace App\Controller\ModuleGestionFormulaires;
 
-use App\Entity\Files;
-use App\Entity\Formulaire;
-use App\Entity\ChampsFormulaire;
-use App\Controller\BaseController;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Core\Service\EnregistrementFormulaire\AddDemoEnregistrementFormulaire;
 use App\Core\Service\EnregistrementFormulaire\AddEnregistrementFormulaire;
+use App\Core\Service\EnregistrementFormulaire\DeleteImage;
 use App\Core\Service\EnregistrementFormulaire\ResultatsFormulaire;
-use App\Core\Trait\RenderTrait;
-use App\Entity\EnregistrementFormulaire;
+use App\Core\Service\EnregistrementFormulaire\Telecharger;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Entity\Files;
+use App\Core\Trait\RenderTrait;
 
-class EnregistrementFormulaireController extends BaseController
+class EnregistrementFormulaireController extends AbstractController
 {
     use RenderTrait;
 
@@ -69,62 +68,61 @@ class EnregistrementFormulaireController extends BaseController
     }
 
     /**
-     * @Route("/supprime/image/{id}", name="enregistrement_formulaire_delete_image", methods={"DELETE"})
-     */
-    public function deleteImage(Files $image, Request $request){
+    * @Route("/supprime/image/{id}", name="enregistrement_formulaire_delete_image", methods={"DELETE"})
+    *
+    * @param Request $request
+    * @param Files $image
+    * @param DeleteImage $service
+    *
+    * @return JsonResponse
+    */
+    public function deleteImage(Files $image, Request $request, DeleteImage $service):JsonResponse
+    {
+        $content = json_decode($request->getContent(), true);
 
-        $data = json_decode($request->getContent(), true);
+        if($this->isCsrfTokenValid('delete'.$image->getId(), $content['_token'])) {
+            $service->init(
+                [
+                    'image'           => $image,
+                    'imagesDirectory' => $this->getParameter('files_directory')
+                ]
+            );
 
-        if($this->isCsrfTokenValid('delete'.$image->getId(), $data['_token'])) {
-            $nom = $image->getFile();
-            unlink($this->getParameter('files_directory').'/'.$nom);
-
-            $this->em->remove($image);
-            $this->em->flush();
+            $service->delete();
 
             return new JsonResponse(['success' => 1]);
-        }else {
-            return new JsonResponse(['error' => 'Token Invalide'], 400);
         }
+
+        return new JsonResponse(['error' => 'Token Invalide'], 400);
     }
+
 
     /**
      * @Route("/gestionnaire/resultats/excel/{id}", name="telecharger_excel", methods={"GET","POST"})
+     *
+     * @param Telecharger $service
+     * @param int $id
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function telechargerExcel(Request $request,$id)
+    public function telechargerFile(Telecharger $service, $id, $format = 'xls'):Response
     {
-        $fields = "";
-        $lineData = "";
-
-        $enregistrementFormulaire = $this->em->getRepository(EnregistrementFormulaire::class)->findBy(
-            ['formulaires' => $id]
+        $service->init(
+            [
+                'id'     => $id,
+                'format' => $format
+            ]
         );
-        $formulaire = $this->em->getRepository(Formulaire::class)->find($id);
 
-        foreach ($enregistrementFormulaire[0]->getResultats() as $key => $value) {
-            $champsformulaire = $this->em->getRepository(ChampsFormulaire::class)->find($key);
-            $fields = $fields.$champsformulaire->getLibelle().",";
-        }
-
-        foreach ($enregistrementFormulaire as $key => $value) {
-            foreach ($value->getResultats() as $valueEnregistrementFormulaire) {
-                if(is_array($valueEnregistrementFormulaire)){
-                    $valueEnregistrementFormulaire = $valueEnregistrementFormulaire["date"];
-                }
-                $lineData = $lineData.$valueEnregistrementFormulaire.",";
-            }
-            $lineData .="\n";
-        }
-
-        $res = $fields."\n".$lineData;
-
-        $fileNameExel = "resultats_formulaire_".$formulaire->getLibelle()."_".date('Y-m-d') . ".xls";
-        $fileNameExel = "resultats_formulaire_".$formulaire->getLibelle()."_".date('Y-m-d') . ".csv";
+        $resultat = $service->telecharger();
 
         return new Response(
-            $res,
+            $resultat['resultat'],
             200,
-            ['Content-Type' => 'application/vnd.ms-excel', "Content-disposition" => "attachment; filename=$fileNameExel"]
+            [
+                'Content-Type' => 'application/vnd.ms-excel',
+                "Content-disposition" => "attachment; filename=".$resultat['fileName']
+            ]
         );
     }
 }

@@ -3,21 +3,22 @@
 // src/Controller/BaseController.php
 namespace App\Controller\ModuleGestionCalendar;
 
-use App\Controller\BaseController;
-use App\Entity\RenderVous;
 use App\Core\Service\Calendar\AddEditeCalendar;
 use App\Core\Service\Calendar\Calendar;
 use App\Core\Service\Calendar\CalendarList;
-use App\Core\Trait\RenderTrait;
+use App\Core\Service\Calendar\DeleteCalender;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use App\Core\Trait\RenderTrait;
 
-class CalendarController extends BaseController
+class CalendarController extends AbstractController
 {
     use RenderTrait;
 
-    /**
+     /**
      * @Route("/intervenant/calendar", name="calendar_vue_agenda", methods={"GET","POST"})
      *
      * @param Request $request
@@ -50,8 +51,7 @@ class CalendarController extends BaseController
         return $this->render($service->view(), $service->parameters());
     }
 
-
-    /**
+     /**
      * @Route("/intervenant/calendar/add", name="calendar_add", methods={"GET"})
      *
      * @param Request $request
@@ -64,7 +64,7 @@ class CalendarController extends BaseController
         return $this->renderTrait($request, $service, ['id' => 0, 'user' => $this->getUser()]);
     }
 
-    /**
+     /**
      * @Route("/intervenant/calendar/edit", name="calendar_edit", methods={"GET"})
      *
      * @param Request $request
@@ -77,17 +77,20 @@ class CalendarController extends BaseController
         return $this->renderTrait($request, $service, ['id' => $request->get('id'), 'user' => $this->getUser()]);
     }
 
-    /**
+     /**
      * @Route("/intervenant/calendar/delet", name="calendar_delet", methods={"DELETE"})
+     *
+     * @param Request $request
+     * @param DeleteCalender $service
+     *
+     * @return RedirectResponse
      */
-    public function delete(Request $request): Response
+    public function delete(Request $request, DeleteCalender $service):RedirectResponse
     {
-        $id = $request->get('id');
-        $calendar = $this->em->getRepository(RenderVous::class)->findOneById($id);
+        $service->init(['id' => $request->get('id')]);
 
-        $this->em->remove($calendar);
-        $this->em->flush();
+        $service->delete();
 
-        return $this->redirectToRoute('calendar_vue_agenda');
+        return $this->redirectToRoute($service->route(), $service->parametersRoute());
     }
 }

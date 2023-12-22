@@ -2,18 +2,17 @@
 
 namespace App\Controller\ModuleGestionFormulaires;
 
-use App\Entity\Formulaire;
-use App\Entity\ChampsFormulaire;
-use App\Controller\BaseController;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Core\Service\Formulaire\AddEditeFormulaire;
+use App\Core\Service\Formulaire\DeleteFormulaire;
 use App\Core\Service\Formulaire\FormulaireList;
-use App\Core\Trait\RenderTrait;
-use App\Entity\EnregistrementFormulaire;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
+use App\Core\Trait\RenderTrait;
 
-class FormulaireController extends BaseController
+class FormulaireController extends AbstractController
 {
     use RenderTrait;
 
@@ -60,37 +59,18 @@ class FormulaireController extends BaseController
 
      /**
      * @Route("/intervenant/formulaire/delete/{id}", name="formulaire_delete")
+     *
+     * @param DeleteFormulaire $service
+     *
+     * @return RedirectResponse
      */
-    public function delete($id)
+    public function delete(DeleteFormulaire $service, $id):RedirectResponse
     {
-        if(!$id){
-            throw $this->createNotFoundException('No ID found');
-        }
+        $service->init(['id' => $id]);
 
-        $formulaire = $this->em->getRepository(Formulaire::class)->find($id);
-        $enregistrementFormulaire = $this->em->getRepository(EnregistrementFormulaire::class)->findBy(
-            ['formulaires' => $formulaire]
-        );
+        $service->delete();
 
-        if($formulaire != null){
-            if($formulaire->getChampFormulaire()){
-                foreach ($formulaire->getChampFormulaire() as $champ) {
-                    $champFormulaire = $this->em->getRepository(ChampsFormulaire::class)->find($champ->getId());
-                    $this->doctrineRemove($champFormulaire);
-                    $this->doctrineFlush();
-                }
-            }
-            if($enregistrementFormulaire){
-                foreach ($enregistrementFormulaire as $enregistrement) {
-                    $this->doctrineRemove($enregistrement);
-                    $this->doctrineFlush();
-                }
-            }
-            $this->doctrineRemove($formulaire);
-            $this->doctrineFlush();
-        }
-
-        return $this->redirectToRoute('formulaire');
+        return $this->redirectToRoute($service->route(), $service->parametersRoute());
     }
 }
 

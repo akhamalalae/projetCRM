@@ -82,6 +82,16 @@ class AddConfigurationEspace implements InitialisationInterface, CreateFormInter
     }
 
     /**
+     * Set name create form
+     *
+     * @return string
+     */
+    public function formName()
+    {
+        return 'form';
+    }
+
+    /**
      * Set data create form
      *
      * @return object|null

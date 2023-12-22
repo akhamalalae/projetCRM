@@ -32,6 +32,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
 
     const VIEW_PATH         = 'tableauBord/index.html.twig';
     const CURRENT_PAGE      = 'formulaire';
+    const FORM_NAME         = 'form';
     const TYPE_FLASH        = 'warning';
     const MESSAGE_FLASH_1   = "Veuillez choisir les filtres de la requête!";
     const MESSAGE_FLASH_2   = "Veuillez choisir les champs a afficher!";
@@ -117,6 +118,16 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
     }
 
     /**
+     * Set name create form
+     *
+     * @return string
+     */
+    public function formName()
+    {
+        return self::FORM_NAME;
+    }
+
+    /**
      * Set data create form
      *
      * @return object|null
@@ -182,9 +193,9 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
 
             $requeteSQL = $this->createRequete($form->getData());
 
-            $this->resultatsRequeteTableauBord = $this->changeLabelFormatResultats(
-                $this->em->getRepository(Formulaire::class)->requeteTableauBordFiltres($requeteSQL)
-            );
+            $resultat = $this->em->getRepository(Formulaire::class)->requeteTableauBordFiltres($requeteSQL);
+
+            $this->resultatsRequeteTableauBord = $this->formaterResultats($resultat);
 
             // Ne pas enregistrer la requête
             if ($this->id === 0 && $form->getData()->getEnregistrerRequete() === false) {
@@ -303,13 +314,13 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
     }
 
     /**
-     * réécrire le format de résultat de la requete
+     * formater le résultat de la requete
      *
      * @param array $resultatsRequeteTableauBord
      *
      * @return array
      */
-    public function changeLabelFormatResultats(array $resultatsRequeteTableauBord)
+    public function formaterResultats(array $resultatsRequeteTableauBord)
     {
         foreach ($resultatsRequeteTableauBord as $key => $var) {
             foreach ($var as $keychamp => $varchamp) {
@@ -432,8 +443,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
             $propertyEntityJointure = $champ->getEntitieJoiture()->getLibelle();
             $entityNomJointure = $champ->getEntitie()->getNomProprieteeJointure();
 
-            $jointure[$entityLibelle] =
-                " LEFT JOIN "
+            $jointure[$entityLibelle] =" LEFT JOIN "
                 . lcfirst($propertyEntityJointure)
                 . "." . $entityNomJointure
                 . " " . lcfirst($entityLibelle);

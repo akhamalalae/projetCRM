@@ -2,13 +2,13 @@
 
 namespace App\Controller\ModuleGestionEntreprises;
 
-use App\Controller\BaseController;
 use App\Core\Service\PointVentes\PointVentes;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-class PointVentesController extends BaseController
+class PointVentesController extends AbstractController
 {
     /**
     * @Route("/gestionnaire/produits/formulaires", name="getProduitsFormulairesOptions", methods={"GET","POST"})

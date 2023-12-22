@@ -95,6 +95,16 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
     }
 
     /**
+     * Set name create form
+     *
+     * @return string
+     */
+    public function formName()
+    {
+        return 'form';
+    }
+
+    /**
      * Set data create form
      *
      * @return object|null

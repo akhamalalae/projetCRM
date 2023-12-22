@@ -1,26 +1,29 @@
 <?php
 
-namespace App\Core\Service\CategoriesProduits;
+namespace App\Core\Service\Utilisateur;
 
+use App\Core\Interface\AddFlashInterface;
 use App\Core\Interface\CreateFormInterface;
 use App\Core\Interface\InitialisationInterface;
 use App\Core\Interface\RenderInterface;
 use App\Core\Interface\SubmittedFormInterface;
-use App\Entity\CategorieProduits;
-use App\Form\Entreprises\CategorieProduitsType;
+use App\Entity\User;
+use App\Form\Intervenants\RegistrationFormType;
 use App\Services\MenuGenerator;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
-class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
-                        RenderInterface, InitialisationInterface
+class Register implements InitialisationInterface, CreateFormInterface,
+                        SubmittedFormInterface, RenderInterface, AddFlashInterface
 {
-    const VIEW_PATH         = 'entrepriseProduits/categoriesProduits.html.twig';
-    const CURRENT_PAGE      = 'categoriesProduits';
-    const ROUTE             = 'categoriesProduits';
+    const VIEW_PATH         = 'registration/register.html.twig';
+    const ROUTE             = 'intervenants';
     const TYPE_FLASH        = 'warning';
     const MESSAGE_FLASH     = 'Enregistrement effectué avec succès';
 
-    public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
+    public function __construct(public EntityManagerInterface $em,
+        public MenuGenerator $menuGenerator,
+        public UserPasswordEncoderInterface $passwordEncoder)
     {
     }
 
@@ -55,12 +58,8 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
      */
     public function parameters()
     {
-        $listeCategorieProduits = $this->em->getRepository(CategorieProduits::class)->findAll();
-
         return [
-            'menus'                  => $this->menuGenerator->getMenu(),
-            'current_page'           => self::CURRENT_PAGE,
-            'listeCategorieProduits' => $listeCategorieProduits,
+            'menus' => $this->menuGenerator->getMenu()
         ];
     }
 
@@ -73,7 +72,7 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
      */
     public function formType()
     {
-        return CategorieProduitsType::class;
+        return RegistrationFormType::class;
     }
 
     /**
@@ -83,7 +82,7 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
      */
     public function formName()
     {
-        return 'form';
+        return 'registrationForm';
     }
 
     /**
@@ -93,7 +92,7 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
      */
     public function formData()
     {
-        return $this->createNewObject();
+        return  $this->createNewObject();
     }
 
     /**
@@ -103,7 +102,7 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
      */
     public function createNewObject()
     {
-        return new CategorieProduits();
+        return new User();
     }
 
      /**
@@ -136,6 +135,8 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
      */
     public function save($form)
     {
+        $this->saveSpecific($form);
+
         $this->em->persist($form->getData());
         $this->em->flush();
     }
@@ -148,6 +149,12 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
      */
     public function saveSpecific($form)
     {
+        $form->getData()->setPassword(
+            $this->passwordEncoder->encodePassword(
+                $form->getData(),
+                $form->get('plainPassword')->getData()
+            )
+        );
     }
 
     /**

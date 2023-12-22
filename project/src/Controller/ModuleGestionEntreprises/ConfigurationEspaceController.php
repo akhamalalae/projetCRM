@@ -2,17 +2,17 @@
 
 namespace App\Controller\ModuleGestionEntreprises;
 
-use App\Controller\BaseController;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Core\Service\ConfigurationEspace\AddConfigurationEspace;
 use App\Core\Service\ConfigurationEspace\AddConfigurationEspaceObject;
 use App\Core\Service\ConfigurationEspace\ConfigurationEspaceList;
-use App\Core\Trait\RenderTrait;
-use App\Entity\ConfigurationEspace;
+use App\Core\Service\ConfigurationEspace\UpdateConfigurationEspace;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Core\Trait\RenderTrait;
 
-class ConfigurationEspaceController extends BaseController
+class ConfigurationEspaceController extends AbstractController
 {
     use RenderTrait;
 
@@ -56,28 +56,23 @@ class ConfigurationEspaceController extends BaseController
         return $this->renderTrait($request, $service,['id' => $id]);
     }
 
-     /**
+    /**
      * @Route("/gestionnaire/update/espace", name="UpdateConfigurationEspace", methods={"GET","POST"})
+     *
+     * @param Request $request
+     * @param UpdateConfigurationEspace $service
+     *
+     * @return RedirectResponse
      */
-    public function UpdateConfigurationEspace(Request $request)
+    public function UpdateConfigurationEspace(UpdateConfigurationEspace $service, Request $request):RedirectResponse
     {
-        $objCoordonnees = $request->get('objCoordonnees');
+        $coordonnees = $request->get('objCoordonnees');
 
-        if($objCoordonnees != [] && $objCoordonnees != null){
-            foreach ($objCoordonnees as $key => $val) {
-                $explodeKey = explode("-", $key);
-                $configurationEspace = $this->em->getRepository(ConfigurationEspace::class)->find($explodeKey[1]);
-                if ($explodeKey[2] == "x" ) {
-                    $configurationEspace->setX($val);
-                }elseif($explodeKey[2] == "y"){
-                    $configurationEspace->setY($val);
-                }
+        $service->init(['objCoordonnees' => $coordonnees]);
 
-                $this->em->persist($configurationEspace);
-                $this->em->flush();
-            }
-        }
-        return $this->json(array('objCoordonnees' => $objCoordonnees));
+        $service->save();
+
+        return $this->json(array('objCoordonnees' => $coordonnees));
     }
 }
 

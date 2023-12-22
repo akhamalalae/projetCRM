@@ -2,16 +2,16 @@
 
 namespace App\Controller\ModuleGestionFormulaires;
 
-use App\Controller\BaseController;
 use App\Core\Service\ChampsFormulaire\AddChampsFormulaire;
 use App\Core\Service\ChampsFormulaire\DeleteChampsFormulaire;
-use App\Core\Trait\RenderTrait;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
+use App\Core\Trait\RenderTrait;
 
-class ChampsFormulaireController extends BaseController
+class ChampsFormulaireController extends AbstractController
 {
     use RenderTrait;
 

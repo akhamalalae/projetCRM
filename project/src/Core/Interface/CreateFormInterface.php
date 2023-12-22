@@ -12,6 +12,13 @@ interface CreateFormInterface
     public function formType();
 
     /**
+     * Set name create form
+     *
+     * @return string
+     */
+    public function formName();
+
+    /**
      * Set data create form
      *
      * @return object|null

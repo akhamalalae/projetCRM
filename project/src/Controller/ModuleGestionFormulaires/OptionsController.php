@@ -2,32 +2,28 @@
 
 namespace App\Controller\ModuleGestionFormulaires;
 
-use App\Entity\ChampsFormulaire;
-use App\Controller\BaseController;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Core\Service\Formulaire\DeleteOption;
 use Symfony\Component\Routing\Annotation\Route;
 
-class OptionsController extends BaseController
+class OptionsController extends AbstractController
 {
-    /**
+
+     /**
      * @Route("/intervenant/option/formulaire/delete/{id}", name="option_delete", methods={"GET","POST"})
+     *
+     * @param DeleteOption $service
+     * @param int $id
+     *
+     * @return RedirectResponse
      */
-    public function delete($id)
+    public function delete(DeleteOption $service, $id):RedirectResponse
     {
-        if(!$id) {
-            throw $this->createNotFoundException('No ID found');
-        }
+        $service->init(['id' => $id]);
 
-        $champsFormulaire = $this->em->getRepository(ChampsFormulaire::class)->find($id);
+        $service->delete();
 
-        if($champsFormulaire != null) {
-            $this->em->remove($champsFormulaire);
-            $this->em->flush();
-        }
-
-        return $this->redirectToRoute('formulaire_champs', array(
-            'id' => $champsFormulaire->getFormulaire()->getId(),
-            'champ' => null,
-        ));
+        return $this->redirectToRoute($service->route(), $service->parametersRoute());
     }
-
 }
+
