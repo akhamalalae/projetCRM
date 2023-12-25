@@ -39,81 +39,84 @@
     </head>
     <body>
         {% block body %}
-        <nav class="container">
+            <nav class="container">
+                <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark" style="background-color: #317AC1;" aria-label="Main navigation">
+                    <div class="container-fluid">
+                        <a class="navbar-brand" href="{{ path('app_home') }}"><i class="fa fa-home" aria-hidden="true"></i></a>
+                        <button class="navbar-toggler p-0 border-0" type="button" id="navbarSideCollapse" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                        </button>
+
+                        <div class="navbar-collapse offcanvas-collapse" id="navbarsExampleDefault">
+                            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                                {% for keyMenuCategorie, valueMenuCategorie in menus['menuCategorie'] %}
+                                    {% if (valueMenuCategorie.access in app.user.roles) %}
+                                        {% if (valueMenuCategorie.url == null or valueMenuCategorie.url == '') %}
+                                            <li class="nav-item dropdown">
+                                                <a class="nav-link dropdown-toggle" href="#" id="dropdown"~valueMenuCategorie data-bs-toggle="dropdown" aria-expanded="false">
+                                                    {% if valueMenuCategorie.icone %}
+                                                        <i class="{{valueMenuCategorie.icone}}" aria-hidden="true"></i>
+                                                    {% endif %}{{ valueMenuCategorie.Libelle }}
+                                                </a>
+                                                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdown"~valueMenuCategorie>
+                                                    {% for keyMenuSousCategorie, valueMenuSousCategorie in menus['menuSousCategorie'] %}
+                                                        {% if valueMenuSousCategorie.menuCategorie == valueMenuCategorie and (valueMenuSousCategorie.access in app.user.roles) %}
+                                                            <li>
+                                                                <a class="dropdown-item" href="{{ path(valueMenuSousCategorie.url) }}">
+                                                                    <i class="{{valueMenuSousCategorie.icone}}" aria-hidden="true"></i>
+                                                                    {{ valueMenuSousCategorie.Libelle }}
+                                                                </a>
+                                                            </li>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </ul>
+                                            </li>
+                                        {% else %}
+                                            <li class="nav-item">
+                                                <a class="nav-link"
+                                                    {% if valueMenuCategorie.url %}
+                                                        href="{{ path(valueMenuCategorie.url) }}"
+                                                    {% endif %}>
+                                                    {% if valueMenuCategorie.url %}
+                                                        <i class="{{valueMenuCategorie.icone}}" aria-hidden="true"></i>
+                                                    {% endif %}{{ valueMenuCategorie.Libelle }}
+                                                </a>
+                                            </li>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+
+                            <li class="nav-item dropdown">
+                                <a class="btn btn-dark" href="">
+                                    <i class="fa fa-user-circle-o" aria-hidden="true">  {{ app.user.firstname }} {{ app.user.lastname }}</i>
+                                </a>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a class="btn btn-dark" href="{{ path('app_logout') }}">
+                                <i class="fa fa-sign-out fa-1x" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                        </div>
+                    </div>
+                </nav>
+            </nav>
             {% for message in app.flashes('success') %}
                 <div class="alert alert-success">
                     {{ message }}
                 </div>
             {% endfor %}
             {% for message in app.flashes('warning') %}
-                <div class="alert alert-success">
+                <div class="alert alert-warning">
                     {{ message }}
                 </div>
             {% endfor %}
-            <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark" style="background-color: #317AC1;" aria-label="Main navigation">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="{{ path('app_home') }}"><i class="fa fa-home" aria-hidden="true"></i></a>
-                    <button class="navbar-toggler p-0 border-0" type="button" id="navbarSideCollapse" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                    </button>
-
-                    <div class="navbar-collapse offcanvas-collapse" id="navbarsExampleDefault">
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            {% for keyMenuCategorie, valueMenuCategorie in menus['menuCategorie'] %}
-                                {% if (valueMenuCategorie.access in app.user.roles) %}
-                                    {% if (valueMenuCategorie.url == null or valueMenuCategorie.url == '') %}
-                                        <li class="nav-item dropdown">
-                                            <a class="nav-link dropdown-toggle" href="#" id="dropdown"~valueMenuCategorie data-bs-toggle="dropdown" aria-expanded="false">
-                                                {% if valueMenuCategorie.icone %}
-                                                    <i class="{{valueMenuCategorie.icone}}" aria-hidden="true"></i>
-                                                {% endif %}{{ valueMenuCategorie.Libelle }}
-                                            </a>
-                                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdown"~valueMenuCategorie>
-                                                {% for keyMenuSousCategorie, valueMenuSousCategorie in menus['menuSousCategorie'] %}
-                                                    {% if valueMenuSousCategorie.menuCategorie == valueMenuCategorie and (valueMenuSousCategorie.access in app.user.roles) %}
-                                                        <li>
-                                                            <a class="dropdown-item" href="{{ path(valueMenuSousCategorie.url) }}">
-                                                                <i class="{{valueMenuSousCategorie.icone}}" aria-hidden="true"></i>
-                                                                {{ valueMenuSousCategorie.Libelle }}
-                                                            </a>
-                                                        </li>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </ul>
-                                        </li>
-                                    {% else %}
-                                        <li class="nav-item">
-                                            <a class="nav-link"
-                                                {% if valueMenuCategorie.url %}
-                                                    href="{{ path(valueMenuCategorie.url) }}"
-                                                {% endif %}>
-                                                {% if valueMenuCategorie.url %}
-                                                    <i class="{{valueMenuCategorie.icone}}" aria-hidden="true"></i>
-                                                {% endif %}{{ valueMenuCategorie.Libelle }}
-                                            </a>
-                                        </li>
-                                    {% endif %}
-                                {% endif %}
-                            {% endfor %}
-                        </ul>
-
-                        <li class="nav-item dropdown">
-                            <a class="btn btn-dark" href="">
-                                <i class="fa fa-user-circle-o" aria-hidden="true">  {{ app.user.firstname }} {{ app.user.lastname }}</i>
-                            </a>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <a class="btn btn-dark" href="{{ path('app_logout') }}">
-                               <i class="fa fa-sign-out fa-1x" aria-hidden="true"></i>
-                            </a>
-                        </li>
-
-
-                    </div>
+            {% for message in app.flashes('danger') %}
+                <div class="alert alert-danger">
+                    {{ message }}
                 </div>
-            </nav>
-        </nav>
+            {% endfor %}
         {% endblock %}
         {% block content %}{% endblock %}
             <script src="{{ asset('fullcalendar/js/main.min.js') }}"></script>

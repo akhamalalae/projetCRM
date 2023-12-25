@@ -221,7 +221,16 @@ class AddChampsFormulaire implements InitialisationInterface, CreateFormInterfac
      * Save
      * @return void
      */
-    public function saveBeforeSubmitFormData()
+    public function beforeSave()
+    {
+    }
+
+     /**
+     * Save
+     *
+     * @return void
+     */
+    public function afterSave()
     {
     }
 

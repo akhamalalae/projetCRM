@@ -15,14 +15,15 @@ use Doctrine\ORM\EntityManagerInterface;
 class ChoixTableauBord implements InitialisationInterface, CreateFormInterface,
                         SubmittedFormInterface, RenderInterface, AddFlashInterface
 {
-    private int     $choix;
-    private object  $requeteTableauBord;
+    private int                      $choix;
+    private RequeteTableauBord|null  $requeteTableauBord;
 
-    const VIEW_PATH         = 'tableauBord/choixTableauBord.html.twig';
-    const CURRENT_PAGE      = 'formulaire';
-    const ROUTE             = 'tableau_de_bord';
-    const TYPE_FLASH        = 'warning';
-    const MESSAGE_FLASH     = 'Enregistrement effectué avec succès';
+    const VIEW_PATH                  = 'tableauBord/choixTableauBord.html.twig';
+    const CURRENT_PAGE               = 'formulaire';
+    const ROUTE                      = 'tableau_de_bord';
+    const TYPE_FLASH                 = 'warning';
+    const MESSAGE_FLASH_CREATE_BORD  = 'Créer un nouveau tableau de Bord';
+    const MESSAGE_FLASH_CHARGER_BORD = 'Charger le tableau de Bord : ';
 
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
@@ -149,7 +150,7 @@ class ChoixTableauBord implements InitialisationInterface, CreateFormInterface,
     public function saveSpecific($form)
     {
         $data                       = $form->getData();
-        $this->requeteTableauBord   = $data["RequeteTableauBord"] ? $data["RequeteTableauBord"] : $this->createNewObject();
+        $this->requeteTableauBord   = $data["RequeteTableauBord"];
         $this->choix                = $data["choix"];
     }
 
@@ -157,7 +158,16 @@ class ChoixTableauBord implements InitialisationInterface, CreateFormInterface,
      * Save
      * @return void
      */
-    public function saveBeforeSubmitFormData()
+    public function beforeSave()
+    {
+    }
+
+     /**
+     * Save
+     *
+     * @return void
+     */
+    public function afterSave()
     {
     }
 
@@ -208,6 +218,12 @@ class ChoixTableauBord implements InitialisationInterface, CreateFormInterface,
      */
     public function message()
     {
-        return self::MESSAGE_FLASH;
+        if ($this->choix === 0) {
+            //'Créer un nouveau tableau de Bord' => 0,
+            return self::MESSAGE_FLASH_CREATE_BORD;
+        }
+
+        //'Charger un tableau de Bord' => 1,
+        return self::MESSAGE_FLASH_CHARGER_BORD . $this->requeteTableauBord?->getLibelle();
     }
 }

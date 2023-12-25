@@ -11,33 +11,27 @@ use App\Entity\Entities;
 use App\Entity\EntitiesPropriete;
 use App\Entity\Formulaire;
 use App\Entity\RequeteTableauBord;
-use App\Entity\Typeschamps;
 use App\Form\TableauBord\TableauBordType;
 use App\Services\MenuGenerator;
-use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use DateTime;
 
-class TableauBord implements InitialisationInterface, CreateFormInterface,
+class TableauBord extends TableauBordCreateRequete implements InitialisationInterface, CreateFormInterface,
                         SubmittedFormInterface, RenderInterface, AddFlashInterface
 {
-    private int             $id;
-    private array           $listesChamps;
-    private array           $listesEntities;
-    private ArrayCollection $orignalRequeteTableauBordFiltres;
-    private object          $requeteTableauBord;
-    private bool            $warning = false;
-    private array|null      $resultatsRequeteTableauBord = null;
-    private bool            $checkIfValid = false;
+    private int                 $id = 0;
+    private ArrayCollection     $orignalRequeteTableauBordFiltres;
+    private array|null          $resultatsRequeteTableauBord = null;
+    private array               $listesChamps = [];
+    private array               $listesEntities = [];
 
     const VIEW_PATH         = 'tableauBord/index.html.twig';
     const CURRENT_PAGE      = 'formulaire';
     const FORM_NAME         = 'form';
+    const ROUTE             = 'tableau_de_bord';
     const TYPE_FLASH        = 'warning';
-    const MESSAGE_FLASH_1   = "Veuillez choisir les filtres de la requête!";
-    const MESSAGE_FLASH_2   = "Veuillez choisir les champs a afficher!";
-    const MESSAGE_FLASH_3   = "Veuillez remplir le nom de la requête!";
-    const MESSAGE_FLASH_4   = "Erreur de syntaxe du champ Valeur des filtres, veuillez regarder la documentation!";
+    const MESSAGE_FLASH     = "Requête effectué avec succés!";
 
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
@@ -45,10 +39,11 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
 
     //InitialisationInterface
 
-    /**
+     /**
      * Initialisation
      *
      * @param array $params
+     *
      * @return void
      */
     public function init($param)
@@ -57,26 +52,23 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
         $this->listesChamps     = $this->em->getRepository(EntitiesPropriete::class)->findBy(['status' => 0]);
         $this->listesEntities   = $this->em->getRepository(Entities::class)->findBy(['status' => 0]);
 
-        $this->orignalRequeteTableauBordFiltres = new ArrayCollection();
-
-        if ($this->id === 0) {
-            //'Créer un nouveau tableau de Bord' => 0,
-            $this->requeteTableauBord = $this->createNewObject();
-        }
-
         if ($this->id !== 0) {
-            //'Charger un tableau de Bord' => 1,
-            $this->requeteTableauBord = $this->em->getRepository(RequeteTableauBord::class)->find($this->id);
+            //'Charger un tableau de Bord'
+            $this->requeteTableauBord = $this->getRequeteTableauBordById();
+
+            $this->orignalRequeteTableauBordFiltres = new ArrayCollection();
 
             foreach ($this->requeteTableauBord->getRequeteTableauBordFiltres() as $champ) {
                 $this->orignalRequeteTableauBordFiltres->add($champ);
             }
+
+            $this->getResultatsRequeteTableauBord();
         }
     }
 
     //RenderInterface
 
-    /**
+     /**
      * view
      *
      * @return string
@@ -86,7 +78,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
         return self::VIEW_PATH;
     }
 
-    /**
+     /**
      * parameters
      *
      * @return array
@@ -97,6 +89,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
             'menus'                         => $this->menuGenerator->getMenu(),
             'current_page'                  => self::CURRENT_PAGE,
             'resultatsRequeteTableauBord'   => $this->resultatsRequeteTableauBord,
+            'libelleResultatsRequeteTB'     =>$this->libelleClauseSelect,
             'listes_champs'                 => $this->listesChamps ,
             'listes_entities'               => $this->listesEntities,
             'requete_tableau_bord_id'       => $this->id,
@@ -107,7 +100,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
 
     //CreateFormInterface
 
-    /**
+     /**
      * Set type create form
      *
      * @return string
@@ -117,7 +110,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
         return TableauBordType::class;
     }
 
-    /**
+     /**
      * Set name create form
      *
      * @return string
@@ -127,7 +120,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
         return self::FORM_NAME;
     }
 
-    /**
+     /**
      * Set data create form
      *
      * @return object|null
@@ -135,15 +128,15 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
     public function formData()
     {
         if ($this->id === 0) {
-            //'Créer un nouveau tableau de Bord' => 0,
+            //'Créer un nouveau tableau de Bord'
             return $this->requeteTableauBord = $this->createNewObject();
         }
 
-        //'Charger un tableau de Bord' => 1,
-        return $this->requeteTableauBord = $this->em->getRepository(RequeteTableauBord::class)->find($this->id);
+        //'Charger un tableau de Bord'
+        return $this->requeteTableauBord = $this->getRequeteTableauBordById();
     }
 
-    /**
+     /**
      * Create new object
      *
      * @return object|null
@@ -151,6 +144,16 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
     public function createNewObject()
     {
         return new RequeteTableauBord();
+    }
+
+    /**
+     * Get Requete Tableau Bord By Id
+     *
+     * @return RequeteTableauBord
+     */
+    public function getRequeteTableauBordById()
+    {
+        return $this->em->getRepository(RequeteTableauBord::class)->find($this->id);
     }
 
      /**
@@ -166,7 +169,7 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
         ];
     }
 
-    /**
+     /**
      * Set options create form
      *
      * @return array
@@ -178,35 +181,30 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
 
     //SubmittedFormInterface
 
-    /**
+     /**
      * Save form data
      *
      * @param Form $form
+     *
      * @return void
      */
     public function save($form)
     {
         $this->saveSpecific($form);
 
-        if ($this->warning === false) {
-            $this->em->persist($form->getData());
+        if ($this->warningIncorrectSyntax === false) {
+            $this->requeteTableauBord = $form->getData();
 
-            $requeteSQL = $this->createRequete($form->getData());
-
-            $resultat = $this->em->getRepository(Formulaire::class)->requeteTableauBordFiltres($requeteSQL);
-
-            $this->resultatsRequeteTableauBord = $this->formaterResultats($resultat);
-
-            // Ne pas enregistrer la requête
-            if ($this->id === 0 && $form->getData()->getEnregistrerRequete() === false) {
-                $this->em->remove($form->getData());
+            if ($this->requeteTableauBord->getEnregistrerRequete() === true) {
+                $this->em->persist($this->requeteTableauBord);
+                $this->em->flush();
             }
 
-            $this->em->flush();
+            $this->getResultatsRequeteTableauBord();
         }
     }
 
-    /**
+     /**
      * Save specific data
      *
      * @param Form $form
@@ -214,64 +212,69 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
      */
     public function saveSpecific($form)
     {
-        $this->checkIfValid = $this->checkValidSyntaxe(
-            $this->requeteTableauBord->getRequeteTableauBordFiltres()
-        );
-
-        if (count($this->requeteTableauBord->getRequeteTableauBordFiltres()) === 0) {
-            $this->warning = true;
-        }
-
-        if (count($this->requeteTableauBord->getPropertiesEntityChoixChamps()) === 0) {
-            $this->warning = true;
-        }
-
-        if (
-            $this->id == 0
-            && $this->requeteTableauBord->getEnregistrerRequete() === true
-            && $this->requeteTableauBord->getLibelle() === ''
-        ) {
-            $this->warning = true;
-        }
-
-        if ($this->checkIfValid  === true) {
-            $this->warning = true;
-        }
+        $this->beforeSave();
     }
 
     /**
      * Save
+     *
      * @return void
      */
-    public function saveBeforeSubmitFormData()
+    public function beforeSave()
+    {
+        $this->checkIfTheQuerySyntaxIsCorrect();
+
+        if ($this->id === 0) {
+            $this->requeteTableauBord->setDateCreation(new DateTime());
+        }
+
+        if ($this->id !== 0) {
+            $this->requeteTableauBord->setDateModification(new DateTime());
+        }
+    }
+
+     /**
+     * Save
+     *
+     * @return void
+     */
+    public function afterSave()
     {
     }
 
     //RedirectToRouteInterface
 
-    /**
+     /**
      * Name route
      *
      * @return string
      */
     public function route()
     {
+        if ($this->id === 0 && $this->warningIncorrectSyntax === false) {
+            return self::ROUTE;
+        }
+
         return '';
     }
 
-    /**
+     /**
      * parametersRoute
      *
      * @return array
      */
     public function parametersRoute()
     {
+        if ($this->id === 0) {
+            return ['id' => $this->requeteTableauBord?->getId()];
+        }
+
         return [];
     }
 
     //AddFlashInterface
 
-    /**
+     /**
      * Type Flash
      *
      * @return string
@@ -281,174 +284,28 @@ class TableauBord implements InitialisationInterface, CreateFormInterface,
         return self::TYPE_FLASH;
     }
 
-    /**
+     /**
      * Message Flash
      *
      * @return string
      */
     public function message()
     {
-        $message = '';
-
-        if (count($this->requeteTableauBord->getRequeteTableauBordFiltres()) === 0) {
-            $message = self::MESSAGE_FLASH_1;
+        if ($this->warningIncorrectSyntax === true) {
+            return $this->messageFlash;
         }
 
-        if (count($this->requeteTableauBord->getPropertiesEntityChoixChamps()) === 0) {
-            $message = self::MESSAGE_FLASH_2;
-        }
-
-        if (
-            $this->id === 0
-            && $this->requeteTableauBord->getEnregistrerRequete() === true
-            && $this->requeteTableauBord->getLibelle() === ''
-        ) {
-            $message = self::MESSAGE_FLASH_3;
-        }
-
-        if ($this->checkIfValid === true) {
-            $message = self::MESSAGE_FLASH_4;
-        }
-
-        return $message;
+        return self::MESSAGE_FLASH;
     }
 
-    /**
-     * formater le résultat de la requete
+     /**
+     * Get resultats Requete Tableau Bord
      *
-     * @param array $resultatsRequeteTableauBord
-     *
-     * @return array
+     * @return void
      */
-    public function formaterResultats(array $resultatsRequeteTableauBord)
+    public function getResultatsRequeteTableauBord()
     {
-        foreach ($resultatsRequeteTableauBord as $key => $var) {
-            foreach ($var as $keychamp => $varchamp) {
-                $explode = explode("_", $keychamp);
-
-                $champ = $this->em->getRepository(EntitiesPropriete::class)->find($explode[1]);
-
-                $resultatsRequeteTableauBord[$key][
-                    $champ->getName()." (".$champ->getEntitie()->getLibelle().")"
-                ] = $varchamp;
-
-                unset($resultatsRequeteTableauBord[$key][$keychamp]);
-            }
-        }
-
-        return $resultatsRequeteTableauBord;
-    }
-
-    /**
-     * vérifier la valeur saisie dans les filtres de la requete
-     *
-     * @return bool
-     */
-    public function checkValidSyntaxe($filtres)
-    {
-        $erreur = false;
-
-        foreach ($filtres as $filtre) {
-            $valeur = $filtre->getValeur();
-
-            if ($filtre->getEntitiesPropriete()->getTypesChamps()->getId() === Typeschamps::DATETYPE) {
-                $format = 'Y/m/d H:i';
-                $checkDateFormat = DateTimeImmutable::createFromFormat($format, $valeur);
-                if($checkDateFormat === false) {
-                    $erreur = true;
-                    break;
-                }
-            }
-
-            if ($filtre->getEntitiesPropriete()->getTypesChamps()->getId() === Typeschamps::BOOLEANTYPE) {
-                $valeur = $valeur === '0'? 0: 1;
-            }
-        }
-
-        return $erreur;
-    }
-
-    /**
-     * creation requete sql
-     *
-     * @param RequeteTableauBord $requeteTableauBord
-     *
-     * @return string
-     */
-    public function createRequete(RequeteTableauBord $requeteTableauBord)
-    {
-        $clauseWhere = '';
-        $clauseSelect = '';
-        $jointure = array();
-
-        foreach ($requeteTableauBord->getPropertiesEntityChoixChamps() as $champ) {
-            $property = $champ->getLibelle();
-            $id = $champ->getId();
-            $entityLibelle = $champ->getEntitie()->getLibelle();
-
-            if ($clauseSelect !== '') {
-                $clauseSelect .= " ,";
-            }
-
-            $clauseSelect .= lcfirst($entityLibelle) . "." . $property . " AS " . $property . "_" . $id;
-
-            $jointure = $this->createJoint($champ, $entityLibelle, $jointure);
-        }
-
-        foreach ($requeteTableauBord->getRequeteTableauBordFiltres() as $filtre) {
-            $property = $filtre->getEntitiesPropriete()->getLibelle();
-            $operator = $filtre->getTableauBordFiltreOperator()->getLibelle();
-            $valeur = $filtre->getValeur();
-
-            if ($operator == "Contient") {
-                $operator = "LIKE";
-                $valeur = "%$valeur%";
-            }
-
-            $condition = "";
-            if ($filtre->getTableauBordFiltreCondition() != '') {
-                $condition = $filtre->getTableauBordFiltreCondition()->getLibelle();
-            }
-
-            $nomJointureFiltre = lcfirst($filtre->getEntitiesPropriete()->getEntitie()->getLibelle());
-
-            $clauseWhere .= " $condition $nomJointureFiltre.$property $operator '$valeur' ";
-
-            $champ = $filtre->getEntitiesPropriete();
-            $entityLibelle = $filtre->getEntitie()->getLibelle();
-
-            $jointure = $this->createJoint($champ, $entityLibelle, $jointure);
-        }
-
-        $clauseJiointures = "";
-        foreach ($jointure as $uneJointure) {
-            $clauseJiointures .= " $uneJointure";
-        }
-
-        return "SELECT $clauseSelect FROM App\Entity\Formulaire formulaire $clauseJiointures WHERE $clauseWhere";
-    }
-
-    /**
-     * creation des joitures de la requete sql
-     *
-     * @param EntitiesPropriete $champ
-     * @param string $entityLibelle
-     * @param array $jointure
-     *
-     * @return array
-     */
-    public function createJoint(EntitiesPropriete $champ, string $entityLibelle, array $jointure)
-    {
-        if ($champ->getEntitieJoiture() != null && ! array_key_exists($entityLibelle, $jointure)) {
-            $propertyEntityJointure = $champ->getEntitieJoiture()->getLibelle();
-            $entityNomJointure = $champ->getEntitie()->getNomProprieteeJointure();
-
-            $jointure[$entityLibelle] =" LEFT JOIN "
-                . lcfirst($propertyEntityJointure)
-                . "." . $entityNomJointure
-                . " " . lcfirst($entityLibelle);
-        }
-
-        return $jointure;
+        $this->resultatsRequeteTableauBord = $this->em->getRepository(Formulaire::class)
+            ->requeteTableauBordFiltres($this->createRequete());
     }
 }

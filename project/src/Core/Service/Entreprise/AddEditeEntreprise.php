@@ -157,7 +157,16 @@ class AddEditeEntreprise implements InitialisationInterface, CreateFormInterface
      * Save
      * @return void
      */
-    public function saveBeforeSubmitFormData()
+    public function beforeSave()
+    {
+    }
+
+     /**
+     * Save
+     *
+     * @return void
+     */
+    public function afterSave()
     {
     }
 

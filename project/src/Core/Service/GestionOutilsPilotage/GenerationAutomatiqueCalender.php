@@ -176,7 +176,16 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
      * Save
      * @return void
      */
-    public function saveBeforeSubmitFormData()
+    public function beforeSave()
+    {
+    }
+
+     /**
+     * Save
+     *
+     * @return void
+     */
+    public function afterSave()
     {
     }
 
@@ -245,8 +254,8 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
      */
     public function historiqueGenerationAutomatiqueRouting($dateDebut, $ecart, $formulaires, $dateNow, $dateExecution)
     {
-        $historiqueGenerationAutomatiqueRouting = $this->createNewObject();
-        $historiqueGenerationAutomatiqueRouting->setDateDebut($dateDebut)
+        $historique = $this->createNewObject();
+        $historique->setDateDebut($dateDebut)
             ->setDateExecution($dateExecution)
             ->setEcartEnMunites($ecart)
             ->setDateCreation($dateNow)
@@ -254,13 +263,14 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
             ->setUserCreateur($this->user);
 
         foreach ($formulaires as $formulaire) {
-            $historiqueGenerationAutomatiqueRouting->addFormulaire($formulaire);
+            $historique->addFormulaire($formulaire);
         }
 
-        $this->generationAutomatique->create($historiqueGenerationAutomatiqueRouting);
-        $historiqueGenerationAutomatiqueRouting->setIsGenerer(true);
+        $this->generationAutomatique->create($historique);
 
-        $this->em->persist($historiqueGenerationAutomatiqueRouting);
+        $historique->setIsGenerer(true);
+
+        $this->em->persist($historique);
         $this->em->flush();
     }
 }

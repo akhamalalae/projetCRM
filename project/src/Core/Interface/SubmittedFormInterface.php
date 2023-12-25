@@ -27,5 +27,12 @@ interface SubmittedFormInterface
      *
      * @return void
      */
-    public function saveBeforeSubmitFormData();
+    public function beforeSave();
+
+    /**
+     * Save other data
+     *
+     * @return void
+     */
+    public function afterSave();
 }

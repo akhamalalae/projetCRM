@@ -202,7 +202,7 @@ class Calendar implements InitialisationInterface, CreateFormInterface,
     public function save($form)
     {
         $this->form = $form;
-        $this->saveBeforeSubmitFormData();
+        $this->afterSave();
     }
 
     /**
@@ -217,9 +217,19 @@ class Calendar implements InitialisationInterface, CreateFormInterface,
 
     /**
      * Save
+     *
      * @return void
      */
-    public function saveBeforeSubmitFormData()
+    public function beforeSave()
+    {
+    }
+
+     /**
+     * Save
+     *
+     * @return void
+     */
+    public function afterSave()
     {
         $events                 = $this->agendaFiltres($this->form);
         $this->countRendezVous  = count($events);

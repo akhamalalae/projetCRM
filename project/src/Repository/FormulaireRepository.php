@@ -43,14 +43,11 @@ class FormulaireRepository extends ServiceEntityRepository
 
     public function requeteTableauBordFiltres($requette)
     {
-        if ($requette != "") {
-            $entityManager = $this->getEntityManager();
-            $query = $entityManager->createQuery(
-                $requette
-            );
-            return $query->getResult();
-        }else {
-            return null;
-        }
+        $entityManager = $this->getEntityManager();
+
+        $query = $entityManager->createQuery(
+            $requette
+        );
+        return $query->getResult();
     }
 }
