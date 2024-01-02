@@ -64,6 +64,11 @@ class EntitiesPropriete
      */
     private $entitie_joiture;
 
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $fonctionAgregation;
+
     public function __construct()
     {
         $this->requeteTableauBordFiltres = new ArrayCollection();
@@ -219,6 +224,18 @@ class EntitiesPropriete
     public function setEntitieJoiture(?Entities $entitie_joiture): self
     {
         $this->entitie_joiture = $entitie_joiture;
+
+        return $this;
+    }
+
+    public function getFonctionAgregation(): ?string
+    {
+        return $this->fonctionAgregation;
+    }
+
+    public function setFonctionAgregation(?string $fonctionAgregation): self
+    {
+        $this->fonctionAgregation = $fonctionAgregation;
 
         return $this;
     }

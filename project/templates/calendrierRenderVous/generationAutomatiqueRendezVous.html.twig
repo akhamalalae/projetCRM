@@ -47,7 +47,7 @@
                                     </thead>
                                     <tbody>
                                         {% for routing in routings %}
-                                        {% set formulaires = "" %}
+                                            {% set formulaires = "" %}
                                             {% for formulaire in routing.formulaires %}
                                                 {% set formulaires = formulaires ~ formulaire.libelle ~ ',' %}
                                             {% endfor %}
@@ -62,15 +62,15 @@
                                                 <td>
                                                     {% if routing.isGenerer == true %}
                                                         <!-- Button trigger modal -->
-                                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal{{ routing.id }}">
                                                             <i class="fa fa-table" aria-hidden="true"></i>
                                                         </button>
                                                         <!-- Modal -->
-                                                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                        <div class="modal fade" id="exampleModal{{ routing.id }}" tabindex="-1" aria-labelledby="exampleModalLabel{{ routing.id }}" aria-hidden="true">
                                                             <div class="modal-dialog modal-fullscreen">
                                                                 <div class="modal-content">
                                                                     <div class="modal-header">
-                                                                        <h5 class="modal-title" id="exampleModalLabel">Routings</h5>
+                                                                        <h5 class="modal-title" id="exampleModalLabel{{ routing.id }}">Routings</h5>
                                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                     </div>
                                                                     <div class="modal-body">

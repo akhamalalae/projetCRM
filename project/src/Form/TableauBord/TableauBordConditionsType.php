@@ -47,6 +47,7 @@ class TableauBordConditionsType extends AbstractType
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('u')
                         ->andWhere('u.status = 0')
+                        ->andWhere('u.fonctionAgregation is null')
                         ->orderBy('u.libelle', 'ASC');
                 },
                 'choice_label' => 'getNameTypesChamps',

@@ -87,7 +87,7 @@ class RenderVous
     private $formulaire;
 
     /**
-     * @ORM\ManyToOne(targetEntity=HistoriqueGenerationAutomatiqueRouting::class, inversedBy="renderVous")
+     * @ORM\ManyToOne(targetEntity=HistoriqueGenerationAutomatiqueRouting::class, cascade={"persist"}, inversedBy="renderVous")
      */
     private $historiqueGenerationAutomatiqueRouting;
 

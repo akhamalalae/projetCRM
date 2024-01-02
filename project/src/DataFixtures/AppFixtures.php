@@ -116,7 +116,9 @@ class AppFixtures extends Fixture
 
             for ($f = 0; $f < 5; $f++) {
                 $entreprise = $this->createEntreprises($manager, $f);
-                $formulaire->addEntreprise($entreprise);
+                if ($entreprise) {
+                    $formulaire->addEntreprise($entreprise);
+                }
             }
 
             for ($f = 0; $f < 5; $f++) {
@@ -159,7 +161,7 @@ class AppFixtures extends Fixture
     {
         $generator = Faker\Factory::create('fr_FR');
         $dateNoow = new DateTime();
-        $ville = $manager->getRepository(Ville::class)->find(30905);
+        $ville = $manager->getRepository(Ville::class)->find(rand(1, 30905));
         $company = $generator->Company();
 
         $entreprise = new Entreprise();
@@ -174,7 +176,7 @@ class AppFixtures extends Fixture
         $entreprise->setCapitalSocial("1200000000000000");
         $entreprise->setDateCreation($dateNoow);
         $entreprise->setVille($ville);
-        $entreprise->setAdresse("Adresse ". $i);
+        $entreprise->setAdresse("Adresse ". $i . $company);
 
         $manager->persist($entreprise);
 
@@ -185,7 +187,7 @@ class AppFixtures extends Fixture
             $pointVente->setStatus(0);
             $pointVente->addEntreprise($entreprise);
             $pointVente->setVille($ville);
-            $pointVente->setAdresse("Adresse ". $j);
+            $pointVente->setAdresse("Adresse ". $j . $company);
 
             $manager->persist($pointVente);
         }

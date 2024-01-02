@@ -8,17 +8,24 @@ use App\Core\Interface\RedirectToRouteInterface;
 use App\Core\Interface\RenderInterface;
 use App\Core\Interface\SubmittedFormInterface;
 use App\Entity\HistoriqueGenerationAutomatiqueRouting;
+use App\Entity\User;
 use App\Form\Planning\GenerationAutomatiqueRendezVousType;
 use App\Services\GenerationAutomatiqueRendezVous;
 use App\Services\MenuGenerator;
 use Doctrine\ORM\EntityManagerInterface;
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
 
 class GenerationAutomatiqueCalender implements RenderInterface, InitialisationInterface, CreateFormInterface,
                                             SubmittedFormInterface, RedirectToRouteInterface
 {
-    private object   $user;
-    private DateTime $dateDebut;
+    private User                $user;
+    private int                 $ecart;
+    private DateTime            $dateDebut;
+    private DateTime            $dateExecution;
+    private DateTime            $dateNow;
+    private ArrayCollection     $formulaires;
+
 
     const VIEW_PATH         = 'calendrierRenderVous/generationAutomatiqueRendezVous.html.twig';
     const CURRENT_PAGE      = 'automatisation_routing';
@@ -155,20 +162,14 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
      */
     public function saveSpecific($form)
     {
-        $this->dateDebut    = $form->getData()["start"];
-        $ecart              = $form->getData()["nbrMinutes"];
-        $formulaires        = $form->getData()["formulaires"];
-        $dateExecution      = $form->getData()["dateExecution"];
-        $dateNoow           = new DateTime();
+        $this->dateDebut          = $form->getData()["start"];
+        $this->ecart              = $form->getData()["nbrMinutes"];
+        $this->formulaires        = $form->getData()["formulaires"];
+        $this->dateExecution      = $form->getData()["dateExecution"];
+        $this->dateNow            = new DateTime();
 
         if (intval($this->dateDebut->format('H')) > 8 || intval($this->dateDebut->format('H')) < 18) {
-            $this->historiqueGenerationAutomatiqueRouting(
-                $this->dateDebut,
-                $ecart,
-                $formulaires,
-                $dateNoow,
-                $dateExecution
-            );
+            $this->historiqueGenerationAutomatiqueRouting();
         }
     }
 
@@ -244,25 +245,20 @@ class GenerationAutomatiqueCalender implements RenderInterface, InitialisationIn
     /**
      * Save specific data
      *
-     * @param DateTime $dateDebut
-     * @param int $ecart
-     * @param array $formulaires
-     * @param DateTime $dateNow
-     * @param DateTime $dateExecution
-     *
      * @return void
      */
-    public function historiqueGenerationAutomatiqueRouting($dateDebut, $ecart, $formulaires, $dateNow, $dateExecution)
-    {
+    public function historiqueGenerationAutomatiqueRouting(){
         $historique = $this->createNewObject();
-        $historique->setDateDebut($dateDebut)
-            ->setDateExecution($dateExecution)
-            ->setEcartEnMunites($ecart)
-            ->setDateCreation($dateNow)
+
+        $historique
+            ->setDateDebut($this->dateDebut)
+            ->setDateExecution($this->dateExecution)
+            ->setEcartEnMunites($this->ecart)
+            ->setDateCreation($this->dateNow)
             ->setIsGenerer(false)
             ->setUserCreateur($this->user);
 
-        foreach ($formulaires as $formulaire) {
+        foreach ($this->formulaires as $formulaire) {
             $historique->addFormulaire($formulaire);
         }
 

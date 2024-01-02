@@ -16,7 +16,7 @@ class TableauBordCreateRequete
     protected string              $clauseSelect = '';
     protected string              $clauseWhere = '';
     protected string              $clauseGroupeBy = '';
-    protected string              $messageFlash = '';
+    protected string              $messageFlashSyntax = '';
     protected bool                $warningIncorrectSyntax = false;
     protected bool                $checkIfValid = false;
 
@@ -34,7 +34,7 @@ class TableauBordCreateRequete
      *
      * @return string
      */
-    protected function createRequete()
+    protected function createRequete():string
     {
         $this->createRequeteChoixChamps();
 
@@ -42,8 +42,15 @@ class TableauBordCreateRequete
 
         $clauseJiointures = implode(' ',$this->jointure);
 
+        dump(sprintf(
+            "SELECT DISTINCT %s FROM App\Entity\Formulaire formulaire %s WHERE %s GROUP BY %s",
+            $this->clauseSelect,
+            $clauseJiointures,
+            $this->clauseWhere,
+            $this->clauseGroupeBy
+        ));
         return sprintf(
-            "SELECT %s FROM App\Entity\Formulaire formulaire %s WHERE %s GROUP BY %s",
+            "SELECT DISTINCT %s FROM App\Entity\Formulaire formulaire %s WHERE %s GROUP BY %s",
             $this->clauseSelect,
             $clauseJiointures,
             $this->clauseWhere,
@@ -59,36 +66,95 @@ class TableauBordCreateRequete
     protected function createRequeteChoixChamps()
     {
         foreach ($this->requeteTableauBord->getPropertiesEntityChoixChamps() as $champ) {
-            $property         = $champ->getLibelle();
-            $propertyName     = $champ->getName();
-            $id               = $champ->getId();
-            $entityLibelle    = $champ->getEntitie()->getLibelle();
-            $clauseSelectName = sprintf("%s_%s", $property, $id);
+            $property           = $champ->getLibelle();
+            $propertyName       = $champ->getName();
+            $id                 = $champ->getId();
+            $entityLibelle      = $champ->getEntitie()->getLibelle();
+            $clauseSelectName   = sprintf("%s_%s", $property, $id);
+            $fonctionAgregation = $champ->getFonctionAgregation();
 
             if (strpos($this->clauseSelect, $clauseSelectName) === false) {
-                $this->libelleClauseSelect[$clauseSelectName] = sprintf(
-                    "%s (%s)",
-                    $propertyName,
-                    $entityLibelle
-                );
+                if ($fonctionAgregation === null) {
+                    $this->createClauseGroupeBy($clauseSelectName);
+                }
 
-                $this->clauseGroupeBy .= sprintf(
-                    "%s %s",
-                    ($this->clauseGroupeBy) !== '' ? ',' : '',
-                    $clauseSelectName
-                );
+                $this->createNameClauseSelect(
+                    $entityLibelle,
+                    $clauseSelectName,
+                    $propertyName);
 
-                $this->clauseSelect .= sprintf(
-                    "%s %s.%s AS %s",
-                    ($this->clauseSelect) !== '' ? ',' : '',
-                    lcfirst($entityLibelle),
-                    $property,
-                    $clauseSelectName
-                );
+                $this->createClauseSelect(
+                     $fonctionAgregation,
+                     $entityLibelle,
+                     $property,
+                     $clauseSelectName);
 
                 $this->createJoint($champ, $entityLibelle);
             }
         }
+    }
+
+    /**
+     * clauseSelect
+     *
+     * @param string $entityLibelle
+     * @param string $clauseSelectName
+     * @param string $propertyName
+     *
+     * @return void
+     */
+    protected function createNameClauseSelect(
+        string $entityLibelle,
+        string $clauseSelectName,
+        string $propertyName)
+    {
+        $this->libelleClauseSelect[$clauseSelectName] = sprintf(
+            "%s (%s)",
+            $propertyName,
+            $entityLibelle
+        );
+    }
+
+     /**
+     * clauseSelect
+     *
+     * @param string|null $fonctionAgregation
+     * @param string $entityLibelle
+     * @param string $property
+     * @param string $clauseSelectName
+     *
+     * @return void
+     */
+    protected function createClauseSelect(
+        string|null $fonctionAgregation,
+        string $entityLibelle,
+        string $property,
+        string $clauseSelectName)
+    {
+        $this->clauseSelect .= sprintf(
+            "%s %s(%s.%s) AS %s",
+            ($this->clauseSelect) !== '' ? ',' : '',
+            ($fonctionAgregation) !== null ? $fonctionAgregation : '',
+            lcfirst($entityLibelle),
+            $property,
+            $clauseSelectName
+        );
+    }
+
+     /**
+     * clauseGroupeBy
+     *
+     * @param string $clauseSelectName
+     *
+     * @return void
+     */
+    protected function createClauseGroupeBy(string $clauseSelectName)
+    {
+        $this->clauseGroupeBy .= sprintf(
+            "%s %s",
+            ($this->clauseGroupeBy) !== '' ? ',' : '',
+            $clauseSelectName
+        );
     }
 
      /**
@@ -139,7 +205,7 @@ class TableauBordCreateRequete
             $entityNomJointure      = $champ->getEntitie()->getNomProprieteeJointure();
 
             $this->jointure[$entityLibelle] = sprintf(
-                " LEFT JOIN %s.%s %s",
+                "  LEFT JOIN %s.%s %s",
                 lcfirst($propertyEntityJointure),
                 $entityNomJointure,
                 lcfirst($entityLibelle)
@@ -156,12 +222,12 @@ class TableauBordCreateRequete
     {
         if (count($this->requeteTableauBord->getRequeteTableauBordFiltres()) === 0) {
             $this->warningIncorrectSyntax   = true;
-            $this->messageFlash             = self::MESSAGE_FLASH_1;
+            $this->messageFlashSyntax       = self::MESSAGE_FLASH_1;
         }
 
         if (count($this->requeteTableauBord->getPropertiesEntityChoixChamps()) === 0) {
             $this->warningIncorrectSyntax   = true;
-            $this->messageFlash             = self::MESSAGE_FLASH_2;
+            $this->messageFlashSyntax       = self::MESSAGE_FLASH_2;
         }
 
         if (
@@ -169,14 +235,14 @@ class TableauBordCreateRequete
             && $this->requeteTableauBord->getLibelle() === null
         ) {
             $this->warningIncorrectSyntax   = true;
-            $this->messageFlash             = self::MESSAGE_FLASH_3;
+            $this->messageFlashSyntax       = self::MESSAGE_FLASH_3;
         }
 
-        $this->checkValidSyntaxe($this->requeteTableauBord->getRequeteTableauBordFiltres());
+        $this->checkValidSyntaxe();
 
         if ($this->checkIfValid === true) {
             $this->warningIncorrectSyntax   = true;
-            $this->messageFlash             = self::MESSAGE_FLASH_4;
+            $this->messageFlashSyntax       = self::MESSAGE_FLASH_4;
         }
     }
 
@@ -185,9 +251,9 @@ class TableauBordCreateRequete
      *
      * @return void
      */
-    protected function checkValidSyntaxe($filtres)
+    protected function checkValidSyntaxe()
     {
-        foreach ($filtres as $filtre) {
+        foreach ($this->requeteTableauBord->getRequeteTableauBordFiltres() as $filtre) {
             $valeur = $filtre->getValeur();
 
             if ($filtre->getEntitiesPropriete()->getTypesChamps()->getId() === Typeschamps::DATETYPE) {
@@ -200,7 +266,7 @@ class TableauBordCreateRequete
             }
 
             if ($filtre->getEntitiesPropriete()->getTypesChamps()->getId() === Typeschamps::BOOLEANTYPE) {
-                $valeur = $valeur === '0' ? 0: 1;
+                $valeur = $valeur === '0' ? 0 : 1;
             }
         }
     }

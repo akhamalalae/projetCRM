@@ -48,7 +48,7 @@ class RenderVousRepository extends ServiceEntityRepository
 
     public function findRendezVousByIntervenentBetweenTowDate($dateDebut, $dateFin, $intervenant)
     {
-        $resultats = $this->createQueryBuilder('r')
+        return $this->createQueryBuilder('r')
             ->andWhere('r.start >= :dateDebut')
             ->andWhere('r.end <= :dateFin')
             ->andWhere('r.intervenant = :intervenant')
@@ -59,7 +59,6 @@ class RenderVousRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
         ;
-        return $resultats;
     }
 
     public function findRealizeRendezVous($user)

@@ -156,10 +156,10 @@
         </div>
 </div>
 <div class="container col-xxl-12 px-6 py-5">
+        <h2>Résultats de la requête</h2>
+        <hr>
+        <br>
         {% if resultatsRequeteTableauBord != null %}
-            <h2>Résultats de la requête</h2>
-            <hr>
-            <br>
             <div id="resultats">
                 <table id="table_id" class="display nowrap" style="width:100%">
                     <thead>
@@ -195,6 +195,10 @@
                     </tbody>
                 </table>
             </div>
+        {% else %}
+            <tr>
+                <td colspan="10">Aucun résultat retourné par la requête</td>
+            </tr>
         {% endif %}
 </div>
 </main>

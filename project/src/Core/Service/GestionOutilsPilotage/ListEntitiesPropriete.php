@@ -28,14 +28,15 @@ class ListEntitiesPropriete implements AjaxInterface
         $listEntitiesPropriete  = "";
 
         $entitiesProprietes = $this->em->getRepository(EntitiesPropriete::class)->findBy(
-            ['entitie' => $idEntite, 'status' => 0]
+            ['entitie' => $idEntite, 'status' => 0, 'fonctionAgregation' => null]
         );
 
-        foreach ($entitiesProprietes as $une_prop) {
-            $listEntitiesPropriete .= "<option value=".$une_prop->getId()
-                                ." >".$une_prop->getName()
-                                ."( ".$une_prop->getTypesChamps()->getLibelle()
-                                ." )"."</option>";
+        foreach ($entitiesProprietes as $prop) {
+            $listEntitiesPropriete .=  sprintf('<option value="%s" > %s (%s) </option>',
+                $prop->getId(),
+                $prop->getName(),
+                $prop->getTypesChamps()->getLibelle()
+            );
         }
 
         return ['listes_EntitiesPropriete' => $listEntitiesPropriete];
