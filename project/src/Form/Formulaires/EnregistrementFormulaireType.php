@@ -19,6 +19,7 @@ class EnregistrementFormulaireType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $champsFormulaires = $options['champsFormulaires'];
+
         foreach ($champsFormulaires as $champ) {
             if($champ->getStatus() == false){
                 $nomChamp = $champ->getLibelle();

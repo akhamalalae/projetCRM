@@ -10,7 +10,6 @@ use App\Core\Interface\SubmittedFormInterface;
 use App\Entity\ChampsFormulaire;
 use App\Entity\EnregistrementFormulaire;
 use App\Entity\Files;
-use App\Entity\Formulaire;
 use App\Entity\RenderVous;
 use App\Form\Formulaires\EnregistrementFormulaireType;
 use App\Services\MenuGenerator;
@@ -22,10 +21,10 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
 {
     private int     $id;
     private object  $user;
-    private object  $dataFormulaire;
+    private object  $formulaire;
     private object  $rendezVous;
     private string  $directory;
-    private object  $dataenregistrementFormulaire;
+    private object  $enregistrementFormulaire;
     private array   $datachampsFormulaires = [];
     private array   $resultats = [];
 
@@ -33,6 +32,10 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
     const ROUTE             = 'calendar_vue_agenda';
     const TYPE_FLASH        = 'warning';
     const MESSAGE_FLASH     = 'Enregistrement effectué avec succès';
+    const FILE              = 'files';
+    const OUI               = 'oui';
+    const NON               = 'non';
+    const DATE_FORMAT       = 'Y-m-d H:i:s';
 
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
@@ -42,19 +45,23 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      * Initialisation
      *
      * @param array $params
+     * 
      * @return void
      */
-    public function init($param)
+    public function init($param): void
     {
         $this->id        = $param['id'];
         $this->user      = $param['user'];
         $this->directory = $param['directory'];
-        
-        $this->datachampsFormulaires = $this->em->getRepository(ChampsFormulaire::class)->findBy(
-            ['formulaire' => $this->id,'status' => 0], ['ordre' => 'ASC']
-        );
+
         $this->rendezVous = $this->em->getRepository(RenderVous::class)->find($this->id);
-        $this->dataFormulaire = $this->em->getRepository(Formulaire::class)->find($this->rendezVous->getFormulaire());
+
+        $this->formulaire = $this->rendezVous->getFormulaire();
+
+        $this->datachampsFormulaires = $this->em->getRepository(ChampsFormulaire::class)->findBy(
+            ['formulaire' => $this->formulaire, 'status' => 0],
+            ['ordre' => 'ASC']
+        );
     }
 
     //RenderInterface
@@ -64,7 +71,7 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      *
      * @return string
      */
-    public function view()
+    public function view(): string
     {
         return self::VIEW_PATH;
     }
@@ -74,11 +81,11 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      *
      * @return array
      */
-    public function parameters()
+    public function parameters(): array
     {
         return [
             'menus'      => $this->menuGenerator->getMenu(),
-            'formulaire' => $this->dataFormulaire
+            'formulaire' => $this->formulaire
         ];
     }
 
@@ -89,7 +96,7 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      *
      * @return string
      */
-    public function formType()
+    public function formType(): string
     {
         return EnregistrementFormulaireType::class;
     }
@@ -99,7 +106,7 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      *
      * @return string
      */
-    public function formName()
+    public function formName(): string
     {
         return 'form';
     }
@@ -109,9 +116,9 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      *
      * @return object|null
      */
-    public function formData()
+    public function formData(): object|null
     {
-        return $this->datachampsFormulaires;
+        return null;
     }
 
     /**
@@ -119,17 +126,17 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      *
      * @return object|null
      */
-    public function createNewObject()
+    public function createNewObject(): object
     {
         return new EnregistrementFormulaire();
     }
 
-     /**
+    /**
      * Set options create form
      *
      * @return array
      */
-    public function formOptions()
+    public function formOptions(): array
     {
         return ['champsFormulaires' => $this->datachampsFormulaires];
     }
@@ -139,7 +146,7 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      *
      * @return array
      */
-    public function formOtherOptions()
+    public function formOtherOptions(): array
     {
         return [];
     }
@@ -150,107 +157,49 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      * Save form data
      *
      * @param Form $form
+     *
      * @return void
      */
-    public function save($form)
+    public function save($form): void
     {
         $this->saveSpecific($form);
+
+        $this->rendezVous->setEffectuer(true);
+
+        $this->em->persist($this->rendezVous);
+        $this->em->flush();
     }
 
     /**
      * Save specific data
      *
      * @param Form $form
+     *
      * @return void
      */
-    public function saveSpecific($form)
+    public function saveSpecific($form): void
     {
-        $this->dataenregistrementFormulaire = $this->createNewObject();
-        $resultats = $this->getResultats($form, $this->datachampsFormulaires);
-        $this->dataenregistrementFormulaire->setDateCreation(new DateTime())
+        $this->enregistrementFormulaire = $this->createNewObject();
+
+        $this->getResultats($form);
+
+        $this->enregistrementFormulaire->setDateCreation(new DateTime())
             ->setDateModification(new DateTime())
-            ->setFormulaires($this->dataFormulaire)
+            ->setFormulaires($this->formulaire)
             ->setIntervenant($this->user)
-            ->setResultats($resultats)
+            ->setResultats($this->resultats)
             ->setCalanderRendezVous($this->rendezVous);
 
-        $this->em->persist($this->dataenregistrementFormulaire);
-
-        $this->rendezVous->setEffectuer(true);
-        $this->em->persist($this->rendezVous);
-
+        $this->em->persist($this->enregistrementFormulaire);
         $this->em->flush();
     }
 
     /**
-     *
-     * @param Form   $form
-     * @param array  $champsFormulaires
-     *
-     * @return array
-     */
-    public function getResultats($form, $champsFormulaires): array
-    {
-        foreach ($form->getData() as $key => $value) {
-            $isFile = '';
-            if (str_contains($key, 'files')) {
-                //cas champs files
-                $explodeChampId = explode("_", $key);
-                $key = $explodeChampId[1];
-                $isFile = $explodeChampId[0];
-            }
-            $this->uplayResultats($form, $champsFormulaires, $key, $value, $isFile);
-        }
-
-        return $this->resultats;
-    }
-
-     /**
-     * @return void
-     */
-    public function uplayResultats($form, $champsFormulaires, $key, $value, $isFile)
-    {
-        foreach ($champsFormulaires as $champ) {
-            $champId = $champ->getId();
-            if ($champId == $key) {
-                if ($isFile == 'files') {
-                    $listeFichiers = $form->get($isFile.'_'.$key)->getData();
-                    foreach($listeFichiers as $un_fichier) {
-                        $fichier = md5(uniqid()).'.'.$un_fichier->guessExtension();
-
-                        $un_fichier->move($this->directory, $fichier);
-
-                        $file = new Files();
-                        $file->setDateCreation(new DateTime());
-                        $file->setDateModification(new DateTime());
-                        $file->setFile($fichier);
-                        $file->setChampsFormulaire($this->em->getRepository(ChampsFormulaire::class)->find($key));
-                        $file->setName($un_fichier->getClientOriginalName());
-                        $this->dataenregistrementFormulaire->addFile($file);
-                    }
-                    $this->resultats[$champId] = "files";
-                }else {
-                    if (is_object($value) && ($value instanceof DateTime) ) {
-                        $this->resultats[$champId] = $value->format('Y-m-d H:i:s');
-                    }else {
-                        if($value === true) {
-                            $this->resultats[$champId] = "OUI";
-                        }elseif($value === false) {
-                            $this->resultats[$champId] = "NON";
-                        }else {
-                            $this->resultats[$champId] = $value;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Save
+     * 
      * @return void
      */
-    public function beforeSave()
+    public function beforeSave(): void
     {
     }
 
@@ -259,7 +208,7 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      *
      * @return void
      */
-    public function afterSave()
+    public function afterSave(): void
     {
     }
 
@@ -270,17 +219,17 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      *
      * @return string
      */
-    public function route()
+    public function route(): string
     {
         return self::ROUTE;
     }
 
     /**
-     * parametersRoute
+     * parameter sRoute
      *
      * @return array
      */
-    public function parametersRoute()
+    public function parametersRoute(): array
     {
         return [];
     }
@@ -292,7 +241,7 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      *
      * @return string
      */
-    public function type()
+    public function type(): string
     {
         return self::TYPE_FLASH;
     }
@@ -302,8 +251,93 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
      *
      * @return string
      */
-    public function message()
+    public function message(): string
     {
         return self::MESSAGE_FLASH;
+    }
+
+    /**
+     * récupérer le résultat
+     *
+     * @param Form $fom
+     * 
+     * @return void
+     */
+    public function getResultats($form): void
+    {
+        foreach ($form->getData() as $champId => $value) {
+            $isFile = '';
+            if (str_contains($champId, self::FILE)) {
+                //cas champs files
+                $explode = explode("_", $champId);
+                $champId = $explode[1];
+                $isFile  = $explode[0];
+            }
+
+            $champFormulaire = $this->em->getRepository(ChampsFormulaire::class)->find($champId);
+
+            if ($champFormulaire) {
+                if ($isFile === self::FILE) {
+                    $fichiers = $form->get($isFile . '_' . $champId)->getData();
+                    $this->addFiles($fichiers, $champFormulaire);
+                    $this->resultats[$champId] = self::FILE;
+                }
+
+                if ($isFile !== self::FILE) {
+                   $this->formatResultats($champId, $value);
+                }
+            }
+        }
+    }
+
+    /**
+     * formater le résultat
+     *
+     * @param int $champId
+     * @param mixed $form
+     *
+     * @return void
+     */
+    public function formatResultats(int $champId, mixed $value): void
+    {
+        switch ($value) {
+            case $value === true:
+                $this->resultats[$champId] = self::OUI;
+                break;
+            case $value === false:
+                $this->resultats[$champId] = self::NON;
+                break;
+            case is_object($value) && ($value instanceof DateTime):
+                $this->resultats[$champId] = $value->format(self::DATE_FORMAT);
+                break;
+            default:
+                $this->resultats[$champId] = $value;
+        }
+    }
+
+    /**
+     * ajouter les fichiers
+     *
+     * @param array             $fichiers
+     * @param ChampsFormulaire  $champFormulaire
+     *
+     * @return void
+     */
+    public function addFiles(array $fichiers, ChampsFormulaire $champFormulaire): void
+    {
+        foreach($fichiers as $fichier) {
+            $hashFichier = md5(uniqid()).'.'.$fichier->guessExtension();
+            $fichier->move($this->directory, $hashFichier);
+
+            $file = new Files();
+
+            $file->setDateCreation(new DateTime())
+                ->setDateModification(new DateTime())
+                ->setFile($hashFichier)
+                ->setChampsFormulaire($champFormulaire)
+                ->setName($fichier->getClientOriginalName());
+
+            $this->enregistrementFormulaire->addFile($file);
+        }
     }
 }

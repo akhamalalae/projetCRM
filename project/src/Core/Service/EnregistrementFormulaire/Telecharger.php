@@ -13,7 +13,7 @@ class Telecharger implements InitialisationInterface
 {
     private int    $id;
     private object $formulaire;
-    private object $enregistrementFormulaire;
+    private array  $enregistrement;
     private string $fields = '';
     private string $lineData = '';
     private string $format = '';
@@ -30,14 +30,45 @@ class Telecharger implements InitialisationInterface
      */
     public function init($param)
     {
-        $this->id     = $param['id'];
-        $this->format = $param['format'];
-
-        $this->formulaire = $this->em->getRepository(Formulaire::class)->find($this->id);
-
-        $this->enregistrementFormulaire = $this->em->getRepository(EnregistrementFormulaire::class)->findBy(
+        $this->id             = $param['id'];
+        $this->format         = $param['format'];
+        $this->formulaire     = $this->em->getRepository(Formulaire::class)->find($this->id);
+        $this->enregistrement = $this->em->getRepository(EnregistrementFormulaire::class)->findBy(
             ['formulaires' => $this->formulaire]
         );
+    }
+
+    /**
+     * Response content
+     *
+     * @return string
+     */
+    public function content(): string
+    {
+        return $this->telecharger()['resultat'];
+    }
+
+    /**
+     * Response status
+     *
+     * @return int
+     */
+    public function status(): int
+    {
+        return 200;
+    }
+
+    /**
+     * Headers status
+     *
+     * @return array
+     */
+    public function headers(): array
+    {
+        return [
+            'Content-Type' => 'application/vnd.ms-excel',
+            "Content-disposition" => "attachment; filename=".$this->telecharger()['fileName']
+        ];
     }
 
     /**
@@ -45,34 +76,62 @@ class Telecharger implements InitialisationInterface
      *
      * @return array
      */
-    public function telecharger()
+    public function telecharger(): array
     {
-        $this->getFieldsAndLineData();
-
         return [
-            'resultat' => $this->fields."\n".$this->lineData,
+            'resultat' => $this->getResults(),
             'fileName' => $this->getNameFile()
         ];
     }
 
     /**
-     * getFields And LineData
+     * get Results
      *
      * @return void
      */
-    public function getFieldsAndLineData()
+    public function getResults(): string
     {
-        foreach ($this->enregistrementFormulaire[0]->getResultats() as $key => $value) {
-            $champsformulaire = $this->em->getRepository(ChampsFormulaire::class)->find($key);
-            $this->fields = $this->fields.$champsformulaire->getLibelle().",";
-        }
+        $this->getFields();
+        $this->getLineData();
 
-        foreach ($this->enregistrementFormulaire as $key => $value) {
-            foreach ($value->getResultats() as $valueEnregistrementFormulaire) {
-                if(is_array($valueEnregistrementFormulaire)){
-                    $valueEnregistrementFormulaire = $valueEnregistrementFormulaire["date"];
+        return $this->fields."\n".$this->lineData;
+    }
+
+    /**
+     * get Fields
+     *
+     * @return void
+     */
+    public function getFields(): void
+    {
+        foreach ($this->enregistrement[0]->getResultats() as $key => $value) {
+            $champsformulaire = $this->em->getRepository(ChampsFormulaire::class)->find($key);
+            $this->fields = sprintf('%s%s%s',
+                $this->fields,
+                $champsformulaire->getLibelle(),
+                ','
+            );
+        }
+    }
+
+    /**
+     * get Line Data
+     *
+     * @return void
+     */
+    public function getLineData(): void
+    {
+        foreach ($this->enregistrement as $enregistrement) {
+            foreach ($enregistrement->getResultats() as $result) {
+                if (is_array($result)) {
+                    $result = $result["date"];
                 }
-                $this->lineData = $this->lineData.$valueEnregistrementFormulaire.",";
+            
+                $this->lineData = sprintf('%s%s%s',
+                    $this->lineData,
+                    $result,
+                    ','
+                );
             }
             $this->lineData .="\n";
         }
@@ -83,8 +142,13 @@ class Telecharger implements InitialisationInterface
      *
      * @return string
      */
-    public function getNameFile()
+    public function getNameFile(): string
     {
-        return "resultats_formulaire_".$this->formulaire->getLibelle()."_".date('Y-m-d') . "." .$this->format;
+        return sprintf('resultats_formulaire_%s_%s.%s',
+            $this->formulaire->getLibelle(),
+            date('Y-m-d'),
+            $this->format
+        );
     }
 }
+

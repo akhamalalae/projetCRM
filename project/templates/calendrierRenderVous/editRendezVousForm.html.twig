@@ -118,7 +118,7 @@
         var selected = e.value;
         $.ajax({
             //L'URL de la requête
-            url: "{{ path('get_point_ventes_calander') }}",
+            url: "{{ path('getProduitsFormulairesOptions') }}",
             //La méthode d'envoi (type de requête)
             method: "GET",
             data: {'selected':selected},

@@ -13,7 +13,7 @@ class ReferentielsList implements RenderInterface
     {
     }
 
-    const VIEW_PATH         = 'referentiels/index.html.twig';
+    const VIEW_PATH = 'referentiels/index.html.twig';
 
     //RenderInterface
 

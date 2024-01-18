@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\RequeteTableauBordRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -12,6 +13,11 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class RequeteTableauBord
 {
+    const MESSAGE_FLASH_1   = "Veuillez choisir les filtres de la requête!";
+    const MESSAGE_FLASH_2   = "Veuillez choisir les champs a afficher!";
+    const MESSAGE_FLASH_3   = "Veuillez remplir le nom de la requête!";
+    const MESSAGE_FLASH_4   = "Erreur de syntaxe du champ Valeur des filtres, veuillez regarder la documentation!";
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -164,5 +170,60 @@ class RequeteTableauBord
         $this->dateModification = $dateModification;
 
         return $this;
+    }
+
+    public function checkRequeteValidSyntax(): array
+    {
+        $warning   = false;
+        $message   = '';
+
+        if (count($this->getRequeteTableauBordFiltres()) === 0) {
+            $warning   = true;
+            $message   = self::MESSAGE_FLASH_1;
+        }
+
+        if (count($this->getPropertiesEntityChoixChamps()) === 0) {
+            $warning  = true;
+            $message  = self::MESSAGE_FLASH_2;
+        }
+
+        if (
+            $this->getEnregistrerRequete() === true
+            && $this->getLibelle() === null
+        ) {
+            $warning   = true;
+            $message   = self::MESSAGE_FLASH_3;
+        }
+
+        if ($this->checkValidSyntaxe() === true) {
+            $warning  = true;
+            $message  = self::MESSAGE_FLASH_4;
+        }
+
+        return [
+            'warning'   => $warning,
+            'message'   => $message
+        ];
+    }
+
+    public function checkValidSyntaxe(): bool
+    {
+        foreach ($this->getRequeteTableauBordFiltres() as $filtre) {
+            $valeur = $filtre->getValeur();
+
+            if ($filtre->getEntitiesPropriete()->getTypesChamps()->getId() === Typeschamps::DATETYPE) {
+                $format = 'Y/m/d H:i';
+                $checkDateFormat = DateTimeImmutable::createFromFormat($format, $valeur);
+                if($checkDateFormat === false) {
+                    return true;
+                }
+            }
+
+            if ($filtre->getEntitiesPropriete()->getTypesChamps()->getId() === Typeschamps::BOOLEANTYPE) {
+                $valeur = $valeur === '0' ? 0 : 1;
+            }
+        }
+
+        return false;
     }
 }

@@ -16,6 +16,7 @@ use App\Services\MenuGenerator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use DateTime;
+use Symfony\Component\Form\Form;
 
 class TableauBord extends TableauBordCreateRequete implements InitialisationInterface, CreateFormInterface,
                         SubmittedFormInterface, RenderInterface, AddFlashInterface
@@ -26,12 +27,13 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     private array               $listesChamps = [];
     private array               $listesEntities = [];
 
-    const VIEW_PATH         = 'tableauBord/index.html.twig';
-    const CURRENT_PAGE      = 'tableauBord';
-    const FORM_NAME         = 'form';
-    const ROUTE             = 'tableau_de_bord';
-    const TYPE_FLASH        = 'warning';
-    const MESSAGE_FLASH     = "Requête effectué avec succés!";
+    const VIEW_PATH            = 'tableauBord/index.html.twig';
+    const CURRENT_PAGE         = 'tableauBord';
+    const FORM_NAME            = 'form';
+    const ROUTE                = 'tableau_de_bord';
+    const TYPE_FLASH_WARNING   = 'warning';
+    const TYPE_FLASH_SUCCESS   = 'success';
+    const MESSAGE_FLASH        = "Requête effectué avec succés!";
 
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
@@ -42,11 +44,11 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      /**
      * Initialisation
      *
-     * @param array $params
+     * @param array $param
      *
      * @return void
      */
-    public function init($param)
+    public function init($param): void
     {
         $this->id               = $param['id'];
         $this->listesChamps     = $this->em->getRepository(EntitiesPropriete::class)->findBy(['status' => 0]);
@@ -74,7 +76,7 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      *
      * @return string
      */
-    public function view()
+    public function view(): string
     {
         return self::VIEW_PATH;
     }
@@ -84,7 +86,7 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      *
      * @return array
      */
-    public function parameters()
+    public function parameters(): array
     {
         $this->getResultatsRequeteTableauBord();
 
@@ -92,7 +94,7 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
             'menus'                         => $this->menuGenerator->getMenu(),
             'current_page'                  => self::CURRENT_PAGE,
             'resultatsRequeteTableauBord'   => $this->resultatsRequeteTableauBord,
-            'libelleResultatsRequeteTB'     =>$this->libelleClauseSelect,
+            'libelleResultatsRequeteTB'     => $this->libelleClauseSelect,
             'listes_champs'                 => $this->listesChamps ,
             'listes_entities'               => $this->listesEntities,
             'requete_tableau_bord_id'       => $this->id,
@@ -108,7 +110,7 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      *
      * @return string
      */
-    public function formType()
+    public function formType(): string
     {
         return TableauBordType::class;
     }
@@ -118,7 +120,7 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      *
      * @return string
      */
-    public function formName()
+    public function formName(): string
     {
         return self::FORM_NAME;
     }
@@ -128,7 +130,7 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      *
      * @return object|null
      */
-    public function formData()
+    public function formData(): object|null
     {
         if ($this->id === 0) {
             //'Créer un nouveau tableau de Bord'
@@ -142,9 +144,9 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      /**
      * Create new object
      *
-     * @return object|null
+     * @return RequeteTableauBord|null
      */
-    public function createNewObject()
+    public function createNewObject(): RequeteTableauBord|null
     {
         return new RequeteTableauBord();
     }
@@ -152,9 +154,9 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     /**
      * Get Requete Tableau Bord By Id
      *
-     * @return RequeteTableauBord
+     * @return RequeteTableauBord|null
      */
-    public function getRequeteTableauBordById():RequeteTableauBord
+    public function getRequeteTableauBordById():RequeteTableauBord|null
     {
         return $this->em->getRepository(RequeteTableauBord::class)->find($this->id);
     }
@@ -164,7 +166,7 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      *
      * @return array
      */
-    public function formOptions()
+    public function formOptions(): array
     {
         return [
             'listes_champs' => $this->listesChamps,
@@ -177,7 +179,7 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      *
      * @return array
      */
-    public function formOtherOptions()
+    public function formOtherOptions(): array
     {
         return [];
     }
@@ -191,8 +193,10 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      *
      * @return void
      */
-    public function save($form)
+    public function save($form): void
     {
+        $this->beforeSave();
+
         $this->requeteTableauBord = $form->getData();
 
         $this->saveSpecific($form);
@@ -209,19 +213,19 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      * Save specific data
      *
      * @param Form $form
-     * @return void
-     */
-    public function saveSpecific($form)
-    {
-        $this->beforeSave();
-    }
-
-    /**
-     * Save
      *
      * @return void
      */
-    public function beforeSave()
+    public function saveSpecific($form): void
+    {
+    }
+
+    /**
+     * beforeSave
+     *
+     * @return void
+     */
+    public function beforeSave(): void
     {
         if ($this->id === 0) {
             $this->requeteTableauBord->setDateCreation(new DateTime());
@@ -233,11 +237,11 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     }
 
      /**
-     * Save
+     * afterSave
      *
      * @return void
      */
-    public function afterSave()
+    public function afterSave(): void
     {
         $this->getResultatsRequeteTableauBord();
     }
@@ -249,9 +253,9 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      *
      * @return string
      */
-    public function route()
+    public function route(): string
     {
-        if ($this->id === 0 && $this->warningIncorrectSyntax === false) {
+        if ($this->conditionsRedirectToRoute()) {
             return self::ROUTE;
         }
 
@@ -263,13 +267,25 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      *
      * @return array
      */
-    public function parametersRoute()
+    public function parametersRoute(): array
     {
-        if ($this->id === 0 && $this->warningIncorrectSyntax === false) {
+        if ($this->conditionsRedirectToRoute()) {
             return ['id' => $this->requeteTableauBord?->getId()];
         }
 
         return [];
+    }
+
+    /**
+     * Conditions Redirect To Route
+     *
+     * @return bool
+     */
+    public function conditionsRedirectToRoute(): bool
+    {
+        return $this->id === 0 &&
+               $this->requeteTableauBord->getEnregistrerRequete() === true &&
+               $this->requeteTableauBord->checkRequeteValidSyntax()['warning'] === false;
     }
 
     //AddFlashInterface
@@ -279,9 +295,13 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      *
      * @return string
      */
-    public function type()
+    public function type(): string
     {
-        return self::TYPE_FLASH;
+        if ($this->requeteTableauBord->checkRequeteValidSyntax()['warning'] === true) {
+            return self::TYPE_FLASH_WARNING;
+        }
+
+        return self::TYPE_FLASH_SUCCESS;
     }
 
      /**
@@ -289,10 +309,10 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      *
      * @return string
      */
-    public function message()
+    public function message(): string
     {
-        if ($this->warningIncorrectSyntax === true) {
-            return $this->messageFlash;
+        if ($this->requeteTableauBord->checkRequeteValidSyntax()['warning'] === true) {
+            return $this->requeteTableauBord->checkRequeteValidSyntax()['message'];
         }
 
         return self::MESSAGE_FLASH;
@@ -300,16 +320,14 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
 
      /**
      * Get resultats Requete Tableau Bord
-     *
+     *s
      * @return void
      */
-    public function getResultatsRequeteTableauBord()
+    public function getResultatsRequeteTableauBord(): void
     {
-        $this->checkIfTheQuerySyntaxIsCorrect();
-
-        if ($this->warningIncorrectSyntax === false) {
+        if ($this->requeteTableauBord->checkRequeteValidSyntax()['warning'] === false) {
             $this->resultatsRequeteTableauBord = $this->em->getRepository(Formulaire::class)
-                    ->requeteTableauBordFiltres($this->createRequete());
+                                                 ->requeteTableauBordFiltres($this->createRequete());
         }
     }
 }

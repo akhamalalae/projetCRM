@@ -22,28 +22,29 @@ trait RenderTrait {
                 if (method_exists($service, 'save')) {
                     $service->save($form);
                 }
-
+    
                 if (method_exists($service, 'type') && $service->type() !== '') {
                     $this->addFlash($service->type(), $service->message());
                 }
-
+    
                 if (method_exists($service, 'route') && $service->route() !== '') {
-                    return $this->redirectToRoute($service->route(), $service->parametersRoute());
+                    return $this->redirectToRoute(
+                        $service->route(),
+                        $service->parametersRoute()
+                    );
                 }
             }
         }
 
         if (method_exists($service, 'view')) {
+            $formCreateView = method_exists($service, 'formName') ? [$service->formName() => $form->createView()] : [];
+
             return $this->render($service->view(),
                 array_merge(
                     $service->parameters(),
-                    method_exists($service, 'formName') ? [$service->formName() => $form->createView()] : []
+                    $formCreateView
                 )
             );
         }
     }
 }
-
-
-
-

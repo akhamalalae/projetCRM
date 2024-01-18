@@ -26,9 +26,9 @@ class EnregistrementFormulaireController extends AbstractController
      * @param AddDemoEnregistrementFormulaire $service
      * @param int $id
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
-    public function formulaireDemo(Request $request, AddDemoEnregistrementFormulaire $service, $id):Response
+    public function formulaireDemo(Request $request, AddDemoEnregistrementFormulaire $service, $id): Response
     {
         return $this->renderTrait($request, $service, ['id' => $id]);
     }
@@ -40,9 +40,9 @@ class EnregistrementFormulaireController extends AbstractController
      * @param AddEnregistrementFormulaire $service
      * @param int $id
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
-    public function remplirFormulaire(Request $request, AddEnregistrementFormulaire $service, $id):Response
+    public function remplirFormulaire(Request $request, AddEnregistrementFormulaire $service, $id): Response
     {
         return $this->renderTrait($request, $service,
                 [
@@ -61,7 +61,7 @@ class EnregistrementFormulaireController extends AbstractController
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function resultatsFormulaire(ResultatsFormulaire $service, $id):Response
+    public function resultatsFormulaire(ResultatsFormulaire $service, $id): Response
     {
         $service->init(['id' => $id]);
         return $this->render($service->view(), $service->parameters());
@@ -70,13 +70,13 @@ class EnregistrementFormulaireController extends AbstractController
     /**
     * @Route("/supprime/image/{id}", name="enregistrement_formulaire_delete_image", methods={"DELETE"})
     *
-    * @param Request $request
     * @param Files $image
+    * @param Request $request
     * @param DeleteImage $service
     *
     * @return JsonResponse
     */
-    public function deleteImage(Files $image, Request $request, DeleteImage $service):JsonResponse
+    public function deleteImage(Files $image, Request $request, DeleteImage $service): JsonResponse
     {
         $content = json_decode($request->getContent(), true);
 
@@ -98,31 +98,18 @@ class EnregistrementFormulaireController extends AbstractController
 
 
     /**
-     * @Route("/gestionnaire/resultats/excel/{id}", name="telecharger_excel", methods={"GET","POST"})
+     * @Route("/gestionnaire/resultats/telecharger/{id}/{format}", name="telecharger", methods={"GET","POST"})
      *
      * @param Telecharger $service
      * @param int $id
+     * @param string $format
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
-    public function telechargerFile(Telecharger $service, $id, $format = 'xls'):Response
+    public function telechargerFile(Telecharger $service, $id, $format = 'xls'): Response
     {
-        $service->init(
-            [
-                'id'     => $id,
-                'format' => $format
-            ]
-        );
+        $service->init(['id' => $id, 'format' => $format]);
 
-        $resultat = $service->telecharger();
-
-        return new Response(
-            $resultat['resultat'],
-            200,
-            [
-                'Content-Type' => 'application/vnd.ms-excel',
-                "Content-disposition" => "attachment; filename=".$resultat['fileName']
-            ]
-        );
+        return new Response($service->content(), $service->status(), $service->headers());
     }
 }

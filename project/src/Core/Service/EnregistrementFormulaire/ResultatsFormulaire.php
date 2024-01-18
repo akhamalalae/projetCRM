@@ -14,7 +14,7 @@ class ResultatsFormulaire implements RenderInterface, InitialisationInterface
 {
     private int $id;
 
-    const VIEW_PATH         = 'enregistrementFormulaire/formulaireResultats.html.twig';
+    const VIEW_PATH = 'enregistrementFormulaire/formulaireResultats.html.twig';
 
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
@@ -24,6 +24,7 @@ class ResultatsFormulaire implements RenderInterface, InitialisationInterface
      * Initialisation
      *
      * @param array $params
+     * 
      * @return void
      */
     public function init($param)
@@ -55,6 +56,7 @@ class ResultatsFormulaire implements RenderInterface, InitialisationInterface
         $champsFormulaires = $this->em->getRepository(ChampsFormulaire::class)->findBy(
             ['formulaire' => $this->id,'status' => 0]
         );
+
         $enregistrementFormulaire = $this->em->getRepository(EnregistrementFormulaire::class)->findBy(
             ['formulaires' => $this->id]
         );

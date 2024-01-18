@@ -22,7 +22,7 @@ class PointVentes implements AjaxInterface
      *
      * @return array
      */
-    public function getJson($request):array
+    public function getJson($request): array
     {
         $selected = $request->get('selected');
         $listePointeVentes = "";

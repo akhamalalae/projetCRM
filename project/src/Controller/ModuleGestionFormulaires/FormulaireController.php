@@ -21,7 +21,7 @@ class FormulaireController extends AbstractController
      *
      * @param FormulaireList $service
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function formulaire(FormulaireList $service):Response
     {
@@ -36,7 +36,7 @@ class FormulaireController extends AbstractController
      * @param AddEditeFormulaire $service
      * @param int $id
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function addFormulaire(Request $request, AddEditeFormulaire $service):Response
     {
@@ -50,7 +50,7 @@ class FormulaireController extends AbstractController
      * @param AddEditeFormulaire $service
      * @param int $id
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function editFormulaire(Request $request, AddEditeFormulaire $service, $id):Response
     {

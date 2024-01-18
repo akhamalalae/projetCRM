@@ -24,7 +24,7 @@ class ListOperators implements AjaxInterface
      *
      * @return array
      */
-    public function getJson($request):array
+    public function getJson($request): array
     {
         $idEntitePropriete = $request->get('idEntitePropriete');
 
@@ -32,39 +32,30 @@ class ListOperators implements AjaxInterface
 
         $arrayOperators = array();
 
-        if ($entitiesProprietes->getTypesChamps()->getId() == Typeschamps::DATETYPE) {
-            array_push($arrayOperators, TableauBordFiltresOperators::OPERATEUREGAL,
-                TableauBordFiltresOperators::OPERATEURSUPERIEUR,
-                TableauBordFiltresOperators::OPERATEURINFERIEUR,
-                TableauBordFiltresOperators::OPERATEURDIFFERENT
-            );
-        }
-
-        if (
-            $entitiesProprietes->getTypesChamps()->getId() == Typeschamps::TEXTTYPE
-            || $entitiesProprietes->getTypesChamps()->getId() == Typeschamps::ZONETEXTTYPE
-        ) {
-            array_push($arrayOperators, TableauBordFiltresOperators::OPERATEUREGAL,
-                TableauBordFiltresOperators::OPERATEURDIFFERENT,
-                TableauBordFiltresOperators::OPERATEURCONTIENT
-            );
-        }
-
-        if (
-            $entitiesProprietes->getTypesChamps()->getId() == Typeschamps::ENTIERTYPE
-            || $entitiesProprietes->getTypesChamps()->getId() == Typeschamps::MONEYTYPE
-        ) {
-            array_push($arrayOperators, TableauBordFiltresOperators::OPERATEUREGAL,
-                TableauBordFiltresOperators::OPERATEURSUPERIEUR,
-                TableauBordFiltresOperators::OPERATEURINFERIEUR,
-                TableauBordFiltresOperators::OPERATEURDIFFERENT
-            );
-        }
-
-        if ($entitiesProprietes->getTypesChamps()->getId() == Typeschamps::BOOLEANTYPE) {
-            array_push($arrayOperators, TableauBordFiltresOperators::OPERATEUREGAL,
-                TableauBordFiltresOperators::OPERATEURDIFFERENT
-            );
+        if ($entitiesProprietes) {
+            if (
+                $entitiesProprietes->getTypesChamps()->getId() == Typeschamps::TEXTTYPE
+                || $entitiesProprietes->getTypesChamps()->getId() == Typeschamps::ZONETEXTTYPE
+            ) {
+                array_push($arrayOperators, TableauBordFiltresOperators::OPERATEUREGAL,
+                    TableauBordFiltresOperators::OPERATEURDIFFERENT,
+                    TableauBordFiltresOperators::OPERATEURCONTIENT
+                );
+            }
+    
+            if (
+                $entitiesProprietes->getTypesChamps()->getId() == Typeschamps::ENTIERTYPE
+                || $entitiesProprietes->getTypesChamps()->getId() == Typeschamps::MONEYTYPE
+                || $entitiesProprietes->getTypesChamps()->getId() == Typeschamps::DATETYPE
+            ) {
+                $arrayOperators = $this->getOpTypeDateAndIntAndMoney();
+            }
+    
+            if ($entitiesProprietes->getTypesChamps()->getId() == Typeschamps::BOOLEANTYPE) {
+                array_push($arrayOperators, TableauBordFiltresOperators::OPERATEUREGAL,
+                    TableauBordFiltresOperators::OPERATEURDIFFERENT
+                );
+            }
         }
 
         $operators = $this->em->getRepository(TableauBordFiltresOperators::class)->getOperators($arrayOperators);
@@ -72,9 +63,30 @@ class ListOperators implements AjaxInterface
         $listOperators = "<option selected>Choisir l'opérateur</option>";
 
         foreach ($operators as $op) {
-            $listOperators .= "<option value=".$op->getId()." >".$op->getLibelle()."</option>";
+            $listOperators .= sprintf('<option value="%s">%s</option>',
+                $op->getId(),
+                $op->getLibelle()
+            );
         }
 
         return ['listOperators' => $listOperators];
+    }
+
+    /**
+     * Get operateur si le champ est de type dateTime ou integer ou money
+     *
+     * @return array
+     */
+    public function getOpTypeDateAndIntAndMoney(): array
+    {
+        $arr = array();
+
+        array_push($arr, TableauBordFiltresOperators::OPERATEUREGAL,
+            TableauBordFiltresOperators::OPERATEURSUPERIEUR,
+            TableauBordFiltresOperators::OPERATEURINFERIEUR,
+            TableauBordFiltresOperators::OPERATEURDIFFERENT
+        );
+
+        return $arr;
     }
 }

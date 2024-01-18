@@ -157,4 +157,24 @@ class RequeteTableauBordFiltres
 
         return $this;
     }
+
+    public function createRequeteClauseWhere(): string
+    {
+        $property            = $this->getEntitiesPropriete();
+        $operator            = $this->getTableauBordFiltreOperator()->getLibelle();
+        $valeur              = $this->getValeur();
+        $jointuretName       = $property->jointureName();
+        $condition           = '';
+
+        if ($operator == "Contient") {
+            $operator = "LIKE";
+            $valeur = "%$valeur%";
+        }
+
+        if ($this->getTableauBordFiltreCondition() !== null) {
+            $condition = $this->getTableauBordFiltreCondition()->getLibelle();
+        }
+
+        return " $condition $jointuretName $operator '$valeur' ";
+    }
 }

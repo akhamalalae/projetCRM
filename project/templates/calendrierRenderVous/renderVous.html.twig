@@ -90,8 +90,8 @@
                 eventResizableFromStart: true,
                 selectable: true,
                 droppable: true,
-                minTime: "09:00:00",
-                maxTime: "18:00:00",
+                minTime: "08:00",
+                maxTime: "20:00",
                 eventClick: function(info) {
                     var roles = {{ app.user.roles|json_encode|raw }};
                     editRenderVous(info.event.id);
@@ -125,8 +125,8 @@
             });
             calendar.render()
             $('#modal').on('hidden.bs.modal', function () {
-                //calendar.refetchEvents();
-                location.reload();
+                calendar.refetchEvents();
+                //location.reload();
             });
 
             function editRenderVous(id){

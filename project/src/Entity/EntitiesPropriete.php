@@ -239,4 +239,47 @@ class EntitiesPropriete
 
         return $this;
     }
+
+    public function createNameRequeteClauseSelect(): string
+    {
+        return sprintf("%s (%s)", $this->getName(), $this->getEntitie()?->getLibelle());
+    }
+
+    public function jointureName(): string
+    {
+        return sprintf("%s.%s", lcfirst($this->getEntitie()->getLibelle()), $this->getLibelle());
+    }
+
+    public function createRequeteJoint(): string
+    {
+        return sprintf(
+            "  LEFT JOIN %s.%s %s",
+            lcfirst($this->getEntitieJoiture()?->getLibelle()),
+            $this->getEntitie()?->getNomProprieteeJointure(),
+            lcfirst($this->getEntitie()->getLibelle())
+        );
+    }
+
+    public function createRequeteClauseSelect(): string
+    {
+        $fonctionAgregation = $this->getFonctionAgregation();
+
+        return sprintf(
+            "%s(%s.%s) AS %s",
+            ($fonctionAgregation) !== null ? $fonctionAgregation : '',
+            lcfirst($this->getEntitie()?->getLibelle()),
+            $this->getLibelle(),
+            $this->clauseSelectName()
+        );
+    }
+
+    public function createRequeteClauseGroupeBy(): string
+    {
+        return sprintf("%s", $this->clauseSelectName());
+    }
+
+    public function clauseSelectName(): string
+    {
+        return sprintf("%s_%s", $this->getLibelle(), $this->id);
+    }
 }

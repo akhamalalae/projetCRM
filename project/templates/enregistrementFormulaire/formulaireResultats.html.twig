@@ -14,9 +14,9 @@
                     Téléchargement format
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                    <li><a class="dropdown-item" href="#"><i class="fa fa-edit" aria-hidden="true"></i> PDF</a></li>
-                    <li><a class="dropdown-item" href="{{ path('telecharger_excel', {'id': formulaire.id}) }}"><i class="fa fa-edit" aria-hidden="true"></i> EXCEL</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="fa fa-edit" aria-hidden="true"></i> WORD</a></li>
+                    <li><a class="dropdown-item" href="{{ path('telecharger', {'id': formulaire.id, 'format': 'pdf'}) }}"><i class="fa fa-edit" aria-hidden="true"></i> PDF</a></li>
+                    <li><a class="dropdown-item" href="{{ path('telecharger', {'id': formulaire.id, 'format': 'xls'}) }}"><i class="fa fa-edit" aria-hidden="true"></i> EXCEL</a></li>
+                    <li><a class="dropdown-item" href="{{ path('telecharger', {'id': formulaire.id, 'format': 'docs'}) }}"><i class="fa fa-edit" aria-hidden="true"></i> WORD</a></li>
                     </ul>
                 </div>
             </div>
