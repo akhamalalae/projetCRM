@@ -1,33 +1,15 @@
-
-{% extends 'base.html.twig' %}
-
-{% block title %}Resultats!{% endblock %}
-
-{% block content %}
-    <div class="container">
-        <br>
-        <br>
-        <br>
-        <h2>Resultats du formulaire : {{ formulaire.libelle }}
-        <div class="btn-group pull-right" role="group" aria-label="Button group with nested dropdown">
-            <div class="btn-group" role="group">
-                <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                Téléchargement format
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                <li><a class="dropdown-item" href="{{ path('telecharger', {'id': formulaire.id, 'format': 'pdf'}) }}"><i class="fa fa-edit" aria-hidden="true"></i> PDF</a></li>
-                <li><a class="dropdown-item" href="{{ path('telecharger', {'id': formulaire.id, 'format': 'xls'}) }}"><i class="fa fa-edit" aria-hidden="true"></i> EXCEL</a></li>
-                <li><a class="dropdown-item" href="{{ path('telecharger', {'id': formulaire.id, 'format': 'docs'}) }}"><i class="fa fa-edit" aria-hidden="true"></i> WORD</a></li>
-                </ul>
-            </div>
-        </div>
-        </h2>        
-        <hr>
-        <br>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+</head>
+<body>
+    <div style="auto;display;">
         {% if enregistrementFormulaire and enregistrementFormulaire != [] %}
             {% set enregistrementFormulaireLength = enregistrementFormulaire|length %}
             {% set enregistrementFormulaireLength = enregistrementFormulaireLength - 1 %}
-            <table id="table_id" class="display" style="width:100%">
+            <table width="100%" border="1">
                 <thead>
                     <tr>
                         <th>Intervenant</th>
@@ -92,23 +74,22 @@
                                                                         {% set functionChacked = 'functionDeleteFiles(' ~ un_fichier.id ~ ')' %}
                                                                         <div>
                                                                             {% set extensionFichier = un_fichier.name|split('.') %}
-                                                                            {% set file = directory ~ un_fichier.file %}
                                                                             {% if ((extensionFichier[1] == 'JPG') or (extensionFichier[1] == "jpg") or
-                                                                                   (extensionFichier[1] == 'GIF') or (extensionFichier[1] == 'gif') or
-                                                                                   (extensionFichier[1] == 'PNG') or (extensionFichier[1] == 'png')) %}
+                                                                                    (extensionFichier[1] == 'GIF') or (extensionFichier[1] == 'gif') or
+                                                                                    (extensionFichier[1] == 'PNG') or (extensionFichier[1] == 'png')) %}
 
-                                                                                <img id="{{un_fichier.id}}" class="card-img-top" src= "{{ asset(file) }}" alt="" >
+                                                                                <img id="{{un_fichier.id}}" class="card-img-top" src= "{{ asset('images/' ~ un_fichier.file) }}" alt="" >
                                                                                 <hr>
                                                                                 {# On ajoute un lien permettant de supprimer une image (sera géré en Ajax)
                                                                                 <a class="btn btn-danger" onclick="{{functionDeleteFiles}}" href="{{ path('enregistrement_formulaire_delete_image', {id: image.id})}}" data-delete data-token="{{ csrf_token('delete' ~ image.id )}}">Supprimer</a>
                                                                                 #}
-                                                                                <a href="{{ asset(file )}}" download>
+                                                                                <a href="{{ asset('images/' ~ un_fichier.file) }}" download>
                                                                                     <i class="fa fa-download" aria-hidden="true"></i>
                                                                                 </a>
                                                                             {% else %}
-                                                                                <i class="fa fa-file-pdf-o" aria-hidden="true"></i> 
-                                                                                {{un_fichier.name}}
-                                                                                <a href="{{ asset(file) }}" download>
+                                                                                <i class="fa fa-file-pdf-o" aria-hidden="true"></i> {{un_fichier.name}}
+                                                                                <hr>
+                                                                                <a href="{{ asset('images/' ~ un_fichier.file) }}" download>
                                                                                     <i class="fa fa-download" aria-hidden="true"></i>
                                                                                 </a>
                                                                             {% endif %}
@@ -131,83 +112,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-        {% else %}
-            <table id="table_id" class="display">
-                <thead>
-                    <tr>
-                        {% for keyhampsFormulaires, valChampsFormulaires  in champsFormulaires  %}
-                                <th>{{ valChampsFormulaires.libelle }}</th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-
-                </tbody>
-            </table>
         {% endif %}
-        <br>
-        <br>
-        <br>
-        <br>
     </div>
-
-{% endblock %}
-{% block javascript %}
-<script>
-
-function functionDeleteFiles(id) {
-  document.getElementById(id).remove();
-}
-
-window.onload = () => {
-    // Gestion des boutons "Supprimer"
-    let links = document.querySelectorAll("[data-delete]")
-
-    // On boucle sur links
-    for(link of links){
-        // On écoute le clic
-        link.addEventListener("click", function(e){
-            // On empêche la navigation
-            e.preventDefault()
-
-            // On demande confirmation
-            if(confirm("Voulez-vous supprimer cette image ?")){
-                // On envoie une requête Ajax vers le href du lien avec la méthode DELETE
-                fetch(this.getAttribute("href"), {
-                    method: "DELETE",
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest",
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({"_token": this.dataset.token})
-                }).then(
-                    // On récupère la réponse en JSON
-                    response => response.json()
-                ).then(data => {
-                    if(data.success){
-                        this.parentElement.remove()
-                    }else{
-                        alert(data.error)
-                    }
-                }).catch(e => alert(e))
-            }
-        })
-    }
-}
-
-    $(document).ready(function() {
-        $('#table_id').DataTable( {
-            "scrollY": 200,
-            "scrollX": true,
-            responsive: true,
-            dom: 'Bfrtip',
-            buttons: [
-                'copy', 'csv', 'excel', 'pdf', 'print'
-            ],
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/fr_fr.json"
-            }
-        } );
-    } );
-</script>
-{% endblock %}
+</body>
+</html>

@@ -172,6 +172,17 @@ class RequeteTableauBord
         return $this;
     }
 
+    public function listChampsClauseSelect(): array
+    {
+        $libelleClauseSelect = [];
+
+        foreach ($this->getPropertiesEntityChoixChamps() as $champ) {
+            $libelleClauseSelect[$champ->clauseSelectName()] = $champ->createNameRequeteClauseSelect();
+        }
+
+        return $libelleClauseSelect;
+    }
+
     public function checkRequeteValidSyntax(): array
     {
         $warning   = false;
@@ -187,10 +198,7 @@ class RequeteTableauBord
             $message  = self::MESSAGE_FLASH_2;
         }
 
-        if (
-            $this->getEnregistrerRequete() === true
-            && $this->getLibelle() === null
-        ) {
+        if ($this->getEnregistrerRequete() === true && $this->getLibelle() === null) {
             $warning   = true;
             $message   = self::MESSAGE_FLASH_3;
         }
@@ -210,17 +218,19 @@ class RequeteTableauBord
     {
         foreach ($this->getRequeteTableauBordFiltres() as $filtre) {
             $valeur = $filtre->getValeur();
+            $typeChamp = $filtre->getEntitiesPropriete()->getTypesChamps()->getId();
 
-            if ($filtre->getEntitiesPropriete()->getTypesChamps()->getId() === Typeschamps::DATETYPE) {
+            if ($typeChamp === Typeschamps::DATETYPE) {
                 $format = 'Y/m/d H:i';
                 $checkDateFormat = DateTimeImmutable::createFromFormat($format, $valeur);
-                if($checkDateFormat === false) {
+
+                if ($checkDateFormat === false) {
                     return true;
                 }
             }
 
-            if ($filtre->getEntitiesPropriete()->getTypesChamps()->getId() === Typeschamps::BOOLEANTYPE) {
-                $valeur = $valeur === '0' ? 0 : 1;
+            if ($typeChamp=== Typeschamps::BOOLEANTYPE) {
+                $filtre->setValeur($valeur === '0' ? 0 : 1);
             }
         }
 

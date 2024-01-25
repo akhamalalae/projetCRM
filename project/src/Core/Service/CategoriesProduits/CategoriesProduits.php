@@ -116,16 +116,6 @@ class CategoriesProduits implements CreateFormInterface, SubmittedFormInterface,
         return [];
     }
 
-    /**
-     * Set options create form
-     *
-     * @return array
-     */
-    public function formOtherOptions()
-    {
-        return [];
-    }
-
     //SubmittedFormInterface
 
     /**

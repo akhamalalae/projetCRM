@@ -12,7 +12,7 @@ interface RedirectToRouteInterface
     public function route();
 
     /**
-     * parameters route
+     * Parameters route
      *
      * @return array
      */

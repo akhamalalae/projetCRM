@@ -141,16 +141,6 @@ class AddEnregistrementFormulaire implements InitialisationInterface, CreateForm
         return ['champsFormulaires' => $this->datachampsFormulaires];
     }
 
-    /**
-     * Set options create form
-     *
-     * @return array
-     */
-    public function formOtherOptions(): array
-    {
-        return [];
-    }
-
     //SubmittedFormInterface
 
     /**

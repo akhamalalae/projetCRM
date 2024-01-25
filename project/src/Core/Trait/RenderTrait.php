@@ -10,11 +10,7 @@ trait RenderTrait {
         }
 
         if (method_exists($service, 'formType') && method_exists($service, 'formData')) {
-            $form = $this->createForm($service->formType(),
-                $service->formData(),
-                $service->formOptions(),
-                $service->FormOtherOptions()
-            );
+            $form = $this->createForm($service->formType(), $service->formData(), $service->formOptions());
 
             $form->handleRequest($request);
 
@@ -28,21 +24,16 @@ trait RenderTrait {
                 }
     
                 if (method_exists($service, 'route') && $service->route() !== '') {
-                    return $this->redirectToRoute(
-                        $service->route(),
-                        $service->parametersRoute()
-                    );
+                    return $this->redirectToRoute($service->route(), $service->parametersRoute());
                 }
             }
         }
 
         if (method_exists($service, 'view')) {
-            $formCreateView = method_exists($service, 'formName') ? [$service->formName() => $form->createView()] : [];
-
             return $this->render($service->view(),
                 array_merge(
                     $service->parameters(),
-                    $formCreateView
+                    method_exists($service, 'formName') ? [$service->formName() => $form->createView()] : []
                 )
             );
         }

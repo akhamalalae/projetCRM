@@ -22,13 +22,11 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
                         SubmittedFormInterface, RenderInterface, AddFlashInterface
 {
     private int                 $id = 0;
-    private ArrayCollection     $orignalRequeteTableauBordFiltres;
-    private array|null          $resultatsRequeteTableauBord = null;
     private array               $listesChamps = [];
     private array               $listesEntities = [];
 
     const VIEW_PATH            = 'tableauBord/index.html.twig';
-    const CURRENT_PAGE         = 'tableauBord';
+    const CURRENT_PAGE         = 'Tableau De Bord!';
     const FORM_NAME            = 'form';
     const ROUTE                = 'tableau_de_bord';
     const TYPE_FLASH_WARNING   = 'warning';
@@ -55,24 +53,14 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
         $this->listesEntities   = $this->em->getRepository(Entities::class)->findBy(['status' => 0]);
 
         if ($this->id !== 0) {
-            //'Charger un tableau de Bord'
             $this->requeteTableauBord = $this->getRequeteTableauBordById();
-
-            if ($this->requeteTableauBord) {
-
-                $this->orignalRequeteTableauBordFiltres = new ArrayCollection();
-
-                foreach ($this->requeteTableauBord->getRequeteTableauBordFiltres() as $champ) {
-                    $this->orignalRequeteTableauBordFiltres->add($champ);
-                }
-            }
         }
     }
 
     //RenderInterface
 
      /**
-     * view
+     * View
      *
      * @return string
      */
@@ -82,24 +70,23 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     }
 
      /**
-     * parameters
+     * Parameters view
      *
      * @return array
      */
     public function parameters(): array
     {
-        $this->getResultatsRequeteTableauBord();
-
+        $nombreFiltres = count($this->requeteTableauBord->getRequeteTableauBordFiltres());
+    
         return [
             'menus'                         => $this->menuGenerator->getMenu(),
-            'current_page'                  => self::CURRENT_PAGE,
-            'resultatsRequeteTableauBord'   => $this->resultatsRequeteTableauBord,
-            'libelleResultatsRequeteTB'     => $this->libelleClauseSelect,
-            'listes_champs'                 => $this->listesChamps ,
-            'listes_entities'               => $this->listesEntities,
-            'requete_tableau_bord_id'       => $this->id,
-            'requete_tableau_bord'          => $this->requeteTableauBord,
-            "nombreFiltres"                 => count($this->requeteTableauBord->getRequeteTableauBordFiltres())
+            "nombreFiltres"                 => $nombreFiltres,
+            'libelleResultatsRequeteTB'     => $this->requeteTableauBord->listChampsClauseSelect(),
+            'resultatsRequeteTableauBord'   => $this->getResultatsRequeteTableauBord(),
+            'currentPage'                   => self::CURRENT_PAGE,
+            'requeteTableauBord'            => $this->requeteTableauBord,
+            'listesChamps'                  => $this->listesChamps,
+            'listesEntities'                => $this->listesEntities
         ];
     }
 
@@ -142,44 +129,11 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     }
 
      /**
-     * Create new object
-     *
-     * @return RequeteTableauBord|null
-     */
-    public function createNewObject(): RequeteTableauBord|null
-    {
-        return new RequeteTableauBord();
-    }
-
-    /**
-     * Get Requete Tableau Bord By Id
-     *
-     * @return RequeteTableauBord|null
-     */
-    public function getRequeteTableauBordById():RequeteTableauBord|null
-    {
-        return $this->em->getRepository(RequeteTableauBord::class)->find($this->id);
-    }
-
-     /**
      * Set options create form
      *
      * @return array
      */
     public function formOptions(): array
-    {
-        return [
-            'listes_champs' => $this->listesChamps,
-            'em'            => $this->em,
-        ];
-    }
-
-     /**
-     * Set options create form
-     *
-     * @return array
-     */
-    public function formOtherOptions(): array
     {
         return [];
     }
@@ -221,7 +175,7 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     }
 
     /**
-     * beforeSave
+     * BeforeSave
      *
      * @return void
      */
@@ -237,13 +191,12 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     }
 
      /**
-     * afterSave
+     * AfterSave
      *
      * @return void
      */
     public function afterSave(): void
     {
-        $this->getResultatsRequeteTableauBord();
     }
 
     //RedirectToRouteInterface
@@ -263,7 +216,7 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     }
 
      /**
-     * parametersRoute
+     * ParametersRoute
      *
      * @return array
      */
@@ -284,8 +237,8 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     public function conditionsRedirectToRoute(): bool
     {
         return $this->id === 0 &&
-               $this->requeteTableauBord->getEnregistrerRequete() === true &&
-               $this->requeteTableauBord->checkRequeteValidSyntax()['warning'] === false;
+               $this->warningInValidSyntax() === false &&
+               $this->requeteTableauBord->getEnregistrerRequete() === true;
     }
 
     //AddFlashInterface
@@ -297,7 +250,7 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      */
     public function type(): string
     {
-        if ($this->requeteTableauBord->checkRequeteValidSyntax()['warning'] === true) {
+        if ($this->warningInValidSyntax() === true) {
             return self::TYPE_FLASH_WARNING;
         }
 
@@ -311,23 +264,65 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      */
     public function message(): string
     {
-        if ($this->requeteTableauBord->checkRequeteValidSyntax()['warning'] === true) {
-            return $this->requeteTableauBord->checkRequeteValidSyntax()['message'];
+        if ($this->warningInValidSyntax() === true) {
+            return $this->messageInValidSyntax();
         }
 
         return self::MESSAGE_FLASH;
     }
 
      /**
+     * Create new object
+     *
+     * @return RequeteTableauBord|null
+     */
+    public function createNewObject(): RequeteTableauBord|null
+    {
+        return new RequeteTableauBord();
+    }
+
+    /**
+     * Get Requete Tableau Bord By Id
+     *
+     * @return RequeteTableauBord|null
+     */
+    public function getRequeteTableauBordById():RequeteTableauBord|null
+    {
+        return $this->em->getRepository(RequeteTableauBord::class)->find($this->id);
+    }
+
+     /**
      * Get resultats Requete Tableau Bord
      *s
-     * @return void
+     * @return array
      */
-    public function getResultatsRequeteTableauBord(): void
+    public function getResultatsRequeteTableauBord(): array
     {
-        if ($this->requeteTableauBord->checkRequeteValidSyntax()['warning'] === false) {
-            $this->resultatsRequeteTableauBord = $this->em->getRepository(Formulaire::class)
-                                                 ->requeteTableauBordFiltres($this->createRequete());
+        if ($this->warningInValidSyntax() === false) {
+            return $this->em->getRepository(Formulaire::class)->getResultRequete($this->query());
         }
+
+        return [];
+    }
+
+     /**
+     * Warning valid syntax
+     *
+     * @return bool
+     */
+    public function warningInValidSyntax(): bool
+    {
+        return $this->requeteTableauBord->checkRequeteValidSyntax()['warning'];
+    }
+
+     /**
+     * Message valid syntax
+     *
+     * @return string
+     */
+    public function messageInValidSyntax(): string
+    {
+        return $this->requeteTableauBord->checkRequeteValidSyntax()['message'];
     }
 }
+

@@ -5,14 +5,14 @@ namespace App\Core\Interface;
 interface RenderInterface
 {
     /**
-     * view
+     * View
      *
      * @return string
      */
     public function view();
 
     /**
-     * parameters
+     * Parameters
      *
      * @return array
      */

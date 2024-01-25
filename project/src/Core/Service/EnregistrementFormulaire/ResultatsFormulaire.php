@@ -12,9 +12,10 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class ResultatsFormulaire implements RenderInterface, InitialisationInterface
 {
-    private int $id;
+    private int $id = 0;
 
-    const VIEW_PATH = 'enregistrementFormulaire/formulaireResultats.html.twig';
+    const VIEW_PATH      = 'enregistrementFormulaire/formulaireResultats.html.twig';
+    const FILE_DIRECTORY = 'attachement/enregistrementFormulaire/files/';
 
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
@@ -65,7 +66,8 @@ class ResultatsFormulaire implements RenderInterface, InitialisationInterface
             'menus'                     => $this->menuGenerator->getMenu(),
             'formulaire'                => $formulaire,
             'enregistrementFormulaire'  => $enregistrementFormulaire,
-            'champsFormulaires'         => $champsFormulaires
+            'champsFormulaires'         => $champsFormulaires,
+            'directory'                 => self::FILE_DIRECTORY
         ];
     }
 }

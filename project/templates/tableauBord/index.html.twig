@@ -1,6 +1,6 @@
 
 {% extends 'base.html.twig' %}
-{% block title %}Tableau De Bord!{% endblock %}
+{% block title %} {{ currentPage }} {% endblock %}
 
 {% block content %}
 <main>
@@ -8,9 +8,9 @@
         <br>
         <br>
         <h2>Tableau De Bord
-        {% if requete_tableau_bord != null and requete_tableau_bord.libelle != null %}
+        {% if requeteTableauBord != null and requeteTableauBord.libelle != null %}
         (
-            {{ requete_tableau_bord.libelle}}
+            {{ requeteTableauBord.libelle}}
         )
         {% endif %}
         </h2>
@@ -104,7 +104,7 @@
                         <h5>Choix des champs</h5>
                         <hr>
 
-                        {% for entitie in listes_entities %}
+                        {% for entitie in listesEntities %}
                             {% set indice = entitie.id %}
                             <div class="accordion" id="accordionPanelsStayOpenExample">
                                 <div class="accordion-item">
@@ -116,7 +116,7 @@
                                     <div id="choix_champs{{ indice }}" class="accordion-collapse collapse" aria-labelledby="panelsStayOpen-headingThree">
                                         <div class="accordion-body">
                                             <div class="row">
-                                                {% for champ in listes_champs %}
+                                                {% for champ in listesChamps %}
                                                     {% if champ.entitie.id == entitie.id %}
                                                         {% for checkbox in form.properties_entity_choix_champs.children %}
                                                             {% if (champ.id) == checkbox.vars.value %}
@@ -206,7 +206,7 @@
 {% block javascript %}
 <script>
 
-    var requete_tableau_bord_id = '{{ requete_tableau_bord_id }}';
+    var requete_tableau_bord_id = '{{ requeteTableauBord.id }}';
     if (requete_tableau_bord_id != 0) {
         $("#form_enregistrer_requete").hide();
     }{

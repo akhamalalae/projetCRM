@@ -10,7 +10,6 @@ class TableauBordCreateRequete
 {
     protected RequeteTableauBord  $requeteTableauBord;
     protected array               $jointures = [];
-    protected array               $libelleClauseSelect = [];
     protected string              $clauseSelect = '';
     protected string              $clauseWhere = '';
     protected string              $clauseGroupeBy = '';
@@ -24,7 +23,7 @@ class TableauBordCreateRequete
      *
      * @return string
      */
-    protected function createRequete(): string
+    protected function query(): string
     {
         $this->createRequeteChoixChamps();
 
@@ -48,31 +47,36 @@ class TableauBordCreateRequete
     {
         foreach ($this->requeteTableauBord->getPropertiesEntityChoixChamps() as $champ) {
             if (strpos($this->clauseSelect, $champ->clauseSelectName()) === false) {
-                $this->createClauseGroupeBy($champ);
-
-                $this->createNameClauseSelect($champ);
-
                 $this->createClauseSelect($champ);
+
+                $this->createClauseGroupeBy($champ);
 
                 $this->createJoint($champ);
             }
         }
     }
 
-    /**
-     * clauseSelect
-     *
-     * @param EntitiesPropriete $champ
+     /**
+     * Création clause where
      *
      * @return void
      */
-    protected function createNameClauseSelect(EntitiesPropriete $champ): void
+    protected function createRequeteFiltres(): void
     {
-        $this->libelleClauseSelect[$champ->clauseSelectName()] = $champ->createNameRequeteClauseSelect();
+        foreach ($this->requeteTableauBord->getRequeteTableauBordFiltres() as $filtre) {
+            $property      = $filtre->getEntitiesPropriete();
+            $jointureName  = $property->jointureName();
+
+            if (strpos($this->clauseWhere, $jointureName) === false) {
+                $this->clauseWhere .= $filtre->createRequeteClauseWhere();
+
+                $this->createJoint($property);
+            }
+        }
     }
 
      /**
-     * clauseSelect
+     * Création clause select
      *
      * @param EntitiesPropriete $champ
      *
@@ -88,7 +92,7 @@ class TableauBordCreateRequete
     }
 
      /**
-     * clauseGroupeBy
+     * Creation clause GroupeBy
      *
      * @param EntitiesPropriete $champ
      *
@@ -106,26 +110,7 @@ class TableauBordCreateRequete
     }
 
      /**
-     * filtres
-     *
-     * @return void
-     */
-    protected function createRequeteFiltres(): void
-    {
-        foreach ($this->requeteTableauBord->getRequeteTableauBordFiltres() as $filtre) {
-            $property            = $filtre->getEntitiesPropriete();
-            $jointureName        = $property->jointureName();
-
-            if (strpos($this->clauseWhere, $jointureName) === false) {
-                $this->clauseWhere .= $filtre->createRequeteClauseWhere();
-
-                $this->createJoint($property);
-            }
-        }
-    }
-
-     /**
-     * creation des joitures de la requete sql
+     * Creation des joitures de la requete sql
      *
      * @param EntitiesPropriete $champ
      *
@@ -133,10 +118,10 @@ class TableauBordCreateRequete
      */
     protected function createJoint(EntitiesPropriete $champ): void
     {
-        $libelleEntitie = $champ->getEntitie()?->getLibelle();
+        $libelleJointure = $champ->getEntitie()?->getLibelle();
 
-        if ($champ->getEntitieJoiture() != null && ! array_key_exists($libelleEntitie, $this->jointures)) {
-            $this->jointures[$libelleEntitie] = $champ->createRequeteJoint();
+        if ($champ->getEntitieJoiture() != null && ! array_key_exists($libelleJointure, $this->jointures)) {
+            $this->jointures[$libelleJointure] = $champ->createRequeteJoint();
         }
     }
 }

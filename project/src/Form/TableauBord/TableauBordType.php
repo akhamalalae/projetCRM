@@ -17,10 +17,6 @@ class TableauBordType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $listes_champs = $options['listes_champs'];
-        foreach ($listes_champs as $key => $value) {
-        }
-
         $builder->add("enregistrer_requete", CheckboxType::class, [
             'label'    => "Enregistrer la requête",
             'required' => false,
@@ -71,9 +67,7 @@ class TableauBordType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'App\Entity\RequeteTableauBord',
-            'listes_champs' => null,
-            'em'=>null,
+            'data_class' => 'App\Entity\RequeteTableauBord'
         ));
     }
 

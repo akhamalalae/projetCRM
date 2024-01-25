@@ -121,16 +121,6 @@ class AddConfigurationEspace implements InitialisationInterface, CreateFormInter
         return [];
     }
 
-    /**
-     * Set options create form
-     *
-     * @return array
-     */
-    public function formOtherOptions()
-    {
-        return [];
-    }
-
     //SubmittedFormInterface
 
     /**

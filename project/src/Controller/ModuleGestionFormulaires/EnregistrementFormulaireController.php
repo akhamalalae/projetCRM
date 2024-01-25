@@ -28,7 +28,7 @@ class EnregistrementFormulaireController extends AbstractController
      *
      * @return Response
      */
-    public function formulaireDemo(Request $request, AddDemoEnregistrementFormulaire $service, $id): Response
+    public function formulaireDemo(Request $request, AddDemoEnregistrementFormulaire $service, int $id): Response
     {
         return $this->renderTrait($request, $service, ['id' => $id]);
     }
@@ -42,7 +42,7 @@ class EnregistrementFormulaireController extends AbstractController
      *
      * @return Response
      */
-    public function remplirFormulaire(Request $request, AddEnregistrementFormulaire $service, $id): Response
+    public function remplirFormulaire(Request $request, AddEnregistrementFormulaire $service, int $id): Response
     {
         return $this->renderTrait($request, $service,
                 [
@@ -59,11 +59,12 @@ class EnregistrementFormulaireController extends AbstractController
      * @param ResultatsFormulaire $service
      * @param int $id
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
-    public function resultatsFormulaire(ResultatsFormulaire $service, $id): Response
+    public function resultatsFormulaire(ResultatsFormulaire $service, int $id): Response
     {
         $service->init(['id' => $id]);
+
         return $this->render($service->view(), $service->parameters());
     }
 
@@ -106,10 +107,23 @@ class EnregistrementFormulaireController extends AbstractController
      *
      * @return Response
      */
-    public function telechargerFile(Telecharger $service, $id, $format = 'xls'): Response
+    public function telechargerFile(Telecharger $service, int $id, string $format = 'xls'): Response
     {
         $service->init(['id' => $id, 'format' => $format]);
 
-        return new Response($service->content(), $service->status(), $service->headers());
+        if ($format === 'xls') {
+            $content = $service->xlsGenerator();
+        }
+
+        if ($format === 'pdf') {
+            $html = $this->renderView($service->view(), $service->parameters());
+
+            $content = $service->pdfGenerator($html)->stream(
+                $service->streamFilename(),
+                $service->streamOptions()
+            );
+        }
+
+        return new Response($content, $service->status(), $service->headers());
     }
 }

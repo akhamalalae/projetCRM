@@ -5,7 +5,7 @@ namespace App\Core\Interface;
 interface DeleteObjectInterface
 {
     /**
-     * delete data
+     * Delete data
      *
      * @param object $object
      * @return void
@@ -13,7 +13,7 @@ interface DeleteObjectInterface
     public function delete();
 
     /**
-     * delete specific data
+     * Delete specific data
      *
      * @param object $object
      * @return void

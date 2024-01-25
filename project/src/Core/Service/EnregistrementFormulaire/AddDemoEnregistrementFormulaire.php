@@ -114,14 +114,4 @@ class AddDemoEnregistrementFormulaire implements RenderInterface, Initialisation
     {
         return ['champsFormulaires' => $this->datachampsFormulaires];
     }
-
-    /**
-     * Set options create form
-     *
-     * @return array
-     */
-    public function formOtherOptions()
-    {
-        return [];
-    }
 }

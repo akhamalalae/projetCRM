@@ -3,20 +3,26 @@
 namespace App\Core\Service\EnregistrementFormulaire;
 
 use App\Core\Interface\InitialisationInterface;
+use App\Core\Interface\RenderInterface;
 use App\Entity\ChampsFormulaire;
 use App\Entity\EnregistrementFormulaire;
 use App\Entity\Formulaire;
 use App\Services\MenuGenerator;
 use Doctrine\ORM\EntityManagerInterface;
+use Dompdf\Dompdf;
 
-class Telecharger implements InitialisationInterface
+class Telecharger implements InitialisationInterface, RenderInterface
 {
     private int    $id;
     private object $formulaire;
-    private array  $enregistrement;
+    private array  $enregistrement =[];
+    private array  $champsFormulaires = [];
     private string $fields = '';
     private string $lineData = '';
     private string $format = '';
+    private string $contentType = '';
+
+    const VIEW_PATH  = 'generatorPDF/enregistrementFormulaire.html.twig';
 
     public function __construct(public EntityManagerInterface $em, public MenuGenerator $menuGenerator)
     {
@@ -26,6 +32,7 @@ class Telecharger implements InitialisationInterface
      * Initialisation
      *
      * @param array $params
+     * 
      * @return void
      */
     public function init($param)
@@ -33,19 +40,24 @@ class Telecharger implements InitialisationInterface
         $this->id             = $param['id'];
         $this->format         = $param['format'];
         $this->formulaire     = $this->em->getRepository(Formulaire::class)->find($this->id);
-        $this->enregistrement = $this->em->getRepository(EnregistrementFormulaire::class)->findBy(
-            ['formulaires' => $this->formulaire]
-        );
-    }
 
-    /**
-     * Response content
-     *
-     * @return string
-     */
-    public function content(): string
-    {
-        return $this->telecharger()['resultat'];
+        if ($this->formulaire) {
+            $this->enregistrement = $this->em->getRepository(EnregistrementFormulaire::class)->findBy(
+                ['formulaires' => $this->formulaire]
+            );
+
+            $this->champsFormulaires = $this->em->getRepository(ChampsFormulaire::class)->findBy(
+                ['formulaire' => $this->formulaire, 'status' => 0]
+            );
+        }
+
+        if ($this->format === 'pdf') {
+            $this->contentType = 'application/pdf';
+        }
+
+        if ($this->format === 'xls') {
+            $this->contentType = 'application/vnd.ms-excel';
+        }
     }
 
     /**
@@ -66,35 +78,83 @@ class Telecharger implements InitialisationInterface
     public function headers(): array
     {
         return [
-            'Content-Type' => 'application/vnd.ms-excel',
-            "Content-disposition" => "attachment; filename=".$this->telecharger()['fileName']
+            'Content-Type'        => $this->contentType,
+            "Content-disposition" => "attachment; filename=".$this->getNameFile()
         ];
     }
 
-    /**
-     * Format Excel
+     /**
+     * view
+     *
+     * @return string
+     */
+    public function view(): string
+    {
+        return self::VIEW_PATH;
+    }
+
+     /**
+     * parameters
      *
      * @return array
      */
-    public function telecharger(): array
+    public function parameters(): array
     {
         return [
-            'resultat' => $this->getResults(),
-            'fileName' => $this->getNameFile()
+            'enregistrementFormulaire' => $this->enregistrement,
+            'champsFormulaires'        => $this->champsFormulaires
         ];
     }
 
     /**
-     * get Results
+     * generate exel
      *
      * @return void
      */
-    public function getResults(): string
+    public function xlsGenerator(): string
     {
         $this->getFields();
         $this->getLineData();
 
-        return $this->fields."\n".$this->lineData;
+        return sprintf('%s \n %s',$this->fields, $this->lineData);
+    }
+
+    /**
+     * generate pdf
+     *
+     * @param string $html
+     * 
+     * @return Dompdf
+     */
+    public function pdfGenerator(string $html): Dompdf
+    {
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->render();
+
+        return $dompdf;
+    }
+
+     /**
+     * stream file name
+     *
+     * @return string
+     */
+    public function streamFilename(): string
+    {
+        return $this->getNameFile();
+    }
+
+     /**
+     * stream oprtions
+     *
+     * @return array
+     */
+    public function streamOptions(): array
+    {
+        return [
+            "Attachment" => false
+        ];
     }
 
     /**
@@ -106,11 +166,7 @@ class Telecharger implements InitialisationInterface
     {
         foreach ($this->enregistrement[0]->getResultats() as $key => $value) {
             $champsformulaire = $this->em->getRepository(ChampsFormulaire::class)->find($key);
-            $this->fields = sprintf('%s%s%s',
-                $this->fields,
-                $champsformulaire->getLibelle(),
-                ','
-            );
+            $this->fields = sprintf('%s%s,',$this->fields, $champsformulaire->getLibelle());
         }
     }
 
@@ -127,13 +183,9 @@ class Telecharger implements InitialisationInterface
                     $result = $result["date"];
                 }
             
-                $this->lineData = sprintf('%s%s%s',
-                    $this->lineData,
-                    $result,
-                    ','
-                );
+                $this->lineData = sprintf('%s%s,', $this->lineData, $result);
             }
-            $this->lineData .="\n";
+            $this->lineData .= "\n";
         }
     }
 
@@ -144,11 +196,23 @@ class Telecharger implements InitialisationInterface
      */
     public function getNameFile(): string
     {
-        return sprintf('resultats_formulaire_%s_%s.%s',
-            $this->formulaire->getLibelle(),
-            date('Y-m-d'),
-            $this->format
-        );
+        return sprintf('resultats_formulaire_%s_%s.%s',$this->formulaire->getLibelle(), date('Y-m-d'), $this->format);
+    }
+
+    /**
+     * image To Base 64
+     *
+     * @param string $path
+     * 
+     * @return string
+     */
+    private function imageToBase64(string $path): string 
+    {
+        $type = pathinfo($path, PATHINFO_EXTENSION);
+        $data = file_get_contents($path);
+        $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
+        return $base64;
     }
 }
 

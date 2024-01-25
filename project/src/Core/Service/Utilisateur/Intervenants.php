@@ -119,16 +119,6 @@ class Intervenants implements InitialisationInterface, CreateFormInterface,
         return [];
     }
 
-    /**
-     * Set options create form
-     *
-     * @return array
-     */
-    public function formOtherOptions()
-    {
-        return [];
-    }
-
     //SubmittedFormInterface
 
     /**
