@@ -13,10 +13,11 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class RequeteTableauBord
 {
-    const MESSAGE_FLASH_1   = "Veuillez choisir les filtres de la requête!";
-    const MESSAGE_FLASH_2   = "Veuillez choisir les champs a afficher!";
-    const MESSAGE_FLASH_3   = "Veuillez remplir le nom de la requête!";
-    const MESSAGE_FLASH_4   = "Erreur de syntaxe du champ Valeur des filtres : %s, veuillez regarder la documentation!";
+    const MESSAGE_FLASH_1   = "Veuillez choisir les filtres de la requête.";
+    const MESSAGE_FLASH_2   = "Veuillez choisir les champs a afficher.";
+    const MESSAGE_FLASH_3   = "Veuillez remplir le nom de la requête.";
+    const MESSAGE_FLASH_4   = "Erreur de syntaxe du champ Valeur des filtres : %s, veuillez regarder la documentation.";
+    const MESSAGE_FLASH_5   = "Veuillez vérifier les parenthèses de la requête.";
 
     /**
      * @ORM\Id
@@ -204,6 +205,10 @@ class RequeteTableauBord
             $message .= sprintf(self::MESSAGE_FLASH_4, $listInvalidChamps);
         }
 
+        if ($this->checkValidParentheses() === false) {
+            $message .= self::MESSAGE_FLASH_5;
+        }
+
         return [
             'warning'   => $message === '' ? false : true,
             'message'   => $message
@@ -239,5 +244,29 @@ class RequeteTableauBord
         }
 
         return $message;
+    }
+
+    public function checkValidParentheses(): bool
+    {
+        $fermante = 0;
+        $ouvrante = 0;
+
+        foreach ($this->getRequeteTableauBordFiltres() as $filtre) {
+            $parenthese = $filtre->getParenthese()?->getLibelle();
+
+            if ($parenthese === '(') {
+                $ouvrante += 1;
+            }
+
+            if ($parenthese === ')') {
+                $fermante += 1;
+            }
+        }
+
+        if ($ouvrante === $fermante) {
+            return true;
+        }
+
+        return false;
     }
 }

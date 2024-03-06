@@ -63,15 +63,11 @@ class TableauBordCreateRequete
      */
     protected function createRequeteFiltres(): void
     {
+        $this->clauseWhere = '';
         foreach ($this->requeteTableauBord->getRequeteTableauBordFiltres() as $filtre) {
-            $property      = $filtre->getEntitiesPropriete();
-            $jointureName  = $property->jointureName();
-
-            if (strpos($this->clauseWhere, $jointureName) === false) {
-                $this->clauseWhere .= $filtre->createRequeteClauseWhere();
-
-                $this->createJoint($property);
-            }
+            $property = $filtre->getEntitiesPropriete();
+            $this->clauseWhere .= $filtre->createRequeteClauseWhere();
+            $this->createJoint($property);
         }
     }
 

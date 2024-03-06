@@ -45,12 +45,19 @@
                                 {% set functionEntityChecked = 'getChampsByEntityChecked(' ~ indice ~ ')' %}
                                 {% set functionGetOperator = 'functionGetOperator(' ~ indice ~ ')' %}
                                 {% set indice = indice + 1 %}
+                                {% set parenthese = row.vars.value.parenthese != null ? row.vars.value.parenthese.libelle : '' %}
                                 <div class="liste_options_accordion" id="accordionExample{{ indice }}">
                                     <div class="accordion" id="accordionExample{{ indice }}">
+                                        {% if parenthese == ')' %}
+                                            <div style="text-align:center"><span class="badge bg-warning">{{ parenthese}}</span></div>
+                                        {% endif %}
                                         {% if indice != 1 %}
                                             <div style="text-align:center">
                                                 <span class="badge bg-primary">{{ row.vars.value.tableau_bord_filtre_condition.libelle }}</span>
                                             </div>
+                                        {% endif %}
+                                        {% if parenthese == '(' %}
+                                            <div style="text-align:center"><span class="badge bg-warning">{{ parenthese}}</span></div>
                                         {% endif %}
                                         <br>
                                         <div class="accordion-item">
@@ -73,7 +80,8 @@
                                                 <div class="accordion-body">
                                                     <div class="panel panel-warning">
                                                         <div class="panel-body">
-                                                        {% if indice == 1 %}
+                                                            {{ form_row(row.parenthese) }}
+                                                            {% if indice == 1 %}
                                                                 <div id="" style="display:none;">
                                                                     {{ form_row(row.tableau_bord_filtre_condition, {'attr': {'style': 'display:none'} }) }}
                                                                 </div>

@@ -57,6 +57,11 @@ class RequeteTableauBordFiltres
      */
     private $dateModification;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Parenthese::class, inversedBy="requeteTableauBordFiltres")
+     */
+    private $parenthese;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -158,13 +163,28 @@ class RequeteTableauBordFiltres
         return $this;
     }
 
+    public function getParenthese(): ?Parenthese
+    {
+        return $this->parenthese;
+    }
+
+    public function setParenthese(?Parenthese $parenthese): self
+    {
+        $this->parenthese = $parenthese;
+
+        return $this;
+    }
+
     public function createRequeteClauseWhere(): string
     {
         $property            = $this->getEntitiesPropriete();
         $operator            = $this->getTableauBordFiltreOperator()->getLibelle();
         $valeur              = $this->getValeur();
         $jointuretName       = $property->jointureName();
+        $parenthese          = $this->getParenthese()?->getLibelle();
         $condition           = '';
+        $ouvrante            = '';
+        $fermante            = '';
 
         if ($operator == "Contient") {
             $operator = "LIKE";
@@ -175,6 +195,14 @@ class RequeteTableauBordFiltres
             $condition = $this->getTableauBordFiltreCondition()->getLibelle();
         }
 
-        return " $condition $jointuretName $operator '$valeur' ";
+        if ($parenthese === '(') {
+            $ouvrante = $parenthese;
+        }
+
+        if ($parenthese === ')') {
+            $fermante = $parenthese;
+        }
+
+        return " $condition $ouvrante $jointuretName $operator '$valeur' $fermante";
     }
 }

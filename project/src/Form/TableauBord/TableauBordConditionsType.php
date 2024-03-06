@@ -12,12 +12,24 @@ use App\Entity\TableauBordFiltresOperators;
 use App\Entity\TableauBordFiltresConditions;
 use App\Entity\EntitiesPropriete;
 use App\Entity\Entities;
+use App\Entity\Parenthese;
 
 class TableauBordConditionsType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('parenthese', EntityType::class, [
+                'class' => Parenthese::class,
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('u')
+                        ->orderBy('u.libelle', 'ASC');
+                },
+                'choice_label' => 'libelle',
+                'required' => false,
+                'label' => 'Parenthèse',
+                'placeholder' => 'Choisir la parenthèse',
+            ])
             ->add('tableau_bord_filtre_condition', EntityType::class, [
                 'class' => TableauBordFiltresConditions::class,
                 'query_builder' => function (EntityRepository $er) {
@@ -26,8 +38,8 @@ class TableauBordConditionsType extends AbstractType
                 },
                 'choice_label' => 'libelle',
                 'required' => false,
+                'label' => 'Condition',
                 'placeholder' => 'Choisir la condition',
-                'label' => false
             ])
             ->add('entitie', EntityType::class, [
                 'class' => Entities::class,
