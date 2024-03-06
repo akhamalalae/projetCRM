@@ -16,7 +16,7 @@ class RequeteTableauBord
     const MESSAGE_FLASH_1   = "Veuillez choisir les filtres de la requête!";
     const MESSAGE_FLASH_2   = "Veuillez choisir les champs a afficher!";
     const MESSAGE_FLASH_3   = "Veuillez remplir le nom de la requête!";
-    const MESSAGE_FLASH_4   = "Erreur de syntaxe du champ Valeur des filtres, veuillez regarder la documentation!";
+    const MESSAGE_FLASH_4   = "Erreur de syntaxe du champ Valeur des filtres : %s, veuillez regarder la documentation!";
 
     /**
      * @ORM\Id
@@ -185,47 +185,51 @@ class RequeteTableauBord
 
     public function checkRequeteValidSyntax(): array
     {
-        $warning   = false;
-        $message   = '';
+         $message   = '';
 
         if (count($this->getRequeteTableauBordFiltres()) === 0) {
-            $warning   = true;
-            $message   = self::MESSAGE_FLASH_1;
+            $message .= self::MESSAGE_FLASH_1;
         }
 
         if (count($this->getPropertiesEntityChoixChamps()) === 0) {
-            $warning  = true;
-            $message  = self::MESSAGE_FLASH_2;
+            $message .= self::MESSAGE_FLASH_2;
         }
 
         if ($this->getEnregistrerRequete() === true && $this->getLibelle() === null) {
-            $warning   = true;
-            $message   = self::MESSAGE_FLASH_3;
+            $message .= self::MESSAGE_FLASH_3;
         }
 
-        if ($this->checkValidSyntaxe() === true) {
-            $warning  = true;
-            $message  = self::MESSAGE_FLASH_4;
+        $listInvalidChamps = $this->checkValidSyntaxe();
+        if ($listInvalidChamps !== '') {
+            $message .= sprintf(self::MESSAGE_FLASH_4, $listInvalidChamps);
         }
 
         return [
-            'warning'   => $warning,
+            'warning'   => $message === '' ? false : true,
             'message'   => $message
         ];
     }
 
-    public function checkValidSyntaxe(): bool
+    public function checkValidSyntaxe(): string
     {
+        $message = '';
+
         foreach ($this->getRequeteTableauBordFiltres() as $filtre) {
-            $valeur = $filtre->getValeur();
-            $typeChamp = $filtre->getEntitiesPropriete()->getTypesChamps()->getId();
+            $valeur    = $filtre->getValeur();
+            $property  = $filtre->getEntitiesPropriete()?->getLibelle();
+            $entitie   = $filtre->getEntitie()?->getLibelle();
+            $typeChamp = $filtre->getEntitiesPropriete()?->getTypesChamps()?->getId();
 
             if ($typeChamp === Typeschamps::DATETYPE) {
                 $format = 'Y/m/d H:i';
                 $checkDateFormat = DateTimeImmutable::createFromFormat($format, $valeur);
 
                 if ($checkDateFormat === false) {
-                    return true;
+                    $message .= sprintf('%s %s (%s)',
+                        $message === '' ? '' : ', ',
+                        $property,
+                        $entitie
+                    );
                 }
             }
 
@@ -234,6 +238,6 @@ class RequeteTableauBord
             }
         }
 
-        return false;
+        return $message;
     }
 }
