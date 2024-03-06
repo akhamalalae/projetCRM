@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\RequeteTableauBordFiltresRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -175,16 +176,59 @@ class RequeteTableauBordFiltres
         return $this;
     }
 
+    public function getIfParenthesOuvrante(): string
+    {
+        $parenthese = $this->getParenthese()?->getLibelle();
+        if ($parenthese === '(') {
+            return $parenthese;
+        }
+
+        return '';
+    }
+
+    public function getIfParenthesFermante(): string
+    {
+        $parenthese = $this->getParenthese()?->getLibelle();
+        if ($parenthese === ')') {
+            return $parenthese;
+        }
+
+        return '';
+    }
+
+    public function getIfInValidFiltreValue(): string
+    {
+        $valeur    = $this->getValeur();
+        $property  = $this->getEntitiesPropriete()?->getLibelle();
+        $entitie   = $this->getEntitie()?->getLibelle();
+        $typeChamp = $this->getEntitiesPropriete()?->getTypesChamps()?->getId();
+        $message = '';
+
+        if ($typeChamp === Typeschamps::DATETYPE) {
+            $format = 'Y/m/d H:i';
+            $checkDateFormat = DateTimeImmutable::createFromFormat($format, $valeur);
+
+            if ($checkDateFormat === false) {
+                $message = sprintf('%s (%s)', $property, $entitie);
+            }
+        }
+
+        if ($typeChamp=== Typeschamps::BOOLEANTYPE) {
+            $this->setValeur($valeur === '0' ? 0 : 1);
+        }
+
+        return $message;
+    }
+
     public function createRequeteClauseWhere(): string
     {
         $property            = $this->getEntitiesPropriete();
-        $operator            = $this->getTableauBordFiltreOperator()->getLibelle();
+        $operator            = $this->getTableauBordFiltreOperator()?->getLibelle();
         $valeur              = $this->getValeur();
-        $jointuretName       = $property->jointureName();
-        $parenthese          = $this->getParenthese()?->getLibelle();
+        $jointuretName       = $property?->jointureName();
+        $parenthesOuvrante   = $this->getIfParenthesOuvrante();
+        $parenthesFermante   = $this->getIfParenthesFermante();
         $condition           = '';
-        $ouvrante            = '';
-        $fermante            = '';
 
         if ($operator == "Contient") {
             $operator = "LIKE";
@@ -195,14 +239,6 @@ class RequeteTableauBordFiltres
             $condition = $this->getTableauBordFiltreCondition()->getLibelle();
         }
 
-        if ($parenthese === '(') {
-            $ouvrante = $parenthese;
-        }
-
-        if ($parenthese === ')') {
-            $fermante = $parenthese;
-        }
-
-        return " $condition $ouvrante $jointuretName $operator '$valeur' $fermante";
+        return " $condition $parenthesOuvrante $jointuretName $operator '$valeur' $parenthesFermante";
     }
 }

@@ -186,7 +186,7 @@ class RequeteTableauBord
 
     public function checkRequeteValidSyntax(): array
     {
-         $message   = '';
+         $message = '';
 
         if (count($this->getRequeteTableauBordFiltres()) === 0) {
             $message .= self::MESSAGE_FLASH_1;
@@ -200,73 +200,48 @@ class RequeteTableauBord
             $message .= self::MESSAGE_FLASH_3;
         }
 
-        $listInvalidChamps = $this->checkValidSyntaxe();
+        $checkValidSyntaxe = $this->checkValidSyntaxe();
+
+        $listInvalidChamps = $checkValidSyntaxe['value'];
         if ($listInvalidChamps !== '') {
             $message .= sprintf(self::MESSAGE_FLASH_4, $listInvalidChamps);
         }
 
-        if ($this->checkValidParentheses() === false) {
+        if ($checkValidSyntaxe['parentheses'] === false) {
             $message .= self::MESSAGE_FLASH_5;
         }
 
         return [
-            'warning'   => $message === '' ? false : true,
-            'message'   => $message
+            'warning' => $message === '' ? false : true,
+            'message' => $message
         ];
     }
 
-    public function checkValidSyntaxe(): string
+    public function checkValidSyntaxe(): array
     {
-        $message = '';
+        $parenthesFermante  = 0;
+        $parenthesOuvrante  = 0;
+        $inValidValues      = ''; 
 
         foreach ($this->getRequeteTableauBordFiltres() as $filtre) {
-            $valeur    = $filtre->getValeur();
-            $property  = $filtre->getEntitiesPropriete()?->getLibelle();
-            $entitie   = $filtre->getEntitie()?->getLibelle();
-            $typeChamp = $filtre->getEntitiesPropriete()?->getTypesChamps()?->getId();
+            $filtreValue = $filtre->getIfInValidFiltreValue();
 
-            if ($typeChamp === Typeschamps::DATETYPE) {
-                $format = 'Y/m/d H:i';
-                $checkDateFormat = DateTimeImmutable::createFromFormat($format, $valeur);
-
-                if ($checkDateFormat === false) {
-                    $message .= sprintf('%s %s (%s)',
-                        $message === '' ? '' : ', ',
-                        $property,
-                        $entitie
-                    );
-                }
+            if ($filtreValue !== '') {
+                $inValidValues .= sprintf('%s %s', $inValidValues === '' ? '' : ', ', $filtreValue);
             }
 
-            if ($typeChamp=== Typeschamps::BOOLEANTYPE) {
-                $filtre->setValeur($valeur === '0' ? 0 : 1);
+            if ($filtre->getIfParenthesOuvrante() !== '') {
+                $parenthesOuvrante += 1;
+            }
+
+            if ($filtre->getIfParenthesFermante() !== '') {
+                $parenthesFermante += 1;
             }
         }
 
-        return $message;
-    }
-
-    public function checkValidParentheses(): bool
-    {
-        $fermante = 0;
-        $ouvrante = 0;
-
-        foreach ($this->getRequeteTableauBordFiltres() as $filtre) {
-            $parenthese = $filtre->getParenthese()?->getLibelle();
-
-            if ($parenthese === '(') {
-                $ouvrante += 1;
-            }
-
-            if ($parenthese === ')') {
-                $fermante += 1;
-            }
-        }
-
-        if ($ouvrante === $fermante) {
-            return true;
-        }
-
-        return false;
+        return [
+            'parentheses' => $parenthesOuvrante === $parenthesFermante ? true : false,
+            'value'       => $inValidValues
+        ];
     }
 }

@@ -48,9 +48,6 @@
                                 {% set parenthese = row.vars.value.parenthese != null ? row.vars.value.parenthese.libelle : '' %}
                                 <div class="liste_options_accordion" id="accordionExample{{ indice }}">
                                     <div class="accordion" id="accordionExample{{ indice }}">
-                                        {% if parenthese == ')' %}
-                                            <div style="text-align:center"><span class="badge bg-warning">{{ parenthese}}</span></div>
-                                        {% endif %}
                                         {% if indice != 1 %}
                                             <div style="text-align:center">
                                                 <span class="badge bg-primary">{{ row.vars.value.tableau_bord_filtre_condition.libelle }}</span>
@@ -102,6 +99,9 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        {% if parenthese == ')' %}
+                                            <div style="text-align:center"><span class="badge bg-warning">{{ parenthese}}</span></div>
+                                        {% endif %}
                                         <br>
                                     </div>
                                 </div>
