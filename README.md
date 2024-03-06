@@ -14,6 +14,7 @@ Le CRM permet la configuration et la création automatique des enquêtes de merc
       - Configurer l'espace des points de vente en mode graphique.
   - Génération des requêtes libres.
       - Module de reporting et statistique.
+      ![Alt text](<Screenshot 2024-03-06 at 18-44-49 Tableau De Bord!.png>)
   - Configuration et génération automatique du routing.
       - Attribution des rendez-vous aux auditeurs.
    
