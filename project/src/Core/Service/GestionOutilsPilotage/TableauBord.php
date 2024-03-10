@@ -11,11 +11,12 @@ use App\Entity\Entities;
 use App\Entity\EntitiesPropriete;
 use App\Entity\Formulaire;
 use App\Entity\RequeteTableauBord;
+use App\Entity\User;
 use App\Form\TableauBord\TableauBordType;
 use App\Services\MenuGenerator;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Form\Form;
 
 class TableauBord extends TableauBordCreateRequete implements InitialisationInterface, CreateFormInterface,
@@ -24,6 +25,8 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     private int                 $id = 0;
     private array               $listesChamps = [];
     private array               $listesEntities = [];
+    private ArrayCollection     $originalFiltres;
+    private User                $user;
 
     const VIEW_PATH            = 'tableauBord/index.html.twig';
     const CURRENT_PAGE         = 'Tableau De Bord!';
@@ -49,11 +52,19 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     public function init($param): void
     {
         $this->id               = $param['id'];
+        $this->user             = $param['user'];
         $this->listesChamps     = $this->em->getRepository(EntitiesPropriete::class)->findBy(['status' => 0]);
         $this->listesEntities   = $this->em->getRepository(Entities::class)->findBy(['status' => 0]);
 
         if ($this->id !== 0) {
             $this->requeteTableauBord = $this->getRequeteTableauBordById();
+
+            // Create an ArrayCollection of the current objects in the database
+            $this->originalFiltres = new ArrayCollection();
+            
+            foreach ($this->requeteTableauBord->getRequeteTableauBordFiltres() as $filtre) {
+                $this->originalFiltres->add($filtre);
+            }
         }
     }
 
@@ -149,18 +160,18 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      */
     public function save($form): void
     {
-        $this->beforeSave();
-
         $this->requeteTableauBord = $form->getData();
-
-        $this->saveSpecific($form);
-
+        
         if ($this->requeteTableauBord->getEnregistrerRequete() === true) {
+            $this->beforeSave();
+
+            $this->saveSpecific($form);
+
             $this->em->persist($this->requeteTableauBord);
             $this->em->flush();
-        }
 
-        $this->afterSave();
+            $this->afterSave();
+        }
     }
 
      /**
@@ -172,6 +183,16 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      */
     public function saveSpecific($form): void
     {
+        if ($this->id !== 0) {
+            foreach ($this->requeteTableauBord->getRequeteTableauBordFiltres() as $filtre) {
+                if ($this->originalFiltres->contains($filtre)) {
+                    $filtre->setDateModification(new DateTime());
+                    $filtre->setUserModificateur($this->user);
+                } else {
+                    $filtre->setUserCreateur($this->user);
+                }
+            }
+        }
     }
 
     /**
@@ -182,11 +203,13 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     public function beforeSave(): void
     {
         if ($this->id === 0) {
-            $this->requeteTableauBord->setDateCreation(new DateTime());
+            $this->requeteTableauBord->setDateCreation(new DateTime())
+                    ->setUserCreateur($this->user);
         }
 
         if ($this->id !== 0) {
-            $this->requeteTableauBord->setDateModification(new DateTime());
+            $this->requeteTableauBord->setDateModification(new DateTime())
+                    ->setUserModificateur($this->user);
         }
     }
 

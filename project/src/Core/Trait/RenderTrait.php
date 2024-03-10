@@ -2,9 +2,12 @@
 
 namespace App\Core\Trait;
 
+use Symfony\Component\HttpFoundation\Request;
+
 trait RenderTrait {
 
-    public function renderTrait($request, $service, $params) {
+    public function renderTrait(Request $request, mixed $service, array $params) : mixed
+    {
         if (method_exists($service, 'init')) {
             $service->init($params);
         }

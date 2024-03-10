@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\RequeteTableauBordFiltresRepository;
+use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -62,6 +63,21 @@ class RequeteTableauBordFiltres
      * @ORM\ManyToOne(targetEntity=Parenthese::class, inversedBy="requeteTableauBordFiltres")
      */
     private $parenthese;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="requeteTableauBordFiltres")
+     */
+    private $userCreateur;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="requeteTableauBordFiltres")
+     */
+    private $userModificateur;
+
+    public function __construct()
+    {
+        $this->dateCreation = new DateTime();
+    }
 
     public function getId(): ?int
     {
@@ -176,9 +192,34 @@ class RequeteTableauBordFiltres
         return $this;
     }
 
+    public function getUserCreateur(): ?User
+    {
+        return $this->userCreateur;
+    }
+
+    public function setUserCreateur(?User $userCreateur): self
+    {
+        $this->userCreateur = $userCreateur;
+
+        return $this;
+    }
+
+    public function getUserModificateur(): ?User
+    {
+        return $this->userModificateur;
+    }
+
+    public function setUserModificateur(?User $userModificateur): self
+    {
+        $this->userModificateur = $userModificateur;
+
+        return $this;
+    }
+
     public function getIfParenthesOuvrante(): string
     {
         $parenthese = $this->getParenthese()?->getLibelle();
+
         if ($parenthese === '(') {
             return $parenthese;
         }
@@ -189,6 +230,7 @@ class RequeteTableauBordFiltres
     public function getIfParenthesFermante(): string
     {
         $parenthese = $this->getParenthese()?->getLibelle();
+
         if ($parenthese === ')') {
             return $parenthese;
         }
@@ -202,22 +244,31 @@ class RequeteTableauBordFiltres
         $property  = $this->getEntitiesPropriete()?->getLibelle();
         $entitie   = $this->getEntitie()?->getLibelle();
         $typeChamp = $this->getEntitiesPropriete()?->getTypesChamps()?->getId();
-        $message = '';
+        $warning   = false;
 
-        if ($typeChamp === Typeschamps::DATETYPE) {
-            $format = 'Y/m/d H:i';
-            $checkDateFormat = DateTimeImmutable::createFromFormat($format, $valeur);
+        switch ($typeChamp) {
+            case Typeschamps::DATETYPE:
+                $format = 'Y/m/d H:i';
+                $checkDateFormat = DateTimeImmutable::createFromFormat($format, $valeur);
 
-            if ($checkDateFormat === false) {
-                $message = sprintf('%s (%s)', $property, $entitie);
-            }
+                if ($checkDateFormat === false) {
+                    $warning = true;
+                }
+                break;
+            case Typeschamps::BOOLEANTYPE:
+                $this->setValeur($valeur === '0' ? 0 : 1);
+
+                if ($valeur !== 0 || $valeur !== 1) {
+                    $warning = true;
+                }
+                break;
         }
 
-        if ($typeChamp=== Typeschamps::BOOLEANTYPE) {
-            $this->setValeur($valeur === '0' ? 0 : 1);
+        if ($warning === true) {
+            return sprintf('%s (%s)', $property, $entitie);
         }
 
-        return $message;
+        return '';
     }
 
     public function createRequeteClauseWhere(): string

@@ -42,7 +42,7 @@ class TableauBordController extends AbstractController
      */
     public function tableauBrd(Request $request,TableauBord $service, $id):Response
     {
-        return $this->renderTrait($request, $service, ['id' => $id]);
+        return $this->renderTrait($request, $service, ['id' => $id, 'user' => $this->getUser()]);
     }
 
     /**

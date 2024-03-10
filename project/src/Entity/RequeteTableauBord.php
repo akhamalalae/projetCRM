@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\RequeteTableauBordRepository;
-use DateTimeImmutable;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -60,10 +60,21 @@ class RequeteTableauBord
      */
     private $dateModification;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="requeteTableauBords")
+     */
+    private $userCreateur;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="requeteTableauBords")
+     */
+    private $userModificateur;
+
     public function __construct()
     {
         $this->requeteTableauBordFiltres = new ArrayCollection();
         $this->properties_entity_choix_champs = new ArrayCollection();
+        $this->dateCreation = new DateTime();
     }
 
     public function getId(): ?int
@@ -186,7 +197,10 @@ class RequeteTableauBord
 
     public function checkRequeteValidSyntax(): array
     {
-         $message = '';
+        $checkChamps            = $this->checkChamps();
+        $listChampsValue        = $checkChamps['value'];
+        $checkChampsParentheses = $checkChamps['parentheses'];
+        $message                = '';
 
         if (count($this->getRequeteTableauBordFiltres()) === 0) {
             $message .= self::MESSAGE_FLASH_1;
@@ -200,14 +214,11 @@ class RequeteTableauBord
             $message .= self::MESSAGE_FLASH_3;
         }
 
-        $checkValidSyntaxe = $this->checkValidSyntaxe();
-
-        $listInvalidChamps = $checkValidSyntaxe['value'];
-        if ($listInvalidChamps !== '') {
-            $message .= sprintf(self::MESSAGE_FLASH_4, $listInvalidChamps);
+        if ($listChampsValue !== '') {
+            $message .= sprintf(self::MESSAGE_FLASH_4, $listChampsValue);
         }
 
-        if ($checkValidSyntaxe['parentheses'] === false) {
+        if ($checkChampsParentheses === false) {
             $message .= self::MESSAGE_FLASH_5;
         }
 
@@ -217,7 +228,7 @@ class RequeteTableauBord
         ];
     }
 
-    public function checkValidSyntaxe(): array
+    public function checkChamps(): array
     {
         $parenthesFermante  = 0;
         $parenthesOuvrante  = 0;
@@ -227,7 +238,7 @@ class RequeteTableauBord
             $filtreValue = $filtre->getIfInValidFiltreValue();
 
             if ($filtreValue !== '') {
-                $inValidValues .= sprintf('%s %s', $inValidValues === '' ? '' : ', ', $filtreValue);
+                $inValidValues .= sprintf('%s %s', $inValidValues === '' ? '' : ',', $filtreValue);
             }
 
             if ($filtre->getIfParenthesOuvrante() !== '') {
@@ -243,5 +254,29 @@ class RequeteTableauBord
             'parentheses' => $parenthesOuvrante === $parenthesFermante ? true : false,
             'value'       => $inValidValues
         ];
+    }
+
+    public function getUserCreateur(): ?User
+    {
+        return $this->userCreateur;
+    }
+
+    public function setUserCreateur(?User $userCreateur): self
+    {
+        $this->userCreateur = $userCreateur;
+
+        return $this;
+    }
+
+    public function getUserModificateur(): ?User
+    {
+        return $this->userModificateur;
+    }
+
+    public function setUserModificateur(?User $userModificateur): self
+    {
+        $this->userModificateur = $userModificateur;
+
+        return $this;
     }
 }

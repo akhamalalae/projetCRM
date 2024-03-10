@@ -113,6 +113,16 @@ class User extends Adresse implements UserInterface, PasswordAuthenticatedUserIn
     #[Groups(['user:read'])]
     private $dateModification;
 
+    /**
+     * @ORM\OneToMany(targetEntity=RequeteTableauBord::class, mappedBy="userCreateur")
+     */
+    private $requeteTableauBords;
+
+    /**
+     * @ORM\OneToMany(targetEntity=RequeteTableauBordFiltres::class, mappedBy="userCreateur")
+     */
+    private $requeteTableauBordFiltres;
+
     public function __construct()
     {
         // guarantee every user at least has ROLE_USER
@@ -125,6 +135,8 @@ class User extends Adresse implements UserInterface, PasswordAuthenticatedUserIn
         $this->renderVousUserCreateur = new ArrayCollection();
         $this->historiqueGenerationAutomatiqueRoutings = new ArrayCollection();
         $this->groupe = new ArrayCollection();
+        $this->requeteTableauBords = new ArrayCollection();
+        $this->requeteTableauBordFiltres = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -440,6 +452,66 @@ class User extends Adresse implements UserInterface, PasswordAuthenticatedUserIn
     public function setFirstname(?string $firstname): self
     {
         $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RequeteTableauBord>
+     */
+    public function getRequeteTableauBords(): Collection
+    {
+        return $this->requeteTableauBords;
+    }
+
+    public function addRequeteTableauBord(RequeteTableauBord $requeteTableauBord): self
+    {
+        if (!$this->requeteTableauBords->contains($requeteTableauBord)) {
+            $this->requeteTableauBords[] = $requeteTableauBord;
+            $requeteTableauBord->setUserCreateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRequeteTableauBord(RequeteTableauBord $requeteTableauBord): self
+    {
+        if ($this->requeteTableauBords->removeElement($requeteTableauBord)) {
+            // set the owning side to null (unless already changed)
+            if ($requeteTableauBord->getUserCreateur() === $this) {
+                $requeteTableauBord->setUserCreateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RequeteTableauBordFiltres>
+     */
+    public function getRequeteTableauBordFiltres(): Collection
+    {
+        return $this->requeteTableauBordFiltres;
+    }
+
+    public function addRequeteTableauBordFiltre(RequeteTableauBordFiltres $requeteTableauBordFiltre): self
+    {
+        if (!$this->requeteTableauBordFiltres->contains($requeteTableauBordFiltre)) {
+            $this->requeteTableauBordFiltres[] = $requeteTableauBordFiltre;
+            $requeteTableauBordFiltre->setUserCreateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRequeteTableauBordFiltre(RequeteTableauBordFiltres $requeteTableauBordFiltre): self
+    {
+        if ($this->requeteTableauBordFiltres->removeElement($requeteTableauBordFiltre)) {
+            // set the owning side to null (unless already changed)
+            if ($requeteTableauBordFiltre->getUserCreateur() === $this) {
+                $requeteTableauBordFiltre->setUserCreateur(null);
+            }
+        }
 
         return $this;
     }
