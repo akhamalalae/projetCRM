@@ -162,7 +162,7 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     {
         $this->requeteTableauBord = $form->getData();
         
-        if ($this->requeteTableauBord->getEnregistrerRequete() === true) {
+        if ($this->requeteTableauBord->getEnregistrerRequete() === true && $this->warningInValidSyntax() === false) {
             $this->beforeSave();
 
             $this->saveSpecific($form);
@@ -186,8 +186,8 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
         if ($this->id !== 0) {
             foreach ($this->requeteTableauBord->getRequeteTableauBordFiltres() as $filtre) {
                 if ($this->originalFiltres->contains($filtre)) {
-                    $filtre->setDateModification(new DateTime());
-                    $filtre->setUserModificateur($this->user);
+                    $filtre->setDateModification(new DateTime())
+                            ->setUserModificateur($this->user);
                 } else {
                     $filtre->setUserCreateur($this->user);
                 }

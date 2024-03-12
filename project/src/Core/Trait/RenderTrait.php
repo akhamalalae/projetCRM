@@ -6,6 +6,15 @@ use Symfony\Component\HttpFoundation\Request;
 
 trait RenderTrait {
 
+     /**
+     * Reuse mechanism of certain Symfony methods, reduce complexity, group functionality and avoid reuse of the same code.
+     * 
+     * @param Request $request
+     * @param mixed   $service
+     * @param array   $param
+     *
+     * @return mixed
+     */
     public function renderTrait(Request $request, mixed $service, array $params) : mixed
     {
         if (method_exists($service, 'init')) {

@@ -9,9 +9,7 @@
         <br>
         <h2>Tableau De Bord
         {% if requeteTableauBord != null and requeteTableauBord.libelle != null %}
-        (
-            {{ requeteTableauBord.libelle}}
-        )
+            ( {{ requeteTableauBord.libelle}} )
         {% endif %}
         </h2>
         <hr>
@@ -45,16 +43,18 @@
                                 {% set functionEntityChecked = 'getChampsByEntityChecked(' ~ indice ~ ')' %}
                                 {% set functionGetOperator = 'functionGetOperator(' ~ indice ~ ')' %}
                                 {% set indice = indice + 1 %}
-                                {% set parenthese = row.vars.value.parenthese != null ? row.vars.value.parenthese.libelle : '' %}
+                                {% set filtre = row.vars.value %}
+                                {% set parentheseOuvrante = filtre.getIfParenthesOuvrante %}
+                                {% set parentheseFermante = filtre.getIfParenthesFermante %}
                                 <div class="liste_options_accordion" id="accordionExample{{ indice }}">
                                     <div class="accordion" id="accordionExample{{ indice }}">
                                         {% if indice != 1 %}
                                             <div style="text-align:center">
-                                                <span class="badge bg-primary">{{ row.vars.value.tableau_bord_filtre_condition.libelle }}</span>
+                                                <span class="badge bg-primary">{{ filtre.tableau_bord_filtre_condition.libelle }}</span>
                                             </div>
                                         {% endif %}
-                                        {% if parenthese == '(' %}
-                                            <div style="text-align:center"><span class="badge bg-warning">{{ parenthese}}</span></div>
+                                        {% if parentheseOuvrante != '' %}
+                                            <div style="text-align:center"><span class="badge bg-warning">{{ parentheseOuvrante}}</span></div>
                                         {% endif %}
                                         <br>
                                         <div class="accordion-item">
@@ -62,13 +62,13 @@
                                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne{{ indice }}" aria-expanded="false" aria-controls="collapseOne{{ indice }}">
                                                 <div>
                                                     <span class="badge rounded-pill bg-success">
-                                                        {{ row.vars.value.entities_propriete.name }} {{ " (" }}  {{ row.vars.value.entities_propriete.entitie.libelle }} {{ " )" }}
+                                                        {{ filtre.entities_propriete.name }} {{ " (" }}  {{ filtre.entities_propriete.entitie.libelle }} {{ " )" }}
                                                     </span>
                                                     <span class="badge rounded-pill bg-info">
-                                                        {{ row.vars.value.tableau_bord_filtre_operator.libelle }}
+                                                        {{ filtre.tableau_bord_filtre_operator.libelle }}
                                                     </span>
                                                     <strong>
-                                                        {{ row.vars.value.valeur }}
+                                                        {{ filtre.valeur }}
                                                     </strong>
                                                 </div>
                                             </button>
@@ -78,13 +78,8 @@
                                                     <div class="panel panel-warning">
                                                         <div class="panel-body">
                                                             {{ form_row(row.parenthese) }}
-                                                            {% if indice == 1 %}
-                                                                <div id="" style="display:none;">
-                                                                    {{ form_row(row.tableau_bord_filtre_condition, {'attr': {'style': 'display:none'} }) }}
-                                                                </div>
-                                                            {% else %}
-                                                                {{ form_row(row.tableau_bord_filtre_condition) }}
-                                                            {% endif %}
+                                                            <br>
+                                                            {{ form_row(row.tableau_bord_filtre_condition) }}
                                                             <br>
                                                             {{ form_row(row.entitie, {'attr': {'onchange': functionEntityChecked } }) }}
                                                             <br>
@@ -99,8 +94,8 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        {% if parenthese == ')' %}
-                                            <div style="text-align:center"><span class="badge bg-warning">{{ parenthese}}</span></div>
+                                        {% if parentheseFermante != '' %}
+                                            <div style="text-align:center"><span class="badge bg-warning">{{ parentheseFermante}}</span></div>
                                         {% endif %}
                                         <br>
                                     </div>

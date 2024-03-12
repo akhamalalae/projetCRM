@@ -13,11 +13,12 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class RequeteTableauBord
 {
-    const MESSAGE_FLASH_1   = "Veuillez choisir les filtres de la requête.";
-    const MESSAGE_FLASH_2   = "Veuillez choisir les champs a afficher.";
-    const MESSAGE_FLASH_3   = "Veuillez remplir le nom de la requête.";
-    const MESSAGE_FLASH_4   = "Erreur de syntaxe du champ Valeur des filtres : %s, veuillez regarder la documentation.";
-    const MESSAGE_FLASH_5   = "Veuillez vérifier les parenthèses de la requête.";
+    const MESSAGE_FLASH_1   = "Veuillez choisir les filtres de la requête. ";
+    const MESSAGE_FLASH_2   = "Veuillez choisir les champs a afficher. ";
+    const MESSAGE_FLASH_3   = "Veuillez remplir le nom de la requête. ";
+    const MESSAGE_FLASH_4   = "Erreur de syntaxe du champ Valeur des filtres : %s, veuillez regarder la documentation. ";
+    const MESSAGE_FLASH_5   = "Veuillez vérifier les parenthèses des filtres de la requête. ";
+    const MESSAGE_FLASH_6   = "Veuillez vérifier les conditions des filtres de la requête. ";
 
     /**
      * @ORM\Id
@@ -184,78 +185,6 @@ class RequeteTableauBord
         return $this;
     }
 
-    public function listChampsClauseSelect(): array
-    {
-        $libelleClauseSelect = [];
-
-        foreach ($this->getPropertiesEntityChoixChamps() as $champ) {
-            $libelleClauseSelect[$champ->clauseSelectName()] = $champ->createNameRequeteClauseSelect();
-        }
-
-        return $libelleClauseSelect;
-    }
-
-    public function checkRequeteValidSyntax(): array
-    {
-        $checkChamps            = $this->checkChamps();
-        $listChampsValue        = $checkChamps['value'];
-        $checkChampsParentheses = $checkChamps['parentheses'];
-        $message                = '';
-
-        if (count($this->getRequeteTableauBordFiltres()) === 0) {
-            $message .= self::MESSAGE_FLASH_1;
-        }
-
-        if (count($this->getPropertiesEntityChoixChamps()) === 0) {
-            $message .= self::MESSAGE_FLASH_2;
-        }
-
-        if ($this->getEnregistrerRequete() === true && $this->getLibelle() === null) {
-            $message .= self::MESSAGE_FLASH_3;
-        }
-
-        if ($listChampsValue !== '') {
-            $message .= sprintf(self::MESSAGE_FLASH_4, $listChampsValue);
-        }
-
-        if ($checkChampsParentheses === false) {
-            $message .= self::MESSAGE_FLASH_5;
-        }
-
-        return [
-            'warning' => $message === '' ? false : true,
-            'message' => $message
-        ];
-    }
-
-    public function checkChamps(): array
-    {
-        $parenthesFermante  = 0;
-        $parenthesOuvrante  = 0;
-        $inValidValues      = ''; 
-
-        foreach ($this->getRequeteTableauBordFiltres() as $filtre) {
-            $filtreValue = $filtre->getIfInValidFiltreValue();
-
-            if ($filtreValue !== '') {
-                $inValidValues .= sprintf('%s %s', $inValidValues === '' ? '' : ',', $filtreValue);
-            }
-
-            if ($filtre->getIfParenthesOuvrante() !== '') {
-                $parenthesOuvrante += 1;
-            }
-
-            if ($filtre->getIfParenthesFermante() !== '') {
-                $parenthesFermante += 1;
-            }
-        }
-
-        return [
-            'parentheses' => $parenthesOuvrante === $parenthesFermante ? true : false,
-            'value'       => $inValidValues
-        ];
-    }
-
     public function getUserCreateur(): ?User
     {
         return $this->userCreateur;
@@ -278,5 +207,91 @@ class RequeteTableauBord
         $this->userModificateur = $userModificateur;
 
         return $this;
+    }
+
+    public function listChampsClauseSelect(): array
+    {
+        $libelleClauseSelect = [];
+
+        foreach ($this->getPropertiesEntityChoixChamps() as $champ) {
+            $libelleClauseSelect[$champ->clauseSelectName()] = $champ->createNameRequeteClauseSelect();
+        }
+
+        return $libelleClauseSelect;
+    }
+
+    public function checkRequeteValidSyntax(): array
+    {
+        $checkChamps            = $this->checkChamps();
+        $listChampsValue        = $checkChamps['value'];
+        $checkChampsParentheses = $checkChamps['parentheses'];
+        $checkChampsConditions  = $checkChamps['conditions'];
+        
+        $message                = '';
+
+        if (count($this->getRequeteTableauBordFiltres()) === 0) {
+            $message .= self::MESSAGE_FLASH_1;
+        }
+
+        if (count($this->getPropertiesEntityChoixChamps()) === 0) {
+            $message .= self::MESSAGE_FLASH_2;
+        }
+
+        if ($this->getEnregistrerRequete() === true && $this->getLibelle() === null) {
+            $message .= self::MESSAGE_FLASH_3;
+        }
+
+        if ($listChampsValue !== '') {
+            $message .= sprintf(self::MESSAGE_FLASH_4, $listChampsValue);
+        }
+
+        if ($checkChampsParentheses === false) {
+            $message .= self::MESSAGE_FLASH_5;
+        }
+
+        if ($checkChampsConditions === true) {
+            $message .= self::MESSAGE_FLASH_6;
+        }
+
+        return [
+            'warning' => $message === '' ? false : true,
+            'message' => $message
+        ];
+    }
+
+    public function checkChamps(): array
+    {
+        $parenthesFermante  = 0;
+        $parenthesOuvrante  = 0;
+        $inValidValues      = ''; 
+        $inValidCcondition  = false;
+
+        foreach ($this->getRequeteTableauBordFiltres() as $key => $filtre) {
+            $filtreValue     = $filtre->getIfInValidFiltreValue();
+            $filtreCondition = $filtre->getTableauBordFiltreCondition();
+            $filtrePrecedent = $this->getRequeteTableauBordFiltres()[$key - 1];
+
+            if ($filtreValue !== '') {
+                $inValidValues .= sprintf('%s %s', $inValidValues === '' ? '' : ',', $filtreValue);
+            }
+
+            if ($filtreCondition !== null && $filtrePrecedent === null) {
+                $inValidCcondition = true;
+            }
+
+            if ($filtre->getIfParenthesOuvrante() !== '') {
+                $parenthesOuvrante += 1;
+            }
+
+            if ($filtre->getIfParenthesFermante() !== '') {
+                $parenthesFermante += 1;
+            }
+        }
+
+        return [
+            'parentheses' => $parenthesOuvrante === $parenthesFermante ? true : false,
+            'value'       => $inValidValues,
+            'conditions'   => $inValidCcondition
+        ];
     }
 }
