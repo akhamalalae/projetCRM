@@ -226,7 +226,6 @@ class RequeteTableauBord
         $listChampsValue        = $checkChamps['value'];
         $checkChampsParentheses = $checkChamps['parentheses'];
         $checkChampsConditions  = $checkChamps['conditions'];
-        
         $message                = '';
 
         if (count($this->getRequeteTableauBordFiltres()) === 0) {
@@ -245,7 +244,7 @@ class RequeteTableauBord
             $message .= sprintf(self::MESSAGE_FLASH_4, $listChampsValue);
         }
 
-        if ($checkChampsParentheses === false) {
+        if ($checkChampsParentheses === true) {
             $message .= self::MESSAGE_FLASH_5;
         }
 
@@ -289,9 +288,9 @@ class RequeteTableauBord
         }
 
         return [
-            'parentheses' => $parenthesOuvrante === $parenthesFermante ? true : false,
+            'parentheses' => $parenthesOuvrante === $parenthesFermante ? false : true,
             'value'       => $inValidValues,
-            'conditions'   => $inValidCcondition
+            'conditions'  => $inValidCcondition
         ];
     }
 }

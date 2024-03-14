@@ -87,12 +87,12 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
      */
     public function parameters(): array
     {
-        $nombreFiltres = count($this->requeteTableauBord->getRequeteTableauBordFiltres());
+        $nombreFiltres = count($this->requeteTableauBord?->getRequeteTableauBordFiltres());
     
         return [
             'menus'                         => $this->menuGenerator->getMenu(),
             "nombreFiltres"                 => $nombreFiltres,
-            'libelleResultatsRequeteTB'     => $this->requeteTableauBord->listChampsClauseSelect(),
+            'libelleResultatsRequeteTB'     => $this->requeteTableauBord?->listChampsClauseSelect(),
             'resultatsRequeteTableauBord'   => $this->getResultatsRequeteTableauBord(),
             'currentPage'                   => self::CURRENT_PAGE,
             'requeteTableauBord'            => $this->requeteTableauBord,
@@ -162,7 +162,7 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     {
         $this->requeteTableauBord = $form->getData();
         
-        if ($this->requeteTableauBord->getEnregistrerRequete() === true && $this->warningInValidSyntax() === false) {
+        if ($this->requeteTableauBord?->getEnregistrerRequete() === true && $this->warningInValidSyntax() === false) {
             $this->beforeSave();
 
             $this->saveSpecific($form);

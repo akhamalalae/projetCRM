@@ -273,21 +273,17 @@ class RequeteTableauBordFiltres
 
     public function createRequeteClauseWhere(): string
     {
-        $property            = $this->getEntitiesPropriete();
         $operator            = $this->getTableauBordFiltreOperator()?->getLibelle();
+        $condition           = $this->getTableauBordFiltreCondition()?->getLibelle();
         $valeur              = $this->getValeur();
+        $property            = $this->getEntitiesPropriete();
         $jointuretName       = $property?->jointureName();
         $parenthesOuvrante   = $this->getIfParenthesOuvrante();
         $parenthesFermante   = $this->getIfParenthesFermante();
-        $condition           = '';
 
-        if ($operator == "Contient") {
-            $operator = "LIKE";
-            $valeur = "%$valeur%";
-        }
-
-        if ($this->getTableauBordFiltreCondition() !== null) {
-            $condition = $this->getTableauBordFiltreCondition()->getLibelle();
+        if ($operator === 'Contient') {
+            $operator = 'LIKE';
+            $valeur   = "%$valeur%";
         }
 
         return " $condition $parenthesOuvrante $jointuretName $operator '$valeur' $parenthesFermante";
