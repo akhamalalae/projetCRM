@@ -1,0 +1,180 @@
+{% extends 'base.html.twig' %}
+{% block title %}Générateur Automatique Routings!{% endblock %}
+
+{% block content %}
+    <div class="container col-xxl-12 px-6 py-1">
+        <br>
+        <br>
+        <h2>Générateur Automatique Routings
+        </h2>
+        <hr>
+        <div class="row">
+            {{ include('calendrierRenderVous/sidebar.html.twig') }}
+            <div class="col-9">
+                <br>
+                <div class="d-flex flex-column flex-shrink-0 p-3 bg-light">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex flex-column flex-shrink-0 p-3 bg-light">
+                                {{ form_start(form) }}
+                                </br>
+                                {{ form_row(form.dateExecution) }}
+                                </br>
+                                {{ form_row(form.start) }}
+                                </br>
+                                {{ form_row(form.formulaires) }}
+                                </br>
+                                {{ form_row(form.nbrMinutes) }}
+                                </br>
+                                {{ form_end(form) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+                <br>
+                <div class="col-12">
+                    <div class="d-flex flex-column flex-shrink-0 p-3 bg-light">
+                        <table id="table_id" class="display">
+                                    <thead>
+                                        <tr>
+                                            <th>Date d'exécution</th>
+                                            <th>Date de début</th>
+                                            <th>Ecart en munites</th>
+                                            <th>Routings</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for routing in routings %}
+                                            {% set formulaires = "" %}
+                                            {% for formulaire in routing.formulaires %}
+                                                {% set formulaires = formulaires ~ formulaire.libelle ~ ',' %}
+                                            {% endfor %}
+                                            <tr>
+                                                <td>
+                                                    {{ routing.dateExecution ? routing.dateExecution|date('Y-m-d H:i') : '' }}
+                                                </td>
+                                                <td>
+                                                    {{ routing.dateDebut ? routing.dateDebut|date('Y-m-d H:i') : '' }}
+                                                </td>
+                                                <td>{{ routing.ecartEnMunites }}</td>
+                                                <td>
+                                                    {% if routing.isGenerer == true %}
+                                                        <!-- Button trigger modal -->
+                                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal{{ routing.id }}">
+                                                            <i class="fa fa-table" aria-hidden="true"></i>
+                                                        </button>
+                                                        <!-- Modal -->
+                                                        <div class="modal fade" id="exampleModal{{ routing.id }}" tabindex="-1" aria-labelledby="exampleModalLabel{{ routing.id }}" aria-hidden="true">
+                                                            <div class="modal-dialog modal-fullscreen">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="exampleModalLabel{{ routing.id }}">Routings</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <table id="table_renderVous_id" class="display">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>Titre du rendez vous</th>
+                                                                                    <th>Date de début</th>
+                                                                                    <th>Date de fin</th>
+                                                                                    <th>Formulaire</th>
+                                                                                    <th>Pointe de vente</th>
+                                                                                    <th>Intervenant</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                {% for renderVous in routing.renderVous %}
+                                                                                    <tr>
+                                                                                        <td>{{ renderVous.title }}</td>
+                                                                                        <td>
+                                                                                            {{ renderVous.start ? renderVous.start|date('Y-m-d H:i') : '' }}
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            {{ renderVous.end ? renderVous.end|date('Y-m-d H:i') : '' }}
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            {{ renderVous.formulaire ? renderVous.formulaire.libelle : '' }}
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            {{ renderVous.pointeVente ? renderVous.pointeVente.libelle : '' }}
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            {{ renderVous.intervenant ? renderVous.intervenant.lastName : '' }}
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                {% else %}
+                                                                                    <tr>
+                                                                                        <td colspan="10"></td>
+                                                                                    </tr>
+                                                                                {% endfor %}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="10"></td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block javascript %}
+<script>
+    $(document).ready( function () {
+        //$('#table_id').DataTable();
+        $('#table_id').DataTable( {
+            responsive: true,
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            responsive: true,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/fr_fr.json"
+            }
+        } );
+
+        $('#table_renderVous_id').DataTable( {
+            responsive: true,
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            responsive: true,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/fr_fr.json"
+            }
+        } );
+
+
+        $('#sandbox-container input').datepicker({
+            todayBtn: "linked",
+            format: "mm/dd/yyyy",
+            language: "fr"
+        });
+    });
+
+    $(function() {
+        $('.js-multiple').select2({
+            placeholder: 'Choisir'
+        });
+     });
+</script>
+{% endblock %}

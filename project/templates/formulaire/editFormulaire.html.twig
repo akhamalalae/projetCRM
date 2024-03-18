@@ -1,0 +1,281 @@
+
+{% extends 'base.html.twig' %}
+{% block title %}Formulaire!{% endblock %}
+
+{% block content %}
+<div class="container">
+    <br>
+        <br>
+        {{ form_start(form) }}
+        <div class="row">
+            <div class="col-6">
+                <h4>Formulaire</h4>
+                <hr>
+                {{ form_row(form.libelle) }}
+                <br>
+                {{ form_row(form.description) }}
+                <br>
+                {{ form_row(form.intervenants) }}
+                <br>
+                {{ form_row(form.entreprises) }}
+                <br>
+                {{ form_row(form.dateDebut) }}
+                <br>
+                {{ form_row(form.dateFin) }}
+                <br>
+                {{ form_row(form.status) }}
+            </div>
+            <div class="col-6">
+                <h4>Champs formulaire</h4>
+                <hr>
+                {# render each row and field in the embedded form, in this example it's rendering the experience (Exp) fiels as rows #}
+                <div id="exp_list" data-prototype="{{ form_widget(form.champFormulaire.vars.prototype)|e('html_attr') }}">
+                    {% set indice = 0 %}
+                    {% for row in form.champFormulaire %}
+                        {% set functionTypeChacked = 'myFunctionType(' ~ indice ~ ')' %}
+                        {% set optionsFormId = indice %}
+                        {% set indice = indice + 1 %}
+                        {% set champId = row.vars.value.id %}
+                        {% set nbrOptions = 0 %}
+                        {% for row in row.options %}
+                            {% set nbrOptions = nbrOptions + 1 %}
+                        {% endfor %}
+                        <div class="liste_options_accordion" id="accordionExample{{ indice }}">
+                            <div class="accordion" id="accordionExample{{ indice }}">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingOne{{ indice }}">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne{{ indice }}" aria-expanded="false" aria-controls="collapseOne{{ indice }}">
+                                        <div>
+                                            <strong>
+                                                {{ row.vars.value.libelle }}
+                                            </strong>
+                                            <span class="badge rounded-pill bg-info">
+                                                {{ row.vars.value.type.libelle }}
+                                            </span>
+                                            {% if row.type.vars.value == 5 %}
+                                                <span class="badge bg-success">
+                                                    {{nbrOptions}}
+                                                </span>
+                                            {% endif %}
+                                            {% if row.type.vars.value == 6 and row.vars.value.referentiels %}
+                                                <span class="badge bg-success">
+                                                    {{ row.vars.value.referentiels.libelle }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </button>
+                                    </h2>
+                                    <div id="collapseOne{{ indice }}" class="accordion-collapse collapse" aria-labelledby="headingOne{{ indice }}" data-bs-parent="#accordionExample{{ indice }}">
+                                        <div class="accordion-body">
+                                                <div class="panel panel-warning">
+                                                    <div class="panel-body">
+                                                        {{ form_row(row.libelle) }}
+                                                        <br>
+                                                        {{ form_row(row.description) }}
+                                                        {{ form_row(row.type, {'attr': {'onchange': functionTypeChacked } }) }}
+                                                        {% if row.type.vars.value == 6 %}
+                                                            {{ form_row(row.referentiels) }}
+                                                        {% else %}
+                                                            {{ form_row(row.referentiels, {'attr': {'style': 'display:none'} }) }}
+                                                        {% endif %}
+                                                        <div id="options_form_{{ optionsFormId }}"
+                                                            {% if row.type.vars.value != 5 %}
+                                                                style="display:none"
+                                                            {% endif %}>
+                                                            <br>
+                                                            <h6>Options du champ</h6>
+                                                            <hr>
+                                                            <div class="tags{{row.vars.value.id}}" data-index="{{ row.options|length > 0 ? row.options|last.vars.name + 1 : 0 }}" data-prototype="{{ form_widget(row.options.vars.prototype)|e('html_attr') }}">
+                                                                {% for row in row.options %}
+                                                                    <div class="accordion" id="accordionExampleOption{{row.vars.value.id}}">
+                                                                        <div class="accordion-item">
+                                                                            <h2 class="accordion-header" id="headingThreeOption{{row.vars.value.id}}">
+                                                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThreeOption{{row.vars.value.id}}" aria-expanded="false" aria-controls="collapseThreeOption{{row.vars.value.id}}">
+                                                                                {{row.vars.value.libelle}}
+                                                                            </button>
+                                                                            </h2>
+                                                                            <div id="collapseThreeOption{{row.vars.value.id}}" class="accordion-collapse collapse" aria-labelledby="headingThreeOption{{row.vars.value.id}}" data-bs-parent="#accordionExampleOption{{row.vars.value.id}}">
+                                                                            <div class="accordion-body">
+                                                                                <div class="card border-info" style="width: 35rem;">
+                                                                                <div class="card-body">
+                                                                                    <p class="card-text">
+                                                                                    <div class="li_option">
+                                                                                        {{ form_row(row.libelle) }}
+                                                                                        <br>
+                                                                                        {{ form_row(row.ordre) }}
+                                                                                        <br>
+                                                                                        {{ form_row(row.status) }}
+                                                                                        <br>
+                                                                                    </div>
+                                                                                    </p>
+                                                                                </div>
+                                                                                <div class="card-footer bg-transparent border-info">
+                                                                                    Dernière mise à jour {{ row.vars.value.dateModification|date('Y-m-d H:i') }}
+                                                                                </div>
+                                                                            </div>
+                                                                            </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <br>
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
+                                                        <div id="options_form_btn_{{ optionsFormId }}"
+                                                            {% if row.type.vars.value != 5 %}
+                                                                style="display:none"
+                                                            {% endif %}>
+                                                            <br>
+                                                            <button type="button" class="add_item_option btn btn-info" data-collection-holder-class="tags{{row.vars.value.id}}"><i class="fa fa-plus-square-o" aria-hidden="true"></i> Nouvelle option du champ</button>
+                                                            <hr>
+                                                            <br>
+                                                        </div>
+                                                        {{ form_row(row.ordre) }}
+                                                        <br>
+                                                        {{ form_row(row.status) }}
+                                                        <br>
+                                                        <hr>
+                                                        <br>
+                                                    </div>
+                                                </div>
+                                                <br>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <hr>
+        {{ form_row(form.save) }}
+        <br><br><br>
+        {{ form_end(form) }}
+        <br><br><br>
+</div>
+
+{% endblock %}
+{% block javascript %}
+<script src="{{ asset('js/formulaires_embedded_form.js') }}"></script>
+<script>
+    document.querySelectorAll('.add_item_option').forEach(btn => btn.addEventListener("click", addFormToCollection));
+
+    const tags = document.querySelectorAll('.li_option')
+    tags.forEach((tag) => {
+        addTagFormDeleteLink(tag)
+    })
+
+    var nbrchampsFormulaire = '{{ champsFormulaire|length }}';
+
+    function myFunctionType(indice) {
+        /*
+            if (confirm('êtes-vous sûr de vouloir appliquer les changements ?')) {
+                // Save it!
+            } else {
+                // Do nothing!
+            }
+        */
+        if($("#formulaire_champFormulaire_"+indice+"_type").val() == 5){
+            $("#options_form_"+indice).show();
+            $("#options_form_btn_"+indice).show();
+            $("#formulaire_champFormulaire_"+indice+"_referentiels").hide();
+        }else if($("#formulaire_champFormulaire_"+indice+"_type").val() == 6){
+            $("#formulaire_champFormulaire_"+indice+"_referentiels").show();
+            $("#options_form_"+indice).hide();
+            $("#options_form_btn_"+indice).hide();
+            $("#options_form_btn_"+indice).remove();
+        }else{
+            $("#options_form_"+indice).hide();
+            $("#options_form_btn_"+indice).hide();
+            $("#formulaire_champFormulaire_"+indice+"_referentiels").hide();
+            $("#options_form_btn_"+indice).remove();
+        }
+    }
+
+    var selected = [];
+    for (var option of document.getElementById('formulaire_entreprises').options)
+    {
+        if (option.selected) {
+            selected.push(option.value);
+        }
+    }
+    getProduitsFormulaires(selected);
+
+    $("select#formulaire_entreprises").change(function(){
+        //console.log($(this).val());
+        var selected = [];
+        for (var option of document.getElementById('formulaire_entreprises').options)
+        {
+            if (option.selected) {
+                selected.push(option.value);
+            }
+        }
+        getProduitsFormulaires(selected);
+    });
+
+    function getProduitsFormulaires(selected) {
+        var idEntreprises = selected;
+        $.ajax({
+            //L'URL de la requête
+            url: "{{ path('getProduitsFormulairesOptions') }}",
+            //La méthode d'envoi (type de requête)
+            method: "GET",
+            data: {'idEntreprises':idEntreprises},
+            beforeSend: function () {
+                //Code à jouer avant l'appel ajax en lui même
+                var htmlSpinner = '<center><i class="fa fa-spinner fa-pulse" style="font-size:200px;color:Gray;"></i></center>'; 
+                $('.modal-body').html(htmlSpinner);
+            }
+        })
+        .done(function(response){
+			$('#formulaire_produits').html(response['listeProduits']);
+        })
+        .fail(function(error){
+            alert("La requête s'est terminée en échec.");
+        })
+    }
+
+    $(function() {
+        $('.js-multiple').select2({
+            placeholder: 'Choisir'
+        });
+    });
+
+    $(document).ready(function() {
+        $(document).on("click", ".select2-results__group", function(){
+            var groupName = $(this).html()
+            var options = $('#formulaire_intervenants option');
+            $.each(options, function(key, value){
+                if($(value)[0].parentElement.label.indexOf(groupName) >= 0){
+                    if ($(value).prop("selected") == true) {
+                        $(value).prop("selected", false);
+                    }
+                    else{
+                        $(value).prop("selected","selected");
+                    }
+                }
+            });
+
+            $('.js-multiple').trigger("change");
+            $('.js-multiple').select2('close');
+        });
+    });
+/*
+    $('#formulaire_dateDebut').datepicker({
+        todayBtn: "linked",
+        format: "mm/dd/yyyy",
+        language: "fr"
+    });
+    $('.datepicker').datepicker({
+        clearBtn: true,
+        format: "dd/mm/yyyy"
+    });
+    */
+
+    //const picker = datepicker('#formulaire_dateDebut')
+
+</script>
+
+{% endblock %}

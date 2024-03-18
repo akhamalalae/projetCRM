@@ -1,0 +1,159 @@
+
+{% extends 'base.html.twig' %}
+{% block title %}Formulaire!{% endblock %}
+
+{% block content %}
+    <div class="container col-xxl-12 px-6 py-1">
+        <br>
+        <br>
+        <h2>Créer un utilisateur</h2>
+        <hr>
+        <br>
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex flex-column flex-shrink-0 p-3 bg-light">
+                    {{ form_start(registrationForm) }}
+                    <div class="row">
+                        <div class="col">
+                            {{ form_row(registrationForm.email) }}
+                        </div>
+                        <div class="col">
+                            {{ form_row(registrationForm.firstname) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            {{ form_row(registrationForm.lastname) }}
+                        </div>
+                        <div class="col">
+                            {{ form_row(registrationForm.roles) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            {{ form_row(registrationForm.groupe) }}
+                        </div>
+                        <div class="col">
+                            {{ form_row(registrationForm.plainPassword, {
+                                label: 'Password'
+                            }) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            {{ form_row(registrationForm.region) }}
+                        </div>
+                        <div class="col">
+                            {{ form_row(registrationForm.departement) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            {{ form_row(registrationForm.ville) }}
+                        </div>
+                        <div class="col">
+                            {{ form_row(registrationForm.adresse) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            {{ form_row(registrationForm.complementAdresse) }}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Valider</button>
+                    {{ form_end(registrationForm) }}
+                </div>
+            </div>
+
+            <div class="col-12">
+                <br>
+                <h2>Liste des utilisateurs</h2>
+                <hr>
+                <br>
+                    <table id="table_id" class="display">
+                        <thead>
+                            <tr>
+                                <th>Prenom</th>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Roles</th>
+                                <th>Groupes</th>
+                                 <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for intervenant in intervenants %}
+                            <tr>
+                                <td>{{ intervenant.firstname }}</td>
+                                <td>{{ intervenant.lastname }}</td>
+                                <td>{{ intervenant.email }}</td>
+                                <td>
+                                    {% if intervenant.roles[0] == "ROLE_GESTIONNAIRE" %}
+                                        Gestionnaire
+                                    {% endif %}
+                                    {% if intervenant.roles[0] == "ROLE_USER" %}
+                                        Intervenant
+                                    {% endif %}
+                                    {% if intervenant.roles[0] == "ROLE_ADMIN" %}
+                                        Administrateur
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% for group in intervenant.groupe %}
+                                        <span class="badge rounded-pill bg-primary">{{ group.libelle }}</span>
+                                    {% endfor %}
+                                </td>
+                                 <td>
+                                    <a class="btn btn-danger" href="{{ path('delete_intervenant', {'id': intervenant.id}) }}" aria-label="delet">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="10"></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascript %}
+<script>
+    $(document).on('change', '#registration_form_region, #registration_form_departement', function () {
+        let $field = $(this)
+        let $regionField = $('#registration_form_region')
+        let $form = $field.closest('form')
+        let target = '#' + $field.attr('id').replace('departement', 'ville').replace('region', 'departement')
+        // Les données à envoyer en Ajax
+        let data = {}
+        data[$regionField.attr('name')] = $regionField.val()
+        data[$field.attr('name')] = $field.val()
+        // On soumet les données
+        $.post($form.attr('action'), data).then(function (data) {
+            // On récupère le nouveau <select>
+            let $input = $(data).find(target)
+            // On remplace notre <select> actuel
+            $(target).replaceWith($input)
+        })
+    })
+
+    $(document).ready( function () {
+        $('#table_id').DataTable();
+    });
+
+    $(function() {
+        $('.js-multiple').select2({
+            placeholder: 'Choisir ...'
+        });
+    });
+    $('#sandbox-container input').datepicker({
+        todayBtn: "linked",
+        format: "mm/dd/yyyy",
+        language: "fr"
+    });
+</script>
+{% endblock %}

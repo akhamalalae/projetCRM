@@ -1,0 +1,67 @@
+
+{% extends 'base.html.twig' %}
+{% block title %}Configuration Espace!{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <br>
+        <br>
+        <h2>Configuration des éspaces </h2>
+        <hr>
+        <div class="row">
+            {{ include('configurationEspace/sidebar.html.twig') }}
+            <div class="col-12">
+            <br>
+            <div class="d-flex flex-column flex-shrink-0 p-3 bg-light">
+                <table id="table_id" class="display">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Entreprise</th>
+                            <th>Adresse</th>
+                            <th>Configuration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for unPointVente in pointVente %}
+                        <tr>
+                            <td>{{ unPointVente.libelle }}</td>
+                            <td>
+                            {% for entreprise in unPointVente.Entreprises %}
+                                {{ entreprise.FormeJuridique }}
+                             {% endfor %}
+                            </td>
+                            <td>{{ unPointVente.adresse }} {{ unPointVente.complementAdresse }}, {{ unPointVente.ville.code }} , {{ unPointVente.ville.name }} </td>
+                            <td>
+                                <a class="btn btn" href="{{ path('configuration_espace', {'id': unPointVente.id}) }}" aria-label="delet">
+                                    <i class="fa fa-tasks" aria-hidden="true"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="10"></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block javascript %}
+<script>
+    $(document).ready( function () {
+        //$('#table_id').DataTable();
+        $('#table_id').DataTable( {
+            responsive: true,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/fr_fr.json"
+            }
+        } );
+
+    });
+</script>
+{% endblock %}

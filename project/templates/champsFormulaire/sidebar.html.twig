@@ -1,0 +1,34 @@
+
+<div class="nav-scroller bg-body shadow-sm">
+    <nav class="nav nav-underline" style="background-color: #d6ecfc;" aria-label="Secondary navigation">
+        {% if editChamps == true %}
+        <a  {% if current_page == "listeChampsFormulaire" %}
+                class="nav-link active" aria-current="page"
+            {% else %}
+                class="nav-link"
+            {% endif %}
+            href="{{ path('formulaire_champs', {'id': formulaire.id,'champ': null}) }}">
+
+            {% if current_page == "listeChampsFormulaire" %}
+                <p style="color: #5784BA;"><i class="fa fa-list-alt" aria-hidden="true"></i> Listes des champs du formulaire</p>
+            {% else %}
+                <p><i class="fa fa-list-alt" aria-hidden="true"></i> Listes des champs du formulaire</p>
+            {% endif %}
+        </a>
+        {% endif %}
+
+        <a  {% if current_page == "listeChampsFormulaire" %}
+                class="nav-link active" aria-current="page"
+            {% else %}
+                class="nav-link"
+            {% endif %}
+            href="{{ path('formulaire') }}">
+
+            {% if current_page == "listeChampsFormulaire" %}
+                <p style="color: #5784BA;"><i class="fa fa-files-o" aria-hidden="true"></i> Liste des formulaires</p>
+            {% else %}
+                <p><i class="fa fa-files-o" aria-hidden="true"></i> Liste des formulaires</p>
+            {% endif %}
+        </a>
+    </nav>
+</div>

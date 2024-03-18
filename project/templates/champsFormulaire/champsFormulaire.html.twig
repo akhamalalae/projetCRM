@@ -1,0 +1,214 @@
+
+{% extends 'base.html.twig' %}
+{% block title %}Formulaire!{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <br>
+        {{ include('champsFormulaire/sidebar.html.twig') }}
+        <br>
+        <br>
+        <div class="row">
+            <div class="col-7">
+                <h2>Listes des champs du formulaire : {{ formulaire.libelle }}</h2>
+                <hr>
+                <table id="table_id" class="display">
+                    <thead>
+                        <tr>
+                            <th>Libelle</th>
+                            <th>Description</th>
+                            <th>Type du champ</th>
+                            <th>Formulaire</th>
+                            <th>Date de creation</th>
+                            <th>Ordre</th>
+                            <th>actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for champs in champsFormulaires %}
+                        <tr>
+                            <td>{{ champs.libelle }}</td>
+                            <td>{{ champs.description }}</td>
+                            <td>{{ champs.type.libelle }}</td>
+                            <td>{{ champs.formulaire.libelle }}</td>
+                            <td>{{ champs.dateCreation ? champs.dateCreation|date('Y-m-d H:i:s') : '' }}</td>
+                            <td>{{ champs.ordre }}</td>
+                            <td>
+                                <a class="btn btn-primary" href="{{ path('formulaire_champs', {'id': champs.formulaire.id,'champ': champs.id}) }}" aria-label="edit">
+                                    <i class="fa fa-edit" aria-hidden="true"></i>
+                                </a>
+                                <a class="btn btn-danger" href="{{ path('champ_formulaire_delete', {'id': champs.id}) }}" aria-label="delet">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="10"></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-3">
+                {% if editChamps == true %}
+                    <h2>Modification champ</h2>
+                {% else %}
+                    <h2>Nouveau champ</h2>
+                {% endif %}
+                <hr>
+                {{ form_start(form) }}
+                    {{ form_row(form.libelle) }}
+                    <br>
+                    {{ form_row(form.description) }}
+                    <br>
+                    {{ form_row(form.type) }}
+                    <br>
+                    {{ form_row(form.ordre) }}
+                    <br>
+                    {{ form_row(form.status) }}
+                    <hr>
+                    <button class="btn btn-primary pull-right">
+                        <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                        Ajouter
+                    </button>
+            </div>
+            <div id="options" class="col-2">
+                <h2>Options</h2>
+                <hr>
+                {# render each row and field in the embedded form, in this example it's rendering the experience (Exp) fiels as rows #}
+                <div id="exp_list" data-prototype="{{ form_widget(form.options.vars.prototype)|e('html_attr') }}">
+                    {% for row in form.options %}
+                        <br>
+                        <div class="panel panel-warning">
+                            <div class="panel-heading">
+                                <strong>{{ row.vars.value.libelle }}</strong>
+                            </div>
+                            <div class="panel-body">
+                                {{ form_row(row.libelle) }}
+                                <br>
+                                {{ form_row(row.ordre) }}
+                                <br>
+                                {{ form_row(row.status) }}
+                                <br>
+                                <hr>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block javascript %}
+<script>
+    if( '{{ statusOptionsChamps }}' == true ){
+            $("#options").show();
+        }else{
+            $("#options").hide();
+        }
+
+        $("select#champs_formulaire_type").change(function(){
+            if($(this).val() == 5){
+                $("#options").show();
+            }else{
+                $("#options").hide();
+            }
+        });
+    $(document).ready( function () {
+        //$('#table_id').DataTable();
+        $('#table_id').DataTable( {
+            responsive: true,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/fr_fr.json"
+            }
+        } );
+    });
+</script>
+<script>
+    // this variable is the list in the dom, it's initiliazed when the document is ready
+    var $collectionHolder;
+    // the link which we click on to add new items
+    var $addNewItem = $('<a href="#" class="btn btn-info"><i class="fa fa-plus-square-o" aria-hidden="true"></i> Nouvelle Option</a>');
+    // when the page is loaded and ready
+    $(document).ready(function () {
+        // get the collectionHolder, initilize the var by getting the list;
+        $collectionHolder = $('#exp_list');
+        // append the add new item link to the collectionHolder
+        $collectionHolder.append($addNewItem);
+        // add an index property to the collectionHolder which helps track the count of forms we have in the list
+        $collectionHolder.data('index', $collectionHolder.find('.panel').length)
+        // finds all the panels in the list and foreach one of them we add a remove button to it
+        // add remove button to existing items
+        $collectionHolder.find('.panel').each(function () {
+            // $(this) means the current panel that we are at
+            // which means we pass the panel to the addRemoveButton function
+            // inside the function we create a footer and remove link and append them to the panel
+            // more informations in the function inside
+            addRemoveButton($(this));
+        });
+        // handle the click event for addNewItem
+        $addNewItem.click(function (e) {
+            // preventDefault() is your  homework if you don't know what it is
+            // also look up preventPropagation both are usefull
+            e.preventDefault();
+            // create a new form and append it to the collectionHolder
+            // and by form we mean a new panel which contains the form
+            addNewForm();
+        })
+    });
+    /*
+    * creates a new form and appends it to the collectionHolder
+    */
+    function addNewForm() {
+        // getting the prototype
+        // the prototype is the form itself, plain html
+        var prototype = $collectionHolder.data('prototype');
+        // get the index
+        // this is the index we set when the document was ready, look above for more info
+        var index = $collectionHolder.data('index');
+        // create the form
+        var newForm = prototype;
+        // replace the __name__ string in the html using a regular expression with the index value
+        newForm = newForm.replace(/__name__/g, index);
+        // incrementing the index data and setting it again to the collectionHolder
+        $collectionHolder.data('index', index+1);
+        // create the panel
+        // this is the panel that will be appending to the collectionHolder
+        var $panel = $('<div class="panel panel-warning"><div class="panel-heading"></div></div>');
+        // create the panel-body and append the form to it
+        var $panelBody = $('<div class="panel-body"></div>').append(newForm);
+        // append the body to the panel
+        $panel.append($panelBody);
+        // append the removebutton to the new panel
+        addRemoveButton($panel);
+        // append the panel to the addNewItem
+        // we are doing it this way to that the link is always at the bottom of the collectionHolder
+        $addNewItem.before($panel);
+    }
+
+    /**
+    * adds a remove button to the panel that is passed in the parameter
+    * @param $panel
+    */
+    function addRemoveButton ($panel) {
+        // create remove button
+        var $removeButton = $('<a href="#" class="btn btn-danger pull-right"><i class="fa fa-trash" aria-hidden="true"></i></a>');
+        // appending the removebutton to the panel footer
+        var $panelFooter = $('<div class="panel-footer"></div>').append($removeButton);
+        // handle the click event of the remove button
+        $removeButton.click(function (e) {
+            e.preventDefault();
+            // gets the parent of the button that we clicked on "the panel" and animates it
+            // after the animation is done the element (the panel) is removed from the html
+            $(e.target).parents('.panel').slideUp(1000, function () {
+                $(this).remove();
+            })
+        });
+        // append the footer to the panel
+        $panel.append($panelFooter);
+    }
+</script>
+{% endblock %}
