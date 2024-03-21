@@ -28,11 +28,6 @@
         <!-- MESSENGER_TRANSPORT_DSN=amqp://guest:guest@localhost:5672/%2f/messages -->
         <!-- MESSENGER_TRANSPORT_DSN=redis://localhost:6379/messages -->
         <!-- ###- symfony/messenger ### -->
-
-        <!-- ###+ acseo/typesense-bundle ### -->
-        <env name="TYPESENSE_URL" value="http://localhost:8108"/>
-        <env name="TYPESENSE_KEY" value="123"/>
-        <!-- ###- acseo/typesense-bundle ### -->
     </php>
 
     <testsuites>

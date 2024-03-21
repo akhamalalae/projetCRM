@@ -12,6 +12,10 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class RequeteTableauBordFiltres
 {
+    const PARENTHES_OUVRANTE = '(';
+    const PARENTHES_FERMANTE = ')'; 
+    const DATE_FORMAT        = 'Y/m/d H:i';
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -220,7 +224,7 @@ class RequeteTableauBordFiltres
     {
         $parenthese = $this->getParenthese()?->getLibelle();
 
-        if ($parenthese === '(') {
+        if ($parenthese === self::PARENTHES_OUVRANTE) {
             return $parenthese;
         }
 
@@ -231,7 +235,7 @@ class RequeteTableauBordFiltres
     {
         $parenthese = $this->getParenthese()?->getLibelle();
 
-        if ($parenthese === ')') {
+        if ($parenthese === self::PARENTHES_FERMANTE) {
             return $parenthese;
         }
 
@@ -249,7 +253,7 @@ class RequeteTableauBordFiltres
 
         switch ($typeChamp) {
             case Typeschamps::DATETYPE:
-                $format = 'Y/m/d H:i';
+                $format = self::DATE_FORMAT;
                 $checkDateFormat = DateTimeImmutable::createFromFormat($format, $valeur);
 
                 if ($valeur === null) {
@@ -281,14 +285,14 @@ class RequeteTableauBordFiltres
 
     public function createRequeteClauseWhere(): string
     {
-        $getOperateurAndValeur = $this->formaterDonneesClauseWhere();
+        $formaterDonnees = $this->formaterDonneesClauseWhere();
 
         return sprintf(' %s %s %s %s %s %s',
             $this->getTableauBordFiltreCondition()?->getLibelleAnglais(),
             $this->getIfParenthesOuvrante(),
             $this->getEntitiesPropriete()?->jointureName(),
-            $getOperateurAndValeur['operator'],
-            $getOperateurAndValeur['valeur'],
+            $formaterDonnees['operator'],
+            $formaterDonnees['valeur'],
             $this->getIfParenthesFermante()
         );
     }

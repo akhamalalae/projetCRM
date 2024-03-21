@@ -18,7 +18,7 @@ class RequeteTableauBord
     const MESSAGE_FLASH_3   = "Veuillez remplir le nom de la requête. ";
     const MESSAGE_FLASH_4   = "Erreur de syntaxe du champ Valeur des filtres : %s, veuillez regarder la documentation. ";
     const MESSAGE_FLASH_5   = "Veuillez vérifier les parenthèses des filtres de la requête. ";
-    const MESSAGE_FLASH_6   = "Veuillez vérifier les conditions des filtres de la requête. ";
+    const MESSAGE_FLASH_6   = "Veuillez vérifier les opérateurs logiques (ET, OU) des filtres de la requête. ";
 
     /**
      * @ORM\Id
@@ -271,7 +271,7 @@ class RequeteTableauBord
             $filtrePrecedent = $this->getRequeteTableauBordFiltres()[$key - 1];
 
             if ($filtreValue !== '') {
-                $inValidValues .= sprintf('%s %s', $inValidValues === '' ? '' : ',', $filtreValue);
+                $inValidValues .= sprintf('%s %s', $inValidValues === '' ? '' : ', ', $filtreValue);
             }
 
             if ($filtreCondition !== null && $filtrePrecedent === null) {

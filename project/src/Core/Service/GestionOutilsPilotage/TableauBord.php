@@ -88,7 +88,7 @@ class TableauBord extends TableauBordCreateRequete implements InitialisationInte
     public function parameters(): array
     {
         $nombreFiltres = count($this->requeteTableauBord?->getRequeteTableauBordFiltres());
-    
+
         return [
             'menus'                         => $this->menuGenerator->getMenu(),
             "nombreFiltres"                 => $nombreFiltres,

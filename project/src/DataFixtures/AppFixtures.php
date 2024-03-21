@@ -104,24 +104,24 @@ class AppFixtures extends Fixture
         $type = $manager->getRepository(Typeschamps::class)->find(1);
         $user = $this->createUserAdmin($manager);
 
-        for ($i = 0; $i < 20; $i++) {
+        for ($i = 0; $i < 100; $i++) {
             $formulaire = new Formulaire();
             $formulaire->setLibelle("Formulaire ". $i);
             $formulaire->setDescription("Formulaire" . $i);
             $formulaire->setDateCreation($dateNoow);
-            $formulaire->setDateDebut($dateNoow);
+            $formulaire->setDateDebut($dateNoow);  
             $formulaire->setDateFin($dateNoow->modify('+1 day'));
             $formulaire->setStatus(0);
             $formulaire->setUser($user);
 
-            for ($f = 0; $f < 5; $f++) {
+            for ($f = 0; $f < 60; $f++) {
                 $entreprise = $this->createEntreprises($manager, $f);
                 if ($entreprise) {
                     $formulaire->addEntreprise($entreprise);
                 }
             }
 
-            for ($f = 0; $f < 5; $f++) {
+            for ($f = 0; $f < 30; $f++) {
                 $intervenant = $this->createIntervenants($manager, $f);
                 $formulaire->addIntervenant($intervenant);
             }
@@ -200,7 +200,7 @@ class AppFixtures extends Fixture
         $generator = Faker\Factory::create('fr_FR');
         $name = explode(" ", $generator->name());
         $user = new User();
-        $user->setEmail($name[0].$name[1].$f.'@gmail.com');
+        $user->setEmail($name[0].$name[1].$f.'@gmail.com'.rand());
         $roles = array('ROLE_USER');
         $user->setRoles($roles);
         $user->setPassword('$2y$13$gVbAQ8gYFFPWZT5xOtOOMeptPU92Sbfd738bg/lXLkuWMZatCGswC');

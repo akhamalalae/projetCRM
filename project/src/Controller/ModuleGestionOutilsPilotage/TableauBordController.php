@@ -42,6 +42,8 @@ class TableauBordController extends AbstractController
      */
     public function tableauBrd(Request $request,TableauBord $service, $id):Response
     {
+        ini_set('memory_limit','2048M');
+        
         return $this->renderTrait($request, $service, ['id' => $id, 'user' => $this->getUser()]);
     }
 

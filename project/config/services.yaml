@@ -41,6 +41,3 @@ services:
               # you can also restrict listeners to a specific Doctrine connection
               connection: 'default'
 
-    App\Controller\ModuleGestionEntreprises\Typesense\SearchController:
-        arguments:
-            $entreprisesFinder: '@typesense.finder.entreprises'

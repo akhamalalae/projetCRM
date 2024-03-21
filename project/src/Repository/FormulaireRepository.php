@@ -45,8 +45,8 @@ class FormulaireRepository extends ServiceEntityRepository
     {
         $entityManager = $this->getEntityManager();
 
-        $query = $entityManager->createQuery($requete);
-
-        return $query->getResult();
+        return $entityManager->createQuery($requete)
+                             ->setMaxResults(10000)
+                             ->getResult();
     }
 }
